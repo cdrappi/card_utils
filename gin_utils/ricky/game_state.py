@@ -253,21 +253,31 @@ class GinRickyGameState:
             final_info['drawn_card'] = self.last_draw
 
         hand = utils.sort_hand(self.p1_hand if is_player_1 else self.p2_hand)
-        transformed_hud = {
-            card: self.transform_hud(loc, is_player_1)
-            for card, loc in self.public_hud.items()
-        }
         return {
             'hand': hand,
             'points': utils.hand_points(hand),
             'top_of_discard': self.top_of_discard,
             'deck_length': len(self.deck),
-            'hud': {**transformed_hud, **{c: self.hud_user for c in hand}},
+            'hud': {
+                **self._transformed_hud(is_player_1),
+                **{c: self.hud_user for c in hand}
+            },
             **final_info,
         }
 
+    def _transformed_hud(self, is_player_1):
+        """ return the full hud from the player's point of view
+
+        :param is_player_1: (bool)
+        :return:
+        """
+        return {
+            card: self._transform_hud_card(loc, is_player_1)
+            for card, loc in self.public_hud.items()
+        }
+
     @classmethod
-    def transform_hud(cls, card_loc, is_player_1):
+    def _transform_hud_card(cls, card_loc, is_player_1):
         """
 
         :param card_loc: (str) one of {"1", "2", "t", "d"}
