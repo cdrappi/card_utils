@@ -84,7 +84,7 @@ class GinRickyGameState:
 
         if from_discard:
             card_drawn = self.top_of_discard
-            self.add_to_hand(card_drawn)
+            self._add_to_hand(card_drawn)
             self.discard = self.discard[:-1]
             self.public_hud[card_drawn] = (
                 self.hud_player_1 if self.p1_draws
@@ -92,7 +92,7 @@ class GinRickyGameState:
             )
         else:
             card_drawn = self.top_of_deck
-            self.add_to_hand(card_drawn)
+            self._add_to_hand(card_drawn)
             self.deck = self.deck[1:]
             if len(self.deck) == 0:
                 # if there are no cards left in the deck,
@@ -164,7 +164,12 @@ class GinRickyGameState:
 
         self.turns += 1
 
-    def add_to_hand(self, card_drawn):
+    def _add_to_hand(self, card_drawn):
+        """ insert card into player's hand
+
+        :param card_drawn: (str)
+        :return: None
+        """
         if self.p1_draws:
             self.p1_hand.append(card_drawn)
         else:
@@ -210,11 +215,11 @@ class GinRickyGameState:
         :return:
         """
         if self.is_complete:
-            return self.complete_game_to_dict(is_player_1)
+            return self._complete_game_to_dict(is_player_1)
         else:
-            return self.incomplete_game_to_dict(is_player_1)
+            return self._incomplete_game_to_dict(is_player_1)
 
-    def complete_game_to_dict(self, is_player_1):
+    def _complete_game_to_dict(self, is_player_1):
         """
 
         :param is_player_1: (bool)
@@ -227,14 +232,17 @@ class GinRickyGameState:
             'action': self.action_complete,
         }
 
-    def incomplete_game_to_dict(self, is_player_1):
+    def _incomplete_game_to_dict(self, is_player_1):
         """
 
         :param is_player_1: (bool)
         :return: (dict)
         """
 
-        final_info = {'action': self.get_action(is_player_1), 'last_draw': None}
+        final_info = {
+            'action': self.get_action(is_player_1),
+            'last_draw': None
+        }
         if final_info['action'] == self.action_draw:
             final_info['last_draw'] = (
                 self.last_draw
@@ -244,21 +252,10 @@ class GinRickyGameState:
         if final_info['action'] == self.action_discard:
             final_info['drawn_card'] = self.last_draw
 
-        def transform_hud(card_loc):
-            """
-            :param card_loc: (str) one of {"1", "2", "t", "d"}
-            :return: (str) one of {"u", "o", "d", "t"}
-            """
-            if card_loc == self.hud_player_1:
-                return self.hud_user if is_player_1 else self.hud_opponent
-            elif card_loc == self.hud_player_2:
-                return self.hud_user if not is_player_1 else self.hud_opponent
-            else:
-                return card_loc
-
         hand = utils.sort_hand(self.p1_hand if is_player_1 else self.p2_hand)
         transformed_hud = {
-            card: transform_hud(loc) for card, loc in self.public_hud.items()
+            card: self.transform_hud(loc, is_player_1)
+            for card, loc in self.public_hud.items()
         }
         return {
             'hand': hand,
@@ -268,3 +265,18 @@ class GinRickyGameState:
             'hud': {**transformed_hud, **{c: self.hud_user for c in hand}},
             **final_info,
         }
+
+    @classmethod
+    def transform_hud(cls, card_loc, is_player_1):
+        """
+
+        :param card_loc: (str) one of {"1", "2", "t", "d"}
+        :param is_player_1: (bool)
+        :return: (str) one of {"u", "o", "d", "t"}
+        """
+        if card_loc == cls.hud_player_1:
+            return cls.hud_user if is_player_1 else cls.hud_opponent
+        elif card_loc == cls.hud_player_2:
+            return cls.hud_user if not is_player_1 else cls.hud_opponent
+        else:
+            return card_loc
