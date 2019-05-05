@@ -1,3 +1,5 @@
+""" class to store and manipulate the state of a gin ricky game """
+
 import copy
 import random
 
