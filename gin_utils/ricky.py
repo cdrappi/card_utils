@@ -125,7 +125,7 @@ def sort_cards_by_rank(cards):
     return sorted(cards, key=lambda c: card_values[c[0]])
 
 
-def sorted_hand(hand):
+def sort_hand(hand):
     """
     :param hand: ([str])
     :return: ([str])
@@ -134,8 +134,8 @@ def sorted_hand(hand):
                                              key=lambda k: combos_points(k[0], k[1]))
     sorted_combo_3 = sort_cards_by_rank(combo_3)
     sorted_combo_4 = sort_cards_by_rank(combo_4)
-    sorted_hand_ = sorted_combo_3 + sorted_combo_4 + maybe_last_card
-    rank_points = sum_card_ranks([c[0] for c in sorted_hand_])
+    sorted_hand = sorted_combo_3 + sorted_combo_4 + maybe_last_card
+    rank_points = sum_card_ranks([c[0] for c in sorted_hand])
     combo_points_ = combos_points(combo_3, combo_4)
     if maybe_last_card:
         combo_points_ += card_values[maybe_last_card[0][0]]
