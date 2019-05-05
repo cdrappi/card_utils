@@ -17,9 +17,9 @@ with open('requirements/common.txt') as f:
         if _is_install_requirement(requirement)
     ]
 
-# setup(
-#     name='gin_utils',
-#     version='2019.5.5',
-#     packages=['gin_utils'],
-#     install_requires=install_requires,
-# )
+setup(
+    name='gin_utils',
+    version='2019.5.5.2',
+    packages=['gin_utils'],
+    install_requires=install_requires,
+)
