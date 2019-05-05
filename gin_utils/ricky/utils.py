@@ -104,7 +104,7 @@ def sum_card_ranks(card_ranks):
     """
 
     :param card_ranks: (str) e.g. "Q" or "2"
-    :return:
+    :return: (int)
     """
     return sum(card_values[r] for r in card_ranks)
 
@@ -122,6 +122,10 @@ def ranks_make_a_straight(rank_combo):
 
 
 def sort_cards_by_rank(cards):
+    """
+    :param cards: ([str])
+    :return: ([str])
+    """
     return sorted(cards, key=lambda c: card_values[c[0]])
 
 
