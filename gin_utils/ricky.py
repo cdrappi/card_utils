@@ -1,7 +1,7 @@
 import itertools
 
-from deal import new_game
-from deck import card_values
+from gin_utils.deal import new_game
+from gin_utils.deck import card_values
 
 
 def deal_new_game():
@@ -119,3 +119,30 @@ def ranks_make_a_straight(rank_combo):
         if r1 != r2 - 1:
             return False
     return True
+
+
+def sort_cards_by_rank(cards):
+    return sorted(cards, key=lambda c: card_values[c[0]])
+
+
+def sorted_hand(hand):
+    """
+    :param hand: ([str])
+    :return: ([str])
+    """
+    combo_3, combo_4, *maybe_last_card = min(yield_hand_combos(hand),
+                                             key=lambda k: combos_points(k[0], k[1]))
+    sorted_combo_3 = sort_cards_by_rank(combo_3)
+    sorted_combo_4 = sort_cards_by_rank(combo_4)
+    sorted_hand_ = sorted_combo_3 + sorted_combo_4 + maybe_last_card
+    rank_points = sum_card_ranks([c[0] for c in sorted_hand_])
+    combo_points_ = combos_points(combo_3, combo_4)
+    if maybe_last_card:
+        combo_points_ += card_values[maybe_last_card[0][0]]
+
+    if rank_points == combo_points_:
+        return sort_cards_by_rank(sorted_hand)
+    elif combo_points(combo_4) < combo_points(combo_3):
+        return sorted_combo_4 + sorted_combo_3 + maybe_last_card
+    else:
+        return sorted_combo_3 + sorted_combo_4 + maybe_last_card
