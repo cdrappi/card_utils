@@ -1,3 +1,5 @@
+""" constants to build the deck of cards and score the game """
+
 card_ranks = list('23456789TJQKA')
 card_suits = set('cdhs')
 

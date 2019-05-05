@@ -1,6 +1,6 @@
 import random
 
-from deck import card_choices
+from gin_utils.deck import card_choices
 
 
 def random_deck():
