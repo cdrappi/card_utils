@@ -11,7 +11,7 @@ class GinRickyGameState:
 
     hud_player_1 = "1"
     hud_player_2 = "2"
-    hud_top_of_deck = "t"
+    hud_top_of_discard = "t"
     hud_discard = "d"
     hud_user = "u"
     hud_opponent = "o"
@@ -24,15 +24,14 @@ class GinRickyGameState:
     action_wait = 'wait'
 
     def __init__(self,
-                 public_hud, deck, discard,
+                 deck, discard,
                  p1_hand, p2_hand,
                  p1_discards, p1_draws, p2_discards, p2_draws,
-                 last_draw, last_draw_from_discard,
+                 public_hud=None, last_draw=None, last_draw_from_discard=None,
                  is_complete=False, turns=0, shuffles=0,
                  p1_points=None, p2_points=None):
         """
 
-        :param public_hud: ({str: str})
         :param deck: ([str])
         :param discard: ([str])
         :param p1_hand: ([str])
@@ -41,6 +40,7 @@ class GinRickyGameState:
         :param p1_draws: (bool)
         :param p2_discards: (bool)
         :param p2_draws: (bool)
+        :param public_hud: ({str: str})
         :param last_draw: (str)
         :param last_draw_from_discard: (bool)
         :param is_complete: (bool)
@@ -49,7 +49,6 @@ class GinRickyGameState:
         :param p1_points: (int)
         :param p2_points: (int)
         """
-        self.public_hud = public_hud
         self.deck = deck
         self.discard = discard
 
@@ -63,6 +62,10 @@ class GinRickyGameState:
 
         self.last_draw = last_draw
         self.last_draw_from_discard = last_draw_from_discard
+
+        if public_hud is None:
+            public_hud = {self.discard[-1]: self.hud_top_of_discard}
+        self.public_hud = public_hud
 
         self.is_complete = is_complete
         self.turns = turns
@@ -140,7 +143,7 @@ class GinRickyGameState:
         # add discard to HUD
         if self.discard:
             self.public_hud[self.discard[-1]] = self.hud_discard
-        self.public_hud[card] = self.hud_top_of_deck
+        self.public_hud[card] = self.hud_top_of_discard
         self.discard.append(card)
 
         if self.p1_discards:
