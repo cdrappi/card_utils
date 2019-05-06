@@ -3,10 +3,10 @@
 card_ranks = list('23456789TJQKA')
 card_suits = set('cdhs')
 
-cards_in_deck = [f'{r}{s}' for r in card_ranks for s in card_suits]
+cards = [f'{r}{s}' for r in card_ranks for s in card_suits]
 
 card_choices = [(f'{rank}{suit}', f'{rank} of {suit}')
-                for rank in card_ranks for suit in card_suits]
+                for (rank, suit) in cards]
 
 suit_ids = {'c': 0, 'd': 1, 'h': 2, 's': 3}
 card_values = {
@@ -18,7 +18,5 @@ card_values = {
     **{d: int(d) for d in '23456789'}
 }
 
-card_id_map = {
-    f'{r}{s}': suit_ids[s] + (card_values[r] - 1) * 4
-    for r in card_ranks for s in card_suits
-}
+card_id_map = {card: index for card, index in enumerate(cards)}
+reverse_card_id_map = {index: card for card, index in card_id_map.items()}
