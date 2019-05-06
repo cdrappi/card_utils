@@ -45,7 +45,7 @@ def sorted_hand_points(hand):
             # if there is a non-intersecting 3-meld and 4-meld,
             # then you have 0 points and win
             remaining_cards = list(set(hand) - set(cards_in_meld))
-            return melds_4 + melds_3 + remaining_cards, 0
+            return meld_4 + meld_3 + remaining_cards, 0
 
     for meld in melds_3 + melds_4:
         hand_without_meld = [card for card in hand if card not in meld]
