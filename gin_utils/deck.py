@@ -18,5 +18,7 @@ card_values = {
     **{d: int(d) for d in '23456789'}
 }
 
+value_to_rank = {14: 'A', **{v: r for r, v in card_values.items()}}
+
 card_id_map = {card: index for index, card in enumerate(cards)}
 reverse_card_id_map = {index: card for card, index in card_id_map.items()}
