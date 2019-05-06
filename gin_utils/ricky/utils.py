@@ -41,7 +41,7 @@ def sorted_hand_points(hand):
 
     for meld_3, meld_4 in itertools.product(melds_3, melds_4):
         cards_in_meld = {*meld_3, *meld_4}
-        if len() == 7:
+        if len(cards_in_meld) == 7:
             # if there is a non-intersecting 3-meld and 4-meld,
             # then you have 0 points and win
             remaining_cards = list(set(hand) - set(cards_in_meld))
