@@ -163,7 +163,6 @@ class GinRickyGameState:
                 self.is_complete = True
                 self.p1_points = 0
                 self.p2_points = utils.hand_points(self.p2_hand)
-                print(f'game complete! {self.p1_points + self.p2_points}')
         elif self.p2_discards:
             if len(self.p2_hand) != 8:
                 raise Exception(f'Cannot discard: player 2 has 8 cards in hand')
