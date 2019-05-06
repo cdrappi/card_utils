@@ -87,6 +87,17 @@ class GinRickyGameState:
                 'to call GinRickyGameState.draw_card'
             )
 
+        if self.p1_draws and len(self.p1_hand) != 7:
+            raise Exception(
+                f'Player 1 cannot draw because '
+                f'they do not have 7 cards! {self.p1_hand}'
+            )
+        if self.p2_draws and len(self.p2_hand) != 7:
+            raise Exception(
+                f'Player 2 cannot draw because '
+                f'they do not have 7 cards! {self.p2_hand}'
+            )
+
         if from_discard:
             card_drawn = self.top_of_discard
             self._add_to_hand(card_drawn)
@@ -140,13 +151,9 @@ class GinRickyGameState:
                 'to call GinRickyGameState.discard_card'
             )
 
-        # add discard to HUD
-        if self.discard:
-            self.public_hud[self.discard[-1]] = self.hud_discard
-        self.public_hud[card] = self.hud_top_of_discard
-        self.discard.append(card)
-
         if self.p1_discards:
+            if len(self.p1_hand) != 8:
+                raise Exception(f'Cannot discard: player 1 has 8 cards in hand')
             if card not in self.p1_hand:
                 raise Exception(f'Player 1 cannot discard {card}: not in hand!')
             self.p1_hand = [c for c in self.p1_hand if c != card]
@@ -156,7 +163,10 @@ class GinRickyGameState:
                 self.is_complete = True
                 self.p1_points = 0
                 self.p2_points = utils.hand_points(self.p2_hand)
+                print(f'game complete! {self.p1_points + self.p2_points}')
         elif self.p2_discards:
+            if len(self.p2_hand) != 8:
+                raise Exception(f'Cannot discard: player 2 has 8 cards in hand')
             if card not in self.p2_hand:
                 raise Exception(f'Player 2 cannot discard {card}: not in hand!')
             self.p2_hand = [c for c in self.p2_hand if c != card]
@@ -166,6 +176,12 @@ class GinRickyGameState:
                 self.is_complete = True
                 self.p2_points = 0
                 self.p1_points = utils.hand_points(self.p1_hand)
+
+        # add discard to HUD
+        if self.discard:
+            self.public_hud[self.discard[-1]] = self.hud_discard
+        self.public_hud[card] = self.hud_top_of_discard
+        self.discard.append(card)
 
         self.turns += 1
 

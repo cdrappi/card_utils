@@ -1,7 +1,8 @@
+import collections
 import itertools
 
 from gin_utils.deal import new_game
-from gin_utils.deck import card_values
+from gin_utils.deck import card_values, value_to_rank
 
 
 def deal_new_game():
@@ -20,105 +21,129 @@ def deal_new_game():
     return new_game(cards=7)
 
 
-def hand_points(hand):
+def sorted_hand_points(hand):
     """
-
     :param hand: ([str]) list of cards
+    :return: ([str], int)
+    """
+    runs_3, runs_4 = get_runs(hand)
+    sets_3, sets_4 = get_sets(hand)
+    melds_3 = runs_3 + sets_3
+    melds_4 = runs_4 + sets_4
+
+    sorted_hand = sort_cards_by_rank(hand)
+    hand_points_ = sum_points_by_ranks(hand)
+    if len(hand) == 8:
+        hand_points_ -= max(card_values[r] for r, _ in hand)
+
+    if len(melds_3 + melds_4) == 0:
+        return sorted_hand, hand_points_
+
+    for meld_3, meld_4 in itertools.product(melds_3, melds_4):
+        cards_in_meld = {*meld_3, *meld_4}
+        if len() == 7:
+            # if there is a non-intersecting 3-meld and 4-meld,
+            # then you have 0 points and win
+            remaining_cards = list(set(hand) - set(cards_in_meld))
+            return melds_4 + melds_3 + remaining_cards, 0
+
+    for meld in melds_3 + melds_4:
+        hand_without_meld = [card for card in hand if card not in meld]
+        # print(hand, hand_without_meld, meld)
+        meld_points = sum_points_by_ranks(hand_without_meld)
+        if len(hand) == 8:
+            meld_points -= max(card_values[r] for r, _ in hand_without_meld)
+
+        if meld_points < hand_points_:
+            sorted_hand = meld + sort_cards_by_rank(hand_without_meld)
+            hand_points_ = min(hand_points_, meld_points)
+
+    return sorted_hand, hand_points_
+
+
+def suit_partition(hand):
+    """
+    :param hand: ([str])
+    :return: ({str: [str]} suit --> [ranks]
+    """
+    suit_to_ranks = collections.defaultdict(list)
+    for rank, suit in sort_cards_by_rank(hand):
+        suit_to_ranks[suit].append(rank)
+
+    return dict(suit_to_ranks)
+
+
+def rank_partition(hand):
+    """
+    :param hand: ([str])
+    :return: ({str: [str]} rank --> [suit]
+    """
+    rank_to_suits = collections.defaultdict(list)
+    for rank, suit in hand:
+        rank_to_suits[rank].append(suit)
+
+    return dict(rank_to_suits)
+
+
+def get_runs(hand):
+    """
+    :param hand: ([str])
+    :return: ([[str]], [[str]])
+    """
+    suit_to_ranks = suit_partition(hand)
+    runs_3, runs_4 = [], []
+    for suit, ranks in suit_to_ranks.items():
+        values = [card_values[r] for r in ranks]
+        if values[0] == 1:
+            values.append(14)
+
+        if len(values) >= 3:
+            for r0, r1, r2 in zip(values[0:-2], values[1:-1], values[2:]):
+                if r0 == r1 - 1 == r2 - 2:
+                    runs_3.append([
+                        f'{value_to_rank[r0]}{suit}',
+                        f'{value_to_rank[r1]}{suit}',
+                        f'{value_to_rank[r2]}{suit}',
+                    ])
+        if len(values) >= 4:
+            for r0, r1, r2, r3 in zip(values[0:-3], values[1:-2], values[2:-1], values[3:]):
+                if r0 == r1 - 1 == r2 - 2 == r3 - 3:
+                    runs_4.append([
+                        f'{value_to_rank[r0]}{suit}',
+                        f'{value_to_rank[r1]}{suit}',
+                        f'{value_to_rank[r2]}{suit}',
+                        f'{value_to_rank[r3]}{suit}',
+                    ])
+    return runs_3, runs_4
+
+
+def get_sets(hand):
+    """
+
+    :param hand: ([str])
+    :return: ([[str]], [[str]])
+    """
+    rank_to_suits = rank_partition(hand)
+    sets_3, sets_4 = [], []
+    for rank, suits in rank_to_suits.items():
+        if len(suits) == 4:
+            sets_4.append([f'{rank}{s}' for s in suits])
+            sets_3.extend([
+                [f'{rank}{s}' for s in suit_combo]
+                for suit_combo in itertools.combinations(suits, 3)
+            ])
+        elif len(suits) == 3:
+            sets_3.append([f'{rank}{s}' for s in suits])
+    return sets_3, sets_4
+
+
+def sum_points_by_ranks(hand):
+    """
+
+    :param hand: ([str])
     :return: (int)
     """
-    points = 14 * 7
-    for combo_3, combo_4, *_ in yield_hand_combos(hand):
-        combo_points_ = combos_points(combo_3, combo_4)
-        if combo_points_ == 0:
-            return 0
-        points = min(combo_points_, points)
-
-    return points
-
-
-def yield_hand_combos(hand):
-    """
-
-    :param hand: ([str]) either 7 or 8 cards
-    :return:
-    """
-    for combo_3 in itertools.combinations(hand, 3):
-        remaining_cards = [c for c in hand if c not in combo_3]
-        if len(remaining_cards) == 5:
-            # not using itertools.combinations(remaining_cards, 1) here,
-            # because it returns a tuple with 1 item rather than sole item
-            for left_out_card in remaining_cards:
-                combo_4 = [c for c in remaining_cards if c != left_out_card]
-                yield combo_3, combo_4, left_out_card
-        elif len(remaining_cards) == 4:
-            yield combo_3, remaining_cards
-        else:
-            raise Exception(f"incorrect number of cards ({len(hand)}) in hand")
-
-
-def combos_points(combo_3, combo_4):
-    """
-
-    :param combo_3: ([str]) 3 cards
-    :param combo_4: ([str]) 4 cards
-    :return:
-    """
-    return combo_points(combo_3) + combo_points(combo_4)
-
-
-def combo_points(card_combo):
-    """
-
-    :param card_combo: ([str])
-    :return: (int)
-    """
-    first_rank, first_suit = card_combo[0]
-    card_ranks = [card[0] for card in card_combo]
-
-    if all(r == first_rank for r in card_ranks):
-        # all cards are same rank
-        return 0
-
-    if any(card[1] != first_suit for card in card_combo):
-        # cards are not of same rank and not of same suit,
-        # so return the points
-        return sum_card_ranks(card_ranks)
-
-    # NOTE: if we get to this point, cards have same suit
-    # so we just need to check if they make a valid 3- or 4-straight
-
-    # handle fact that aces can be 1 or 14
-    values_ace_as_1 = sorted(card_values[r] for r in card_ranks)
-    rank_combos = [values_ace_as_1]
-    if any(r == 'A' for r in card_ranks):
-        rank_combos.append(sorted(14 if value == 1 else value for value in values_ace_as_1))
-
-    for rank_combo in rank_combos:
-        if ranks_make_a_straight(rank_combo):
-            return 0
-
-    return sum_card_ranks(card_ranks)
-
-
-def sum_card_ranks(card_ranks):
-    """
-
-    :param card_ranks: (str) e.g. "Q" or "2"
-    :return: (int)
-    """
-    return sum(card_values[r] for r in card_ranks)
-
-
-def ranks_make_a_straight(rank_combo):
-    """
-
-    :param rank_combo: ([int])
-    :return: (bool)
-    """
-    for r1, r2 in zip(rank_combo[:-1], rank_combo[1:]):
-        if r1 != r2 - 1:
-            return False
-    return True
+    return sum(card_values[r] for r, _ in hand)
 
 
 def sort_cards_by_rank(cards):
@@ -134,19 +159,14 @@ def sort_hand(hand):
     :param hand: ([str])
     :return: ([str])
     """
-    combo_3, combo_4, *maybe_last_card = min(yield_hand_combos(hand),
-                                             key=lambda k: combos_points(k[0], k[1]))
-    sorted_combo_3 = sort_cards_by_rank(combo_3)
-    sorted_combo_4 = sort_cards_by_rank(combo_4)
-    sorted_hand = sorted_combo_3 + sorted_combo_4 + maybe_last_card
-    rank_points = sum_card_ranks([c[0] for c in sorted_hand])
-    combo_points_ = combos_points(combo_3, combo_4)
-    if maybe_last_card:
-        combo_points_ += card_values[maybe_last_card[0][0]]
+    sorted_hand, _ = sorted_hand_points(hand)
+    return sorted_hand
 
-    if rank_points == combo_points_:
-        return sort_cards_by_rank(sorted_hand)
-    elif combo_points(combo_4) < combo_points(combo_3):
-        return sorted_combo_4 + sorted_combo_3 + maybe_last_card
-    else:
-        return sorted_combo_3 + sorted_combo_4 + maybe_last_card
+
+def hand_points(hand):
+    """
+    :param hand: ([str])
+    :return: (int)
+    """
+    _, points = sorted_hand_points(hand)
+    return points
