@@ -263,11 +263,20 @@ class GinRickyGameState:
             'points': utils.hand_points(hand),
             'top_of_discard': self.top_of_discard,
             'deck_length': len(self.deck),
-            'hud': {
-                **self._transformed_hud(is_player_1),
-                **{c: self.hud_user for c in hand}
-            },
+            'hud': self.player_hud(is_player_1),
             **final_info,
+        }
+
+    def player_hud(self, is_player_1):
+        """
+
+        :param is_player_1:
+        :return:
+        """
+        hand = self.p1_hand if is_player_1 else self.p2_hand
+        return {
+            **self._transformed_hud(is_player_1),
+            **{c: self.hud_user for c in hand}
         }
 
     def _transformed_hud(self, is_player_1):
