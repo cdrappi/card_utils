@@ -87,6 +87,19 @@ class GinRickyGameState:
                 'to call GinRickyGameState.draw_card'
             )
 
+        if self.p1_draws:
+            if len(self.p1_hand) != 7:
+                raise Exception(
+                    f'Player 1 cannot draw because '
+                    f'they do not have 7 cards! {self.p1_hand}'
+                )
+        if self.p2_draws:
+            if len(self.p2_hand) != 7:
+                raise Exception(
+                    f'Player 2 cannot draw because '
+                    f'they do not have 7 cards! {self.p2_hand}'
+                )
+
         if from_discard:
             card_drawn = self.top_of_discard
             self._add_to_hand(card_drawn)
