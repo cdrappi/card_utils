@@ -49,6 +49,10 @@ class GinRickyGameState:
         :param shuffles: (int)
         :param p1_points: (int)
         :param p2_points: (int)
+        :param max_turns: (int) stop game after this many turns
+            --> if None, play until someone makes gin
+        :param max_shuffles: (int) stop game after this many shuffles
+            --> if None, play until someone makes gin
         """
         self.deck = deck
         self.discard = discard
