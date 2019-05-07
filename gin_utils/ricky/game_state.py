@@ -125,13 +125,13 @@ class GinRickyGameState:
                 random.shuffle(new_deck)
                 self.deck = new_deck
                 self.discard = []
-                self.shuffles += 1
                 # Both players know each others hands
                 # at this point, so we can just do this:
                 self.public_hud = {
                     **{c: self.hud_player_1 for c in self.p1_hand},
                     **{c: self.hud_player_2 for c in self.p2_hand}
                 }
+                self.shuffles += 1
                 if self.exceeded_max_shuffles():
                     self.end_game()
 
