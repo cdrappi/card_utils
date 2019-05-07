@@ -193,17 +193,20 @@ class GinRickyGameState:
             self.end_game()
 
     def end_game(self):
+        """ set game state to complete and calculate points for each player """
         self.is_complete = True
         self.p1_points = utils.hand_points(self.p1_hand)
         self.p2_points = utils.hand_points(self.p2_hand)
 
     def exceeded_max_shuffles(self):
+        """ :return: (bool) """
         if self.max_shuffles is None:
             return False
 
         return self.shuffles > self.max_shuffles
 
     def exceeded_max_turns(self):
+        """ :return: (bool) """
         if self.max_turns is None:
             return False
 
