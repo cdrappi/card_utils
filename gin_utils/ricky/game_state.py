@@ -29,7 +29,8 @@ class GinRickyGameState:
                  p1_discards, p1_draws, p2_discards, p2_draws,
                  public_hud=None, last_draw=None, last_draw_from_discard=None,
                  is_complete=False, turns=0, shuffles=0,
-                 p1_points=None, p2_points=None):
+                 p1_points=None, p2_points=None,
+                 max_turns=None, max_shuffles=None):
         """
 
         :param deck: ([str])
@@ -48,6 +49,10 @@ class GinRickyGameState:
         :param shuffles: (int)
         :param p1_points: (int)
         :param p2_points: (int)
+        :param max_turns: (int) stop game after this many turns
+            --> if None, play until someone makes gin
+        :param max_shuffles: (int) stop game after this many shuffles
+            --> if None, play until someone makes gin
         """
         self.deck = deck
         self.discard = discard
@@ -73,6 +78,9 @@ class GinRickyGameState:
 
         self.p1_points = p1_points
         self.p2_points = p2_points
+
+        self.max_turns = max_turns
+        self.max_shuffles = max_shuffles
 
     def draw_card(self, from_discard):
         """ draw card from top of deck or discard to player's hand
@@ -117,13 +125,15 @@ class GinRickyGameState:
                 random.shuffle(new_deck)
                 self.deck = new_deck
                 self.discard = []
-                self.shuffles += 1
                 # Both players know each others hands
                 # at this point, so we can just do this:
                 self.public_hud = {
                     **{c: self.hud_player_1 for c in self.p1_hand},
                     **{c: self.hud_player_2 for c in self.p2_hand}
                 }
+                self.shuffles += 1
+                if self.exceeded_max_shuffles():
+                    self.end_game()
 
         if self.p1_draws:
             self.p1_draws = False
@@ -160,9 +170,7 @@ class GinRickyGameState:
             self.p1_discards = False
             self.p2_draws = True
             if utils.hand_points(self.p1_hand) == 0:
-                self.is_complete = True
-                self.p1_points = 0
-                self.p2_points = utils.hand_points(self.p2_hand)
+                self.end_game()
         elif self.p2_discards:
             if len(self.p2_hand) != 8:
                 raise Exception(f'Cannot discard: player 2 has 8 cards in hand')
@@ -172,9 +180,7 @@ class GinRickyGameState:
             self.p2_discards = False
             self.p1_draws = True
             if utils.hand_points(self.p2_hand) == 0:
-                self.is_complete = True
-                self.p2_points = 0
-                self.p1_points = utils.hand_points(self.p1_hand)
+                self.end_game()
 
         # add discard to HUD
         if self.discard:
@@ -183,6 +189,28 @@ class GinRickyGameState:
         self.discard.append(card)
 
         self.turns += 1
+        if self.exceeded_max_turns():
+            self.end_game()
+
+    def end_game(self):
+        """ set game state to complete and calculate points for each player """
+        self.is_complete = True
+        self.p1_points = utils.hand_points(self.p1_hand)
+        self.p2_points = utils.hand_points(self.p2_hand)
+
+    def exceeded_max_shuffles(self):
+        """ :return: (bool) """
+        if self.max_shuffles is None:
+            return False
+
+        return self.shuffles > self.max_shuffles
+
+    def exceeded_max_turns(self):
+        """ :return: (bool) """
+        if self.max_turns is None:
+            return False
+
+        return self.turns > self.max_turns
 
     def _add_to_hand(self, card_drawn):
         """ insert card into player's hand
