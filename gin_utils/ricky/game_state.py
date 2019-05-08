@@ -305,6 +305,7 @@ class GinRickyGameState:
             'hand': hand,
             'points': utils.hand_points(hand),
             'top_of_discard': self.top_of_discard,
+            'last_draw_from_discard': self.last_draw_from_discard,
             'deck_length': len(self.deck),
             'hud': self.player_hud(is_player_1),
             **final_info,
