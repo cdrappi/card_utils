@@ -1,5 +1,6 @@
 import collections
 import itertools
+from typing import List, Tuple
 
 from gin_utils.deal import new_game
 from gin_utils.deck import card_values, value_to_rank
@@ -135,6 +136,31 @@ def get_sets(hand):
         elif len(suits) == 3:
             sets_3.append([f'{rank}{s}' for s in suits])
     return sets_3, sets_4
+
+
+def get_melds(hand) -> Tuple:
+    """
+    :param hand: ([str])
+    :return: ([[str], [str]])
+    """
+    runs_3, runs_4 = get_runs(hand)
+    sets_3, sets_4 = get_sets(hand)
+    return runs_3 + sets_3, runs_4 + sets_4
+
+
+def are_two_distinct_3_melds(melds_3: List[List]):
+    """
+    :param melds_3: ([[str]])
+    :return: (bool)
+    """
+    if len(melds_3) < 2:
+        return False
+
+    for m1, m2 in itertools.combinations(melds_3, 2):
+        if len({*m1, *m2}) == 6:
+            return True
+
+    return False
 
 
 def sum_points_by_ranks(hand):
