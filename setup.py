@@ -19,7 +19,7 @@ with open('requirements/common.txt') as f:
 
 setup(
     name='gin_utils',
-    version='2019.5.11',
+    version='2019.5.11.1',
     packages=['gin_utils'],
     install_requires=install_requires,
 )
