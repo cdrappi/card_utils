@@ -3,7 +3,7 @@ import itertools
 from typing import List, Tuple
 
 from gin_utils.deal import new_game
-from gin_utils.deck import card_values, value_to_rank
+from gin_utils.deck import rank_values, value_to_rank
 
 
 def deal_new_game():
@@ -35,7 +35,7 @@ def sorted_hand_points(hand):
     sorted_hand = sort_cards_by_rank(hand)
     hand_points_ = sum_points_by_ranks(hand)
     if len(hand) == 8:
-        hand_points_ -= max(card_values[r] for r, _ in hand)
+        hand_points_ -= max(rank_values[r] for r, _ in hand)
 
     if len(melds_3 + melds_4) == 0:
         return sorted_hand, hand_points_
@@ -53,7 +53,7 @@ def sorted_hand_points(hand):
         # print(hand, hand_without_meld, meld)
         meld_points = sum_points_by_ranks(hand_without_meld)
         if len(hand) == 8:
-            meld_points -= max(card_values[r] for r, _ in hand_without_meld)
+            meld_points -= max(rank_values[r] for r, _ in hand_without_meld)
 
         if meld_points < hand_points_:
             sorted_hand = meld + sort_cards_by_rank(hand_without_meld)
@@ -94,7 +94,7 @@ def get_runs(hand):
     suit_to_ranks = suit_partition(hand)
     runs_3, runs_4 = [], []
     for suit, ranks in suit_to_ranks.items():
-        values = [card_values[r] for r in ranks]
+        values = [rank_values[r] for r in ranks]
         if values[0] == 1:
             values.append(14)
 
@@ -169,7 +169,7 @@ def sum_points_by_ranks(hand):
     :param hand: ([str])
     :return: (int)
     """
-    return sum(card_values[r] for r, _ in hand)
+    return sum(rank_values[r] for r, _ in hand)
 
 
 def sort_cards_by_rank(cards):
@@ -177,7 +177,7 @@ def sort_cards_by_rank(cards):
     :param cards: ([str])
     :return: ([str])
     """
-    return sorted(cards, key=lambda c: card_values[c[0]])
+    return sorted(cards, key=lambda c: rank_values[c[0]])
 
 
 def sort_hand(hand):
