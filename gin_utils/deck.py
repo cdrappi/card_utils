@@ -19,6 +19,8 @@ rank_values = {
     'K': 13,
     **{d: int(d) for d in '23456789'}
 }
+# TODO
+card_values = rank_values
 
 value_to_rank = {14: 'A', **{v: r for r, v in rank_ids.items()}}
 
