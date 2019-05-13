@@ -71,7 +71,10 @@ def suit_partition(hand):
     for rank, suit in sort_cards_by_rank(hand):
         suit_to_ranks[suit].append(rank)
 
-    return dict(suit_to_ranks)
+    return {
+        suit: sorted(ranks, key=lambda r: rank_values[r])
+        for suit, ranks in suit_to_ranks.items()
+    }
 
 
 def rank_partition(hand):
@@ -86,6 +89,61 @@ def rank_partition(hand):
     return dict(rank_to_suits)
 
 
+def get_ranks_in_a_row(values, suit, n):
+    """
+    :param values: ([int])
+    :param suit: (str)
+    :param n: (int)
+    :return: ([[str]])
+    """
+    runs = []
+    if n == 3:
+        for r0, r1, r2 in zip(values[0:-2], values[1:-1], values[2:]):
+            # TODO: make this more efficient using
+            if r0 == r1 - 1 == r2 - 2:
+                runs.append([
+                    f'{value_to_rank[r0]}{suit}',
+                    f'{value_to_rank[r1]}{suit}',
+                    f'{value_to_rank[r2]}{suit}',
+                ])
+    elif n == 4:
+        for r0, r1, r2, r3 in zip(values[0:-3], values[1:-2], values[2:-1], values[3:]):
+            if r0 == r1 - 1 == r2 - 2 == r3 - 3:
+                runs.append([
+                    f'{value_to_rank[r0]}{suit}',
+                    f'{value_to_rank[r1]}{suit}',
+                    f'{value_to_rank[r2]}{suit}',
+                    f'{value_to_rank[r3]}{suit}',
+                ])
+    else:
+        raise ValueError(
+            f'get_ranks_in_a_row: n must be 3 or 4 (passed in n={n})'
+        )
+
+
+def get_runs_from_ranks(ranks, suit):
+    """
+    :param ranks: ([str])
+    :param suit: (str)
+    :return: ([[str]], [[str]])
+    """
+    runs_3, runs_4 = [], []
+
+    if len(ranks) < 3:
+        return runs_3, runs_4
+
+    values = [rank_values[r] for r in ranks]
+    if values[0] == 1:
+        values.append(14)
+
+    if len(values) >= 3:
+        runs_3.extend(get_ranks_in_a_row(values, suit, 3))
+    if len(values) >= 4:
+        runs_4.extend(get_ranks_in_a_row(values, suit, 4))
+
+    return runs_3, runs_4
+
+
 def get_runs(hand):
     """
     :param hand: ([str])
@@ -94,27 +152,9 @@ def get_runs(hand):
     suit_to_ranks = suit_partition(hand)
     runs_3, runs_4 = [], []
     for suit, ranks in suit_to_ranks.items():
-        values = [rank_values[r] for r in ranks]
-        if values[0] == 1:
-            values.append(14)
-
-        if len(values) >= 3:
-            for r0, r1, r2 in zip(values[0:-2], values[1:-1], values[2:]):
-                if r0 == r1 - 1 == r2 - 2:
-                    runs_3.append([
-                        f'{value_to_rank[r0]}{suit}',
-                        f'{value_to_rank[r1]}{suit}',
-                        f'{value_to_rank[r2]}{suit}',
-                    ])
-        if len(values) >= 4:
-            for r0, r1, r2, r3 in zip(values[0:-3], values[1:-2], values[2:-1], values[3:]):
-                if r0 == r1 - 1 == r2 - 2 == r3 - 3:
-                    runs_4.append([
-                        f'{value_to_rank[r0]}{suit}',
-                        f'{value_to_rank[r1]}{suit}',
-                        f'{value_to_rank[r2]}{suit}',
-                        f'{value_to_rank[r3]}{suit}',
-                    ])
+        suit_runs_3, suit_runs_4 = get_runs_from_ranks(ranks, suit)
+        runs_3.extend(suit_runs_3)
+        runs_4.extend(suit_runs_4)
     return runs_3, runs_4
 
 
