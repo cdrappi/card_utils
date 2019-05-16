@@ -18,7 +18,7 @@ def deal_new_game():
             'deck':    [str]
         }
     """
-    return new_game(cards=7)
+    return new_game(n_cards=7)
 
 
 def sorted_hand_points(hand):
