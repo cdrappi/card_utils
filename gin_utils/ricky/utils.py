@@ -1,4 +1,3 @@
-import collections
 import itertools
 from typing import List, Tuple
 
@@ -67,11 +66,13 @@ def suit_partition(hand):
     :param hand: ([str])
     :return: ({str: [str]} suit --> [ranks]
     """
-    suit_to_ranks = collections.defaultdict(list)
+    suit_to_ranks = {}
     for rank, suit in hand:
+        if suit not in suit_to_ranks:
+            suit_to_ranks[suit] = []
         suit_to_ranks[suit].append(rank)
 
-    return dict(suit_to_ranks)
+    return suit_to_ranks
 
 
 def rank_partition(hand):
@@ -79,11 +80,13 @@ def rank_partition(hand):
     :param hand: ([str])
     :return: ({str: [str]} rank --> [suit]
     """
-    rank_to_suits = collections.defaultdict(list)
+    rank_to_suits = {}
     for rank, suit in hand:
+        if rank not in rank_to_suits:
+            rank_to_suits[rank] = []
         rank_to_suits[rank].append(suit)
 
-    return dict(rank_to_suits)
+    return rank_to_suits
 
 
 def ranks_to_sorted_values(ranks, aces_high, aces_low):
@@ -306,3 +309,7 @@ def accuracy_speed_test(n):
 
     assert old_p == new_p
     return old_t, new_t
+
+
+if __name__ == '__main__':
+    print(accuracy_speed_test(100000))
