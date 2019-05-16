@@ -10,7 +10,6 @@ def deal_new_game():
     """ shuffle up and deal each player 7 cards,
         put one card in the discard list,
         and put remaining cards in deck
-
     :return: (dict)
         {
             'p1_hand': [str],
@@ -68,7 +67,7 @@ def suit_partition(hand):
     :return: ({str: [str]} suit --> [ranks]
     """
     suit_to_ranks = collections.defaultdict(list)
-    for rank, suit in hand:
+    for rank, suit in sort_cards_by_rank(hand):
         suit_to_ranks[suit].append(rank)
 
     return dict(suit_to_ranks)
@@ -86,92 +85,6 @@ def rank_partition(hand):
     return dict(rank_to_suits)
 
 
-def ranks_to_sorted_values(ranks, aces_high, aces_low):
-    """
-    :param ranks: ([str])
-    :param aces_high: (bool)
-    :param aces_low: (bool)
-    :return: ([int])
-    """
-    values = []
-    for rank in ranks:
-        if rank == 'A':
-            if aces_low:
-                # A=1,2=2,3=3,...
-                values.append(1)
-            if aces_high:
-                # T=10,J=11,Q=12,K=13,A=14
-                values.append(14)
-        else:
-            values.append(rank_values[rank])
-
-    return sorted(values)
-
-
-def rank_straights(ranks, straight_length, aces_high=True, aces_low=True):
-    """
-    :param ranks: ([str])
-        e.g. ['A', '2', '7', 'T', 'J', 'Q', 'K']
-    :param straight_length: (int) e.g. 5
-    :param aces_high: (bool)
-    :param aces_low: (bool)
-    :return: ([[str]]) list of list of straights,
-        each with length straight_length
-        e.g. [['T','J','Q','K','A']]
-    """
-    if len(ranks) < straight_length:
-        # don't waste our time if its impossible to make a straight
-        return []
-
-    values = ranks_to_sorted_values(ranks, aces_high=aces_high, aces_low=aces_low)
-
-    values_in_a_row = 0
-    last_value = values[0]
-    straights = []
-
-    for ii, value in enumerate(values[1:]):
-        if last_value + 1 == value:
-            values_in_a_row += 1
-        else:
-            values_in_a_row = 0
-
-        if values_in_a_row >= straight_length - 1:
-            straights.append([
-                value_to_rank[v]
-                for v in range(value - straight_length + 1, value + 1)
-            ])
-
-        last_value = value
-
-    return straights
-
-
-def _inject_suits(list_of_list_of_ranks, suit):
-    """
-    :param list_of_list_of_ranks: ([[str]])
-    :param suit: (str)
-    :return: ([[str]]) list of list of cards
-    """
-    return [
-        [f'{rank}{suit}' for rank in list_of_ranks]
-        for list_of_ranks in list_of_list_of_ranks
-    ]
-
-
-def _get_runs_from_ranks(ranks, suit, aces_high=True, aces_low=True):
-    """
-    :param ranks: ([str])
-    :param suit: (str)
-    :param aces_high: (bool)
-    :param aces_low: (bool)
-    :return: ([[str]], [[str]])
-    """
-    return (
-        _inject_suits(rank_straights(ranks, 3, aces_high, aces_low), suit),
-        _inject_suits(rank_straights(ranks, 4, aces_high, aces_low), suit)
-    )
-
-
 def get_runs(hand):
     """
     :param hand: ([str])
@@ -180,15 +93,32 @@ def get_runs(hand):
     suit_to_ranks = suit_partition(hand)
     runs_3, runs_4 = [], []
     for suit, ranks in suit_to_ranks.items():
-        suit_runs_3, suit_runs_4 = _get_runs_from_ranks(ranks, suit)
-        runs_3.extend(suit_runs_3)
-        runs_4.extend(suit_runs_4)
+        values = [rank_values[r] for r in ranks]
+        if values[0] == 1:
+            values.append(14)
+
+        if len(values) >= 3:
+            for r0, r1, r2 in zip(values[0:-2], values[1:-1], values[2:]):
+                if r0 == r1 - 1 == r2 - 2:
+                    runs_3.append([
+                        f'{value_to_rank[r0]}{suit}',
+                        f'{value_to_rank[r1]}{suit}',
+                        f'{value_to_rank[r2]}{suit}',
+                    ])
+        if len(values) >= 4:
+            for r0, r1, r2, r3 in zip(values[0:-3], values[1:-2], values[2:-1], values[3:]):
+                if r0 == r1 - 1 == r2 - 2 == r3 - 3:
+                    runs_4.append([
+                        f'{value_to_rank[r0]}{suit}',
+                        f'{value_to_rank[r1]}{suit}',
+                        f'{value_to_rank[r2]}{suit}',
+                        f'{value_to_rank[r3]}{suit}',
+                    ])
     return runs_3, runs_4
 
 
 def get_sets(hand):
     """
-
     :param hand: ([str])
     :return: ([[str]], [[str]])
     """
@@ -233,7 +163,6 @@ def are_two_distinct_3_melds(melds_3: List[List]):
 
 def sum_points_by_ranks(hand):
     """
-
     :param hand: ([str])
     :return: (int)
     """
