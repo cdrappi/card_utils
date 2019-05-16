@@ -10,6 +10,7 @@ def deal_new_game():
     """ shuffle up and deal each player 7 cards,
         put one card in the discard list,
         and put remaining cards in deck
+
     :return: (dict)
         {
             'p1_hand': [str],
@@ -119,6 +120,7 @@ def get_runs(hand):
 
 def get_sets(hand):
     """
+
     :param hand: ([str])
     :return: ([[str]], [[str]])
     """
@@ -163,6 +165,7 @@ def are_two_distinct_3_melds(melds_3: List[List]):
 
 def sum_points_by_ranks(hand):
     """
+
     :param hand: ([str])
     :return: (int)
     """

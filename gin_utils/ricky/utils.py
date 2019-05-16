@@ -93,19 +93,23 @@ def ranks_to_sorted_values(ranks, aces_high, aces_low):
     :param aces_low: (bool)
     :return: ([int])
     """
-    values = []
-    for rank in ranks:
-        if rank == 'A':
-            if aces_low:
-                # A=1,2=2,3=3,...
-                values.append(1)
-            if aces_high:
-                # T=10,J=11,Q=12,K=13,A=14
-                values.append(14)
-        else:
-            values.append(rank_values[rank])
+    if not (aces_high or aces_low):
+        raise ValueError(
+            'Call to ranks_to_sorted_values: '
+            'Aces cannot be neither high nor low! Makes no sense'
+        )
 
-    return sorted(values)
+    values = sorted(rank_values[rank] for rank in ranks)
+    # aces marked as low (1) now
+    if values[0] == 'A':
+        # if we have an ace...
+        if aces_high:
+            values.append(14)
+        if not aces_low:
+            # get rid of first card
+            values = values[1:]
+
+    return values
 
 
 def rank_straights(ranks, straight_length, aces_high=True, aces_low=True):
@@ -126,6 +130,7 @@ def rank_straights(ranks, straight_length, aces_high=True, aces_low=True):
     values = ranks_to_sorted_values(ranks, aces_high=aces_high, aces_low=aces_low)
 
     values_in_a_row = 0
+    num_values = len(values)
     last_value = values[0]
     straights = []
 
@@ -143,6 +148,11 @@ def rank_straights(ranks, straight_length, aces_high=True, aces_low=True):
 
         last_value = value
 
+        if num_values + values_in_a_row < straight_length + ii:
+            # exit early if there aren't enough cards left
+            # to complete a straight
+            return straights
+
     return straights
 
 
@@ -158,7 +168,7 @@ def _inject_suits(list_of_list_of_ranks, suit):
     ]
 
 
-def get_runs(hand):
+def get_runs_new(hand):
     """
     :param hand: ([str])
     :return: ([[str]], [[str]])
@@ -168,6 +178,36 @@ def get_runs(hand):
     for suit, ranks in suit_to_ranks.items():
         runs_3.extend(_inject_suits(rank_straights(ranks, 3, aces_high=True, aces_low=True), suit))
         runs_4.extend(_inject_suits(rank_straights(ranks, 4, aces_high=True, aces_low=True), suit))
+    return runs_3, runs_4
+
+
+def get_runs(hand):
+    """
+    :param hand: ([str])
+    :return: ([[str]], [[str]])
+    """
+    suit_to_ranks = suit_partition(hand)
+    runs_3, runs_4 = [], []
+    for suit, ranks in suit_to_ranks.items():
+        values = ranks_to_sorted_values(ranks, aces_high=True, aces_low=True)
+
+        if len(values) >= 3:
+            for r0, r1, r2 in zip(values[0:-2], values[1:-1], values[2:]):
+                if r0 == r1 - 1 == r2 - 2:
+                    runs_3.append([
+                        f'{value_to_rank[r0]}{suit}',
+                        f'{value_to_rank[r1]}{suit}',
+                        f'{value_to_rank[r2]}{suit}',
+                    ])
+        if len(values) >= 4:
+            for r0, r1, r2, r3 in zip(values[0:-3], values[1:-2], values[2:-1], values[3:]):
+                if r0 == r1 - 1 == r2 - 2 == r3 - 3:
+                    runs_4.append([
+                        f'{value_to_rank[r0]}{suit}',
+                        f'{value_to_rank[r1]}{suit}',
+                        f'{value_to_rank[r2]}{suit}',
+                        f'{value_to_rank[r3]}{suit}',
+                    ])
     return runs_3, runs_4
 
 
