@@ -1,9 +1,8 @@
-import collections
 import itertools
 from typing import List, Tuple
 
 from gin_utils.deal import new_game
-from gin_utils.deck import rank_values, value_to_rank
+from gin_utils.deck import rank_values, value_to_rank, card_suits
 
 
 def deal_new_game():
@@ -67,11 +66,13 @@ def suit_partition(hand):
     :param hand: ([str])
     :return: ({str: [str]} suit --> [ranks]
     """
-    suit_to_ranks = collections.defaultdict(list)
-    for rank, suit in sort_cards_by_rank(hand):
+    suit_to_ranks = {}
+    for rank, suit in hand:
+        if suit not in suit_to_ranks:
+            suit_to_ranks[suit] = []
         suit_to_ranks[suit].append(rank)
 
-    return dict(suit_to_ranks)
+    return suit_to_ranks
 
 
 def rank_partition(hand):
@@ -79,42 +80,103 @@ def rank_partition(hand):
     :param hand: ([str])
     :return: ({str: [str]} rank --> [suit]
     """
-    rank_to_suits = collections.defaultdict(list)
+    rank_to_suits = {}
     for rank, suit in hand:
+        if rank not in rank_to_suits:
+            rank_to_suits[rank] = []
         rank_to_suits[rank].append(suit)
 
-    return dict(rank_to_suits)
+    return rank_to_suits
+
+
+def ranks_to_sorted_values(ranks, aces_high, aces_low):
+    """
+    :param ranks: ([str])
+    :param aces_high: (bool)
+    :param aces_low: (bool)
+    :return: ([int])
+    """
+    if not (aces_high or aces_low):
+        raise ValueError(
+            'Call to ranks_to_sorted_values: '
+            'Aces cannot be neither high nor low! Makes no sense'
+        )
+
+    values = sorted(rank_values[rank] for rank in ranks)
+    # aces marked as low (1) now
+    if values[0] == 1:
+        # if we have an ace...
+        if aces_high:
+            values.append(14)
+        if not aces_low:
+            # get rid of first card
+            values.pop(0)
+
+    return values
+
+
+def rank_straights(ranks, straight_length, aces_high=True, aces_low=True, suit=''):
+    """
+    :param ranks: ([str])
+        e.g. ['A', '2', '7', 'T', 'J', 'Q', 'K']
+    :param straight_length: (int) e.g. 5
+    :param aces_high: (bool)
+    :param aces_low: (bool)
+    :param suit: (str) optional: inject a suit in the final returned value
+    :return: ([[str]]) list of list of straights,
+        each with length straight_length
+        e.g. [['T','J','Q','K','A']]
+        or [['Th', 'Jh', 'Qh', 'Kh', 'Ah']]
+    """
+    if len(ranks) < straight_length:
+        # don't waste our time if its impossible to make a straight
+        return []
+
+    if suit not in {'', *card_suits}:
+        raise ValueError(
+            f'rank_straights: suit parameter must either be '
+            f'the empty string "" or one of {card_suits}'
+        )
+
+    values = ranks_to_sorted_values(ranks, aces_high=aces_high, aces_low=aces_low)
+
+    values_in_a_row = 0
+    num_values = len(values)
+    last_value = values[0]
+    straights = []
+
+    for ii, value in enumerate(values[1:]):
+        if last_value + 1 == value:
+            values_in_a_row += 1
+        else:
+            values_in_a_row = 0
+
+        if values_in_a_row >= straight_length - 1:
+            straights.append([
+                f'{value_to_rank[v]}{suit}'
+                for v in range(value - straight_length + 1, value + 1)
+            ])
+
+        if num_values + values_in_a_row < straight_length + ii:
+            # exit early if there aren't enough cards left
+            # to complete a straight
+            return straights
+
+        last_value = value
+
+    return straights
 
 
 def get_runs(hand):
-    """
+    """ cleaner but slower (!?) method to get runs
     :param hand: ([str])
     :return: ([[str]], [[str]])
     """
     suit_to_ranks = suit_partition(hand)
     runs_3, runs_4 = [], []
     for suit, ranks in suit_to_ranks.items():
-        values = [rank_values[r] for r in ranks]
-        if values[0] == 1:
-            values.append(14)
-
-        if len(values) >= 3:
-            for r0, r1, r2 in zip(values[0:-2], values[1:-1], values[2:]):
-                if r0 == r1 - 1 == r2 - 2:
-                    runs_3.append([
-                        f'{value_to_rank[r0]}{suit}',
-                        f'{value_to_rank[r1]}{suit}',
-                        f'{value_to_rank[r2]}{suit}',
-                    ])
-        if len(values) >= 4:
-            for r0, r1, r2, r3 in zip(values[0:-3], values[1:-2], values[2:-1], values[3:]):
-                if r0 == r1 - 1 == r2 - 2 == r3 - 3:
-                    runs_4.append([
-                        f'{value_to_rank[r0]}{suit}',
-                        f'{value_to_rank[r1]}{suit}',
-                        f'{value_to_rank[r2]}{suit}',
-                        f'{value_to_rank[r3]}{suit}',
-                    ])
+        runs_3.extend(rank_straights(ranks, 3, True, True, suit=suit))
+        runs_4.extend(rank_straights(ranks, 4, True, True, suit=suit))
     return runs_3, runs_4
 
 
