@@ -158,20 +158,6 @@ def _inject_suits(list_of_list_of_ranks, suit):
     ]
 
 
-def _get_runs_from_ranks(ranks, suit, aces_high=True, aces_low=True):
-    """
-    :param ranks: ([str])
-    :param suit: (str)
-    :param aces_high: (bool)
-    :param aces_low: (bool)
-    :return: ([[str]], [[str]])
-    """
-    return (
-        _inject_suits(rank_straights(ranks, 3, aces_high, aces_low), suit),
-        _inject_suits(rank_straights(ranks, 4, aces_high, aces_low), suit)
-    )
-
-
 def get_runs(hand):
     """
     :param hand: ([str])
@@ -180,9 +166,8 @@ def get_runs(hand):
     suit_to_ranks = suit_partition(hand)
     runs_3, runs_4 = [], []
     for suit, ranks in suit_to_ranks.items():
-        suit_runs_3, suit_runs_4 = _get_runs_from_ranks(ranks, suit)
-        runs_3.extend(suit_runs_3)
-        runs_4.extend(suit_runs_4)
+        runs_3.extend(_inject_suits(rank_straights(ranks, 3, aces_high=True, aces_low=True), suit))
+        runs_4.extend(_inject_suits(rank_straights(ranks, 4, aces_high=True, aces_low=True), suit))
     return runs_3, runs_4
 
 
