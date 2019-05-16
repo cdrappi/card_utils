@@ -138,70 +138,40 @@ def rank_straights(ranks, straight_length, aces_high=True, aces_low=True):
         else:
             values_in_a_row = 0
 
-        if values_in_a_row == straight_length - 1:
+        if values_in_a_row >= straight_length - 1:
             straights.append([
                 value_to_rank[v]
-                for v in range(value, value - straight_length, -1)
+                for v in range(value - straight_length + 1, value + 1)
             ])
-
         last_value = value
 
     return straights
 
 
-def get_ranks_in_a_row(values, suit, n):
+def inject_suits(list_of_list_of_ranks, suit):
     """
-    :param values: ([int])
+    :param list_of_list_of_ranks: ([[str]])
     :param suit: (str)
-    :param n: (int)
-    :return: ([[str]])
+    :return: ([[str]]) list of list of cards
     """
-    runs = []
-    if n == 3:
-        for r0, r1, r2 in zip(values[0:-2], values[1:-1], values[2:]):
-            # TODO: make this more efficient using
-            if r0 == r1 - 1 == r2 - 2:
-                runs.append([
-                    f'{value_to_rank[r0]}{suit}',
-                    f'{value_to_rank[r1]}{suit}',
-                    f'{value_to_rank[r2]}{suit}',
-                ])
-    elif n == 4:
-        for r0, r1, r2, r3 in zip(values[0:-3], values[1:-2], values[2:-1], values[3:]):
-            if r0 == r1 - 1 == r2 - 2 == r3 - 3:
-                runs.append([
-                    f'{value_to_rank[r0]}{suit}',
-                    f'{value_to_rank[r1]}{suit}',
-                    f'{value_to_rank[r2]}{suit}',
-                    f'{value_to_rank[r3]}{suit}',
-                ])
-    else:
-        raise ValueError(
-            f'get_ranks_in_a_row: n must be 3 or 4 (passed in n={n})'
-        )
+    return [
+        [f'{rank}{suit}' for rank in list_of_ranks]
+        for list_of_ranks in list_of_list_of_ranks
+    ]
 
 
-def get_runs_from_ranks(ranks, suit):
+def get_runs_from_ranks(ranks, suit, aces_high=True, aces_low=True):
     """
     :param ranks: ([str])
     :param suit: (str)
+    :param aces_high: (bool)
+    :param aces_low: (bool)
     :return: ([[str]], [[str]])
     """
-    runs_3, runs_4 = [], []
-
-    if len(ranks) < 3:
-        return runs_3, runs_4
-
-    values = [rank_values[r] for r in ranks]
-    if values[0] == 1:
-        values.append(14)
-
-    if len(values) >= 3:
-        runs_3.extend(get_ranks_in_a_row(values, suit, 3))
-    if len(values) >= 4:
-        runs_4.extend(get_ranks_in_a_row(values, suit, 4))
-
-    return runs_3, runs_4
+    return (
+        inject_suits(rank_straights(ranks, 3, aces_high, aces_low), suit),
+        inject_suits(rank_straights(ranks, 4, aces_high, aces_low), suit)
+    )
 
 
 def get_runs(hand):
