@@ -175,38 +175,8 @@ def get_runs(hand):
     suit_to_ranks = suit_partition(hand)
     runs_3, runs_4 = [], []
     for suit, ranks in suit_to_ranks.items():
-        runs_3.extend(rank_straights(ranks, 3, aces_high=True, aces_low=True, suit=suit))
-        runs_4.extend(rank_straights(ranks, 4, aces_high=True, aces_low=True, suit=suit))
-    return runs_3, runs_4
-
-
-def get_runs_faster(hand):
-    """
-    :param hand: ([str])
-    :return: ([[str]], [[str]])
-    """
-    suit_to_ranks = suit_partition(hand)
-    runs_3, runs_4 = [], []
-    for suit, ranks in suit_to_ranks.items():
-        values = ranks_to_sorted_values(ranks, aces_high=True, aces_low=True)
-
-        if len(values) >= 3:
-            for r0, r1, r2 in zip(values[0:-2], values[1:-1], values[2:]):
-                if r0 == r1 - 1 == r2 - 2:
-                    runs_3.append([
-                        f'{value_to_rank[r0]}{suit}',
-                        f'{value_to_rank[r1]}{suit}',
-                        f'{value_to_rank[r2]}{suit}',
-                    ])
-        if len(values) >= 4:
-            for r0, r1, r2, r3 in zip(values[0:-3], values[1:-2], values[2:-1], values[3:]):
-                if r0 == r1 - 1 == r2 - 2 == r3 - 3:
-                    runs_4.append([
-                        f'{value_to_rank[r0]}{suit}',
-                        f'{value_to_rank[r1]}{suit}',
-                        f'{value_to_rank[r2]}{suit}',
-                        f'{value_to_rank[r3]}{suit}',
-                    ])
+        runs_3.extend(rank_straights(ranks, 3, True, True, suit=suit))
+        runs_4.extend(rank_straights(ranks, 4, True, True, suit=suit))
     return runs_3, runs_4
 
 
@@ -288,20 +258,3 @@ def hand_points(hand):
     """
     _, points = sorted_hand_points(hand)
     return points
-
-
-def accuracy_speed_test(n):
-    import time
-    from gin_utils.ricky.old_utils import hand_points as old_hand_points
-    hands = [deal_new_game()['p1_hand'] for _ in range(n)]
-
-    def points_timed(f):
-        start_t = time.time()
-        points = [f(h) for h in hands]
-        return points, time.time() - start_t
-
-    old_p, old_t = points_timed(old_hand_points)
-    new_p, new_t = points_timed(hand_points)
-
-    assert old_p == new_p
-    return old_t, new_t
