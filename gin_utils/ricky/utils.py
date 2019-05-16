@@ -101,13 +101,13 @@ def ranks_to_sorted_values(ranks, aces_high, aces_low):
 
     values = sorted(rank_values[rank] for rank in ranks)
     # aces marked as low (1) now
-    if values[0] == 'A':
+    if values[0] == 1:
         # if we have an ace...
         if aces_high:
             values.append(14)
         if not aces_low:
             # get rid of first card
-            values = values[1:]
+            values.pop(0)
 
     return values
 
