@@ -89,6 +89,16 @@ def rank_partition(hand):
     return dict(rank_to_suits)
 
 
+def rank_straights(card_ranks):
+    """
+    :param card_ranks: ([str])
+        e.g. ['A', '2', '7', 'T', 'J', 'Q', 'K']
+    :return: ([[str]]) list of list of straights
+        e.g. [['T','J','Q','K','A']]
+    """
+    return []
+
+
 def get_ranks_in_a_row(values, suit, n):
     """
     :param values: ([int])
