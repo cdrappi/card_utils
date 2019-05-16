@@ -185,9 +185,7 @@ def get_runs(hand):
     suit_to_ranks = suit_partition(hand)
     runs_3, runs_4 = [], []
     for suit, ranks in suit_to_ranks.items():
-        values = sorted(rank_values[r] for r in ranks)
-        if values[0] == 1:
-            values.append(14)
+        values = ranks_to_sorted_values(ranks, aces_high=True, aces_low=True)
 
         if len(values) >= 3:
             for r0, r1, r2 in zip(values[0:-2], values[1:-1], values[2:]):
