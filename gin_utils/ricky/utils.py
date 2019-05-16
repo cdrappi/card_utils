@@ -249,3 +249,20 @@ def hand_points(hand):
     """
     _, points = sorted_hand_points(hand)
     return points
+
+
+def accuracy_speed_test(n):
+    import time
+    from gin_utils.ricky.old_utils import hand_points as old_hand_points
+    hands = [deal_new_game()['p1_hand'] for _ in range(n)]
+
+    def points_timed(f):
+        start_t = time.time()
+        points = [f(h) for h in hands]
+        return points, time.time() - start_t
+
+    old_p, old_t = points_timed(old_hand_points)
+    new_p, new_t = points_timed(hand_points)
+
+    assert old_p == new_p
+    return old_t, new_t
