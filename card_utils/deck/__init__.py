@@ -21,6 +21,6 @@ rank_to_value = {
     'Q': 12,
     'K': 13,
     **{d: int(d) for d in '23456789'}
-    
 }
+
 value_to_rank = {14: 'A', **{v: r for r, v in rank_to_value.items()}}
