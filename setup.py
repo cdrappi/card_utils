@@ -18,8 +18,8 @@ with open('requirements/common.txt') as f:
     ]
 
 setup(
-    name='gin_utils',
-    version='2019.5.16.1',
-    packages=['gin_utils'],
+    name='card_utils',
+    version='2019.5.16.2',
+    packages=['card_utils'],
     install_requires=install_requires,
 )

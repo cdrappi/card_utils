@@ -13,7 +13,7 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # Environments
-gin_utils_venv/
+card_utils_venv/
 
 # Editors: PyCharm
 .idea/*

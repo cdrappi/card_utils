@@ -3,7 +3,7 @@
 import copy
 import random
 
-from gin_utils.ricky import utils
+from card_utils.games.gin.ricky import utils
 
 
 class GinRickyGameState:
