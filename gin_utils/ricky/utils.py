@@ -93,6 +93,12 @@ def ranks_to_sorted_values(ranks, aces_high, aces_low):
     :param aces_low: (bool)
     :return: ([int])
     """
+    if not (aces_high or aces_low):
+        raise ValueError(
+            'Call to ranks_to_sorted_values: '
+            'Aces cannot be neither high nor low! Makes no sense'
+        )
+
     values = []
     for rank in ranks:
         if rank == 'A':
