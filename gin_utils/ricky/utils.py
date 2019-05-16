@@ -2,7 +2,7 @@ import itertools
 from typing import List, Tuple
 
 from gin_utils.deal import new_game
-from gin_utils.deck import rank_values, value_to_rank
+from gin_utils.deck import rank_values, value_to_rank, card_suits
 
 
 def deal_new_game():
@@ -115,20 +115,28 @@ def ranks_to_sorted_values(ranks, aces_high, aces_low):
     return values
 
 
-def rank_straights(ranks, straight_length, aces_high=True, aces_low=True):
+def rank_straights(ranks, straight_length, aces_high=True, aces_low=True, suit=''):
     """
     :param ranks: ([str])
         e.g. ['A', '2', '7', 'T', 'J', 'Q', 'K']
     :param straight_length: (int) e.g. 5
     :param aces_high: (bool)
     :param aces_low: (bool)
+    :param suit: (str) optional: inject a suit in the final returned value
     :return: ([[str]]) list of list of straights,
         each with length straight_length
         e.g. [['T','J','Q','K','A']]
+        or [['Th', 'Jh', 'Qh', 'Kh', 'Ah']]
     """
     if len(ranks) < straight_length:
         # don't waste our time if its impossible to make a straight
         return []
+
+    if suit not in {'', *card_suits}:
+        raise ValueError(
+            f'rank_straights: suit parameter must either be '
+            f'the empty string "" or one of {card_suits}'
+        )
 
     values = ranks_to_sorted_values(ranks, aces_high=aces_high, aces_low=aces_low)
 
@@ -145,7 +153,7 @@ def rank_straights(ranks, straight_length, aces_high=True, aces_low=True):
 
         if values_in_a_row >= straight_length - 1:
             straights.append([
-                value_to_rank[v]
+                f'{value_to_rank[v]}{suit}'
                 for v in range(value - straight_length + 1, value + 1)
             ])
 
@@ -159,32 +167,20 @@ def rank_straights(ranks, straight_length, aces_high=True, aces_low=True):
     return straights
 
 
-def _inject_suits(list_of_list_of_ranks, suit):
-    """
-    :param list_of_list_of_ranks: ([[str]])
-    :param suit: (str)
-    :return: ([[str]]) list of list of cards
-    """
-    return [
-        [f'{rank}{suit}' for rank in list_of_ranks]
-        for list_of_ranks in list_of_list_of_ranks
-    ]
-
-
-def get_runs_slower(hand):
-    """
+def get_runs(hand):
+    """ cleaner but slower (!?) method to get runs
     :param hand: ([str])
     :return: ([[str]], [[str]])
     """
     suit_to_ranks = suit_partition(hand)
     runs_3, runs_4 = [], []
     for suit, ranks in suit_to_ranks.items():
-        runs_3.extend(_inject_suits(rank_straights(ranks, 3, aces_high=True, aces_low=True), suit))
-        runs_4.extend(_inject_suits(rank_straights(ranks, 4, aces_high=True, aces_low=True), suit))
+        runs_3.extend(rank_straights(ranks, 3, aces_high=True, aces_low=True, suit=suit))
+        runs_4.extend(rank_straights(ranks, 4, aces_high=True, aces_low=True, suit=suit))
     return runs_3, runs_4
 
 
-def get_runs(hand):
+def get_runs_faster(hand):
     """
     :param hand: ([str])
     :return: ([[str]], [[str]])
@@ -309,7 +305,3 @@ def accuracy_speed_test(n):
 
     assert old_p == new_p
     return old_t, new_t
-
-
-if __name__ == '__main__':
-    print(accuracy_speed_test(100000))
