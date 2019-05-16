@@ -89,14 +89,64 @@ def rank_partition(hand):
     return dict(rank_to_suits)
 
 
-def rank_straights(card_ranks):
+def ranks_to_sorted_values(ranks, aces_high, aces_low):
     """
-    :param card_ranks: ([str])
+    :param ranks: ([str])
+    :param aces_high: (bool)
+    :param aces_low: (bool)
+    :return: ([int])
+    """
+    values = []
+    for rank in ranks:
+        if rank == 'A':
+            if aces_low:
+                # A=1,2=2,3=3,...
+                values.append(1)
+            if aces_high:
+                # T=10,J=11,Q=12,K=13,A=14
+                values.append(14)
+        else:
+            values.append(rank_values[rank])
+
+    return sorted(values)
+
+
+def rank_straights(ranks, straight_length, aces_high=True, aces_low=True):
+    """
+    :param ranks: ([str])
         e.g. ['A', '2', '7', 'T', 'J', 'Q', 'K']
-    :return: ([[str]]) list of list of straights
+    :param straight_length: (int) e.g. 5
+    :param aces_high: (bool)
+    :param aces_low: (bool)
+    :return: ([[str]]) list of list of straights,
+        each with length straight_length
         e.g. [['T','J','Q','K','A']]
     """
-    return []
+    if len(ranks) < straight_length:
+        # don't waste our time if its impossible to make a straight
+        return []
+
+    values = ranks_to_sorted_values(ranks, aces_high=aces_high, aces_low=aces_low)
+
+    values_in_a_row = 0
+    last_value = values[0]
+    straights = []
+
+    for value in values[1:]:
+        if last_value + 1 == value:
+            values_in_a_row += 1
+        else:
+            values_in_a_row = 0
+
+        if values_in_a_row == straight_length - 1:
+            straights.append([
+                value_to_rank[v]
+                for v in range(value, value - straight_length, -1)
+            ])
+
+        last_value = value
+
+    return straights
 
 
 def get_ranks_in_a_row(values, suit, n):
