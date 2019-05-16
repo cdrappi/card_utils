@@ -68,7 +68,7 @@ def suit_partition(hand):
     :return: ({str: [str]} suit --> [ranks]
     """
     suit_to_ranks = collections.defaultdict(list)
-    for rank, suit in sort_cards_by_rank(hand):
+    for rank, suit in hand:
         suit_to_ranks[suit].append(rank)
 
     return {
