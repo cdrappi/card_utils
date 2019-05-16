@@ -126,6 +126,7 @@ def rank_straights(ranks, straight_length, aces_high=True, aces_low=True):
     values = ranks_to_sorted_values(ranks, aces_high=aces_high, aces_low=aces_low)
 
     values_in_a_row = 0
+    num_values = len(values)
     last_value = values[0]
     straights = []
 
@@ -143,6 +144,11 @@ def rank_straights(ranks, straight_length, aces_high=True, aces_low=True):
 
         last_value = value
 
+        if num_values + values_in_a_row < straight_length + ii:
+            # exit early if there aren't enough cards left
+            # to complete a straight
+            return straights
+
     return straights
 
 
@@ -158,7 +164,7 @@ def _inject_suits(list_of_list_of_ranks, suit):
     ]
 
 
-def get_runs(hand):
+def get_runs_new(hand):
     """
     :param hand: ([str])
     :return: ([[str]], [[str]])
@@ -168,6 +174,38 @@ def get_runs(hand):
     for suit, ranks in suit_to_ranks.items():
         runs_3.extend(_inject_suits(rank_straights(ranks, 3, aces_high=True, aces_low=True), suit))
         runs_4.extend(_inject_suits(rank_straights(ranks, 4, aces_high=True, aces_low=True), suit))
+    return runs_3, runs_4
+
+
+def get_runs(hand):
+    """
+    :param hand: ([str])
+    :return: ([[str]], [[str]])
+    """
+    suit_to_ranks = suit_partition(hand)
+    runs_3, runs_4 = [], []
+    for suit, ranks in suit_to_ranks.items():
+        values = sorted(rank_values[r] for r in ranks)
+        if values[0] == 1:
+            values.append(14)
+
+        if len(values) >= 3:
+            for r0, r1, r2 in zip(values[0:-2], values[1:-1], values[2:]):
+                if r0 == r1 - 1 == r2 - 2:
+                    runs_3.append([
+                        f'{value_to_rank[r0]}{suit}',
+                        f'{value_to_rank[r1]}{suit}',
+                        f'{value_to_rank[r2]}{suit}',
+                    ])
+        if len(values) >= 4:
+            for r0, r1, r2, r3 in zip(values[0:-3], values[1:-2], values[2:-1], values[3:]):
+                if r0 == r1 - 1 == r2 - 2 == r3 - 3:
+                    runs_4.append([
+                        f'{value_to_rank[r0]}{suit}',
+                        f'{value_to_rank[r1]}{suit}',
+                        f'{value_to_rank[r2]}{suit}',
+                        f'{value_to_rank[r3]}{suit}',
+                    ])
     return runs_3, runs_4
 
 
