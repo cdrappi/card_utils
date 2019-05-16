@@ -146,12 +146,12 @@ def rank_straights(ranks, straight_length, aces_high=True, aces_low=True):
                 for v in range(value - straight_length + 1, value + 1)
             ])
 
-        last_value = value
-
         if num_values + values_in_a_row < straight_length + ii:
             # exit early if there aren't enough cards left
             # to complete a straight
             return straights
+
+        last_value = value
 
     return straights
 
@@ -168,7 +168,7 @@ def _inject_suits(list_of_list_of_ranks, suit):
     ]
 
 
-def get_runs_new(hand):
+def get_runs_slower(hand):
     """
     :param hand: ([str])
     :return: ([[str]], [[str]])
