@@ -2,13 +2,13 @@ from card_utils import deck
 from card_utils.deck.utils import random_deck
 
 
-def new_game(cards):
+def new_game(n_cards):
     """ deal new game of gin
 
-    :param cards: (int) how many cards to give to each player
+    :param n_cards: (int) how many cards to give to each player
     :return: (dict)
     """
-    if 2 * cards + 1 >= len(deck.cards):
+    if 2 * n_cards + 1 >= len(deck.cards):
         raise ValueError(
             f'gin.deal.new_game: too many cards, '
             f'cannot exceed ~2x deck length!'
@@ -16,8 +16,8 @@ def new_game(cards):
 
     deck_ = random_deck()
     return {
-        'p1_hand': deck_[0:cards],
-        'p2_hand': deck_[cards:2 * cards],
-        'discard': [deck_[2 * cards]],
-        'deck': deck_[2 * cards + 1:],
+        'p1_hand': deck_[0:n_cards],
+        'p2_hand': deck_[n_cards:2 * n_cards],
+        'discard': [deck_[2 * n_cards]],
+        'deck': deck_[2 * n_cards + 1:],
     }
