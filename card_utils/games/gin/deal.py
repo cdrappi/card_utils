@@ -10,8 +10,8 @@ def new_game(n_cards):
     """
     if 2 * n_cards + 1 >= len(deck.cards):
         raise ValueError(
-            f'gin.deal.new_game: too many cards, '
-            f'cannot exceed ~2x deck length!'
+            f'gin.deal.new_game: too many cards ({n_cards}), '
+            f'not enough to deal a game to two players!'
         )
 
     deck_ = random_deck()
