@@ -14,12 +14,13 @@ rank_ids = {rank: index for index, rank in enumerate(ranks)}
 card_id_map = {card: index for index, card in enumerate(cards)}
 reverse_card_id_map = {index: card for card, index in card_id_map.items()}
 
-rank_to_values = {
+rank_to_value = {
     'A': 1,
     'T': 10,
     'J': 11,
     'Q': 12,
     'K': 13,
     **{d: int(d) for d in '23456789'}
+    
 }
-value_to_rank = {14: 'A', **{v: r for r, v in rank_to_values.items()}}
+value_to_rank = {14: 'A', **{v: r for r, v in rank_to_value.items()}}

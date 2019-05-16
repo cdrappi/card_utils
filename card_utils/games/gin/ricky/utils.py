@@ -34,7 +34,7 @@ def sorted_hand_points(hand):
     sorted_hand = sort_cards_by_rank(hand)
     hand_points_ = sum_points_by_ranks(hand)
     if len(hand) == 8:
-        hand_points_ -= max(deck.rank_to_values[r] for r, _ in hand)
+        hand_points_ -= max(deck.rank_to_value[r] for r, _ in hand)
 
     if len(melds_3 + melds_4) == 0:
         return sorted_hand, hand_points_
@@ -52,7 +52,7 @@ def sorted_hand_points(hand):
         # print(hand, hand_without_meld, meld)
         meld_points = sum_points_by_ranks(hand_without_meld)
         if len(hand) == 8:
-            meld_points -= max(deck.rank_to_values[r] for r, _ in hand_without_meld)
+            meld_points -= max(deck.rank_to_value[r] for r, _ in hand_without_meld)
 
         if meld_points < hand_points_:
             sorted_hand = meld + sort_cards_by_rank(hand_without_meld)
@@ -102,7 +102,7 @@ def ranks_to_sorted_values(ranks, aces_high, aces_low):
             'Aces cannot be neither high nor low! Makes no sense'
         )
 
-    values = sorted(deck.rank_to_values[rank] for rank in ranks)
+    values = sorted(deck.rank_to_value[rank] for rank in ranks)
     # aces marked as low (1) now
     if values[0] == 1:
         # if we have an ace...
@@ -231,7 +231,7 @@ def sum_points_by_ranks(hand):
     :param hand: ([str])
     :return: (int)
     """
-    return sum(deck.rank_to_values[r] for r, _ in hand)
+    return sum(deck.rank_to_value[r] for r, _ in hand)
 
 
 def sort_cards_by_rank(cards):
@@ -239,7 +239,7 @@ def sort_cards_by_rank(cards):
     :param cards: ([str])
     :return: ([str])
     """
-    return sorted(cards, key=lambda c: deck.rank_to_values[c[0]])
+    return sorted(cards, key=lambda c: deck.rank_to_value[c[0]])
 
 
 def sort_hand(hand):
