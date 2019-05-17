@@ -72,7 +72,7 @@ def _get_connecting_values(v1, v2, v3):
     return straight_values
 
 
-def get_possible_straight_values(ranks):
+def get_possible_straights(ranks):
     """ get a list of hole card combinations
         that could make a straight
         on a board with these ranks
@@ -84,7 +84,7 @@ def get_possible_straight_values(ranks):
     """
     if len(ranks) < 3:
         # need 3 cards to make a straight
-        return []
+        return {}
 
     values = ranks_to_sorted_values(
         ranks=ranks,
@@ -116,7 +116,7 @@ def get_possible_straight_flushes(ranks, suit):
     """
     return {
         tuple(f'{value_to_rank[v]}{suit}' for v in connectors): max_value
-        for connectors, max_value in get_possible_straight_values(ranks)
+        for connectors, max_value in get_possible_straights(ranks)
     }
 
 
@@ -148,11 +148,11 @@ def get_best_straight_flushes(possible_straight_flushes, hands, suit):
     return highest_straight_flush_hand_index
 
 
-def get_best_straights(possible_straight_values, hands):
+def get_best_straights(possible_straights, hands):
     """ get list of indices of hands that make the strongest straight
         if no one makes a straight, return empty list
 
-    :param possible_straight_values: ({tuple(str): int})
+    :param possible_straights: ({tuple(str): int})
         map tuple of connecting cards --> best straight value they make
     :param hands: ([[str]] list of list of strings
     :return: ([int]) list of indices of hands that make the best straight
@@ -162,7 +162,7 @@ def get_best_straights(possible_straight_values, hands):
     best_straight_highest_value = 0  # e.g. 14 for broadway, 5 for the wheel
     for ii, hand in enumerate(hands):
         hand_values = set(rank_to_value[r] for r, _ in hand)
-        for connecting_values, max_value in possible_straight_values.items():
+        for connecting_values, max_value in possible_straights.items():
             connecting_cards = set(connecting_values).union(hand_values)
             if len(connecting_cards) == 2:
                 # we've made a straight!
@@ -173,6 +173,33 @@ def get_best_straights(possible_straight_values, hands):
                     best_straight_indices.append(ii)
 
     return best_straight_indices
+
+
+def get_best_flushes(hands_flush_ranks):
+    """ get indexes of hands that make the best flush
+        in omaha, only one hand can make the same flush,
+        since you must play exactly two cards from your hand.
+        still, we return a list to keep the return type
+        consistent with other functions
+
+    :param hands_flush_ranks: ([set(str)]
+    :param board_flush_ranks: ([str]) list of ranks of flush suit
+    :return: ([int])
+    """
+    best_flush_indices = []
+    best_flush_highest_value = 0
+    for ii, hand_flush_ranks in enumerate(hands_flush_ranks):
+        if len(hand_flush_ranks) >= 2:
+            max_flush_rank = max(rank_to_value[r] for r in hands_flush_ranks)
+            if max_flush_rank == best_flush_highest_value:
+                raise ValueError(
+                    f'Two Omaha hands cannot make the same strength flush!'
+                )
+            if max_flush_rank > best_flush_highest_value:
+                best_flush_indices = [ii]
+                best_flush_highest_value = max_flush_rank
+
+    return best_flush_indices
 
 
 def get_best_hand(board, hands):
@@ -223,15 +250,19 @@ def get_best_hand(board, hands):
 
     # Check to see if anyone has a straight flush
     if flush_suit is not None:
-        possible_straight_flushes = get_possible_straight_flushes(
-            ranks=board_by_suits[flush_suit],
-            suit=flush_suit
+        possible_straight_flushes = get_possible_straights(
+            ranks=board_by_suits[flush_suit]
         )
         if possible_straight_flushes:
-            best_straight_flushes = get_best_straight_flushes(
-                possible_straight_flushes=possible_straight_flushes,
-                hands=hands,
-                suit=flush_suit
+            best_straight_flushes = get_best_straights(
+                possible_straights=possible_straight_flushes,
+                hands=[
+                    # filter hands by suit, and then we can use the
+                    # same function for straight flushes
+                    # as we use for straights
+                    set(f'{r}{s}' for r, s in hand if s == flush_suit)
+                    for hand in hands
+                ],
             )
             if best_straight_flushes:
                 return best_straight_flushes
@@ -245,17 +276,24 @@ def get_best_hand(board, hands):
         # TODO: check for full houses
         pass
 
-    # TODO: check for regular flushes
     if flush_suit is not None:
-        pass
+        best_flushes = get_best_flushes(
+            hands_flush_ranks=[
+                set(r for r, s in hand if s == flush_suit)
+                for hand in hands
+            ]
+        )
+        if best_flushes:
+            return best_flushes
 
-    # TODO: check for straights
-    possible_straights = get_possible_straight_values([r for r, _ in board])
+    possible_straights = get_possible_straights([r for r, _ in board])
     if possible_straights:
-        best_straight_indices = get_best_straights(
+        best_straights = get_best_straights(
             possible_straights=possible_straights,
             hands=hands
         )
+        if best_straights:
+            return best_straights
 
     # TODO: check for three of a kind
 
