@@ -51,7 +51,7 @@ def _get_straight_values(v1, v2, v3):
     :param v3: (int)
     :return: (set(tuple(int))) set of tuples of ints
     """
-    straight_range = 3 + v1 - v3
+    straight_range = 3 + v1 - v3  # TODO: better variable name... gaps?
     if straight_range <= 0:
         return set()
 
