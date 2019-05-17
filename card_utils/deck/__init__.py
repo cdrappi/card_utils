@@ -22,15 +22,16 @@ common_rank_to_value = {
     **{d: int(d) for d in '23456789'}
 }
 
-rank_to_value = {
-    'A': 1,
-    **common_rank_to_value
-}
-
 ace_high_rank_to_value = {
     'A': 14,
     **common_rank_to_value
 }
+ace_low_rank_to_value = {
+    'A': 1,
+    **common_rank_to_value
+}
+
+rank_to_value = ace_low_rank_to_value
 
 value_to_rank = {
     14: 'A',
