@@ -6,7 +6,7 @@ from card_utils.deck.utils import (
     ranks_to_sorted_values,
 )
 from card_utils.games.poker import broadway_ranks
-
+import collections
 
 def _validate_board(board):
     """ raise exception if board doesn't have exactly 5 cards
@@ -202,6 +202,28 @@ def get_best_flushes(hands_flush_ranks):
     return best_flush_indices
 
 
+def get_best_quads(hands_values, board_values):
+    """
+    :param hands_values: ([[int]])
+    :param board_values:
+    :return:
+    """
+    best_quad_indices = []
+
+    return best_quad_indices
+
+
+def get_best_full_houses(hands_values, board_values):
+    """
+    :param hands_values:
+    :param board_values:
+    :return:
+    """
+    best_full_house_indices = []
+
+    return best_full_house_indices
+
+
 def get_best_hand(board, hands):
     """
     hand ranks go:
@@ -274,7 +296,20 @@ def get_best_hand(board, hands):
     if is_paired_board:
         # TODO: check for quads
         # TODO: check for full houses
-        pass
+        hands_values = [
+            collections.Counter(rank_to_value[r] for r, _ in hand)
+            for hand in hands
+        ]
+        board_values = {
+            14 if r == 'A' else rank_to_value[r]
+        }
+        best_quads = get_best_quads(hands_values, board_values)
+        if best_quads:
+            return best_quads
+
+        best_full_houses = get_best_full_houses(hands_values, board_values)
+        if best_full_houses:
+            return best_full_houses
 
     if flush_suit is not None:
         best_flushes = get_best_flushes(

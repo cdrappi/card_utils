@@ -14,8 +14,7 @@ rank_ids = {rank: index for index, rank in enumerate(ranks)}
 card_id_map = {card: index for index, card in enumerate(cards)}
 reverse_card_id_map = {index: card for card, index in card_id_map.items()}
 
-rank_to_value = {
-    'A': 1,
+common_rank_to_value = {
     'T': 10,
     'J': 11,
     'Q': 12,
@@ -23,4 +22,18 @@ rank_to_value = {
     **{d: int(d) for d in '23456789'}
 }
 
-value_to_rank = {14: 'A', **{v: r for r, v in rank_to_value.items()}}
+rank_to_value = {
+    'A': 1,
+    **common_rank_to_value
+}
+
+ace_high_rank_to_value = {
+    'A': 14,
+    **common_rank_to_value
+}
+
+value_to_rank = {
+    14: 'A',
+    1: 'A',
+    **{v: r for r, v in common_rank_to_value.items()}
+}
