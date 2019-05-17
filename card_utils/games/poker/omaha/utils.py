@@ -184,6 +184,7 @@ def get_best_hand(board, hands):
     board_by_suits = suit_partition(board)
     flush_suit = get_suit_with_gte_3_cards(board_by_suits)
 
+    # Check to see if anyone has a straight flush
     if flush_suit is not None:
         possible_straight_flushes = get_possible_straight_flushes(
             ranks=board_by_suits[flush_suit],
@@ -198,4 +199,28 @@ def get_best_hand(board, hands):
             if best_straight_flush_index is not None:
                 return [best_straight_flush_index]
 
+    # If the board is paired, we could have quads or a full house
     board_by_ranks = rank_partition(board)
+    is_paired_board = any(len(suits) > 1 for suits in board_by_ranks.values())
+
+    if is_paired_board:
+        # TODO: check for quads
+        # TODO: check for full houses
+        pass
+
+    # TODO: check for regular flushes
+    if flush_suit is not None:
+        pass
+
+    # TODO: check for straights
+    possible_straights = get_possible_straights(ranks=[r for r, _ in board])
+    if possible_straights:
+        pass
+
+    # TODO: check for three of a kind
+
+    # TODO: check for two pairs
+    # TODO: check for pairs
+    # TODO: check for high cards
+
+    return []
