@@ -45,25 +45,29 @@ def get_suit_with_gte_3_cards(board_by_suits):
 
 
 def _get_straight_values(v1, v2, v3):
-    """
+    """ get tuples of card values that could make a straight
+        given cards with values v1, v2, v3 are on the board
+
     :param v1: (int)
     :param v2: (int)
     :param v3: (int)
     :return: (set(tuple(int))) set of tuples of ints
     """
-    straight_range = 3 + v1 - v3  # TODO: better variable name... gaps?
-    if straight_range <= 0:
+    n_gaps = v3 - v1 - 1
+    if n_gaps > 2:
+        # can't make a straight if there are 3+ gaps
+        # e.g. 5-GAP-6-GAP-GAP-9
         return set()
 
     cards_on_board = {v1, v2, v3}
-    start_value = max(1, v1 - straight_range)
-    end_value = min(14, v3 + straight_range)
+    worst_straight_start = max(1, v1 + n_gaps - 2)
+    best_straight_start = min(14, v1 - n_gaps + 2)
 
     straight_values = set()
-    for lowest_value in range(start_value, end_value):
-        straight_values = set(range(lowest_value, lowest_value + 5))
-        in_hand_values = straight_values.difference(cards_on_board)
-        straight_values.add(tuple(in_hand_values))
+    for bottom_value in range(worst_straight_start, best_straight_start):
+        straight_values = set(range(bottom_value, bottom_value + 5))
+        values_to_make_straight = straight_values.difference(cards_on_board)
+        straight_values.add(tuple(values_to_make_straight))
 
     return straight_values
 
