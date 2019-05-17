@@ -1,12 +1,13 @@
 """ util functions for omaha games """
-from card_utils.deck import value_to_rank, rank_to_value
+import collections
+
+from card_utils.deck import value_to_rank, ace_high_rank_to_value
 from card_utils.deck.utils import (
     rank_partition,
     suit_partition,
     ranks_to_sorted_values,
 )
-from card_utils.games.poker import broadway_ranks
-import collections
+
 
 def _validate_board(board):
     """ raise exception if board doesn't have exactly 5 cards
@@ -120,34 +121,6 @@ def get_possible_straight_flushes(ranks, suit):
     }
 
 
-def get_best_straight_flushes(possible_straight_flushes, hands, suit):
-    """
-
-    :param possible_straight_flushes: ([[str]])
-    :param hands: ([set(str)])
-    :param suit: (str)
-    :return: (int) index of `hands` holding best straight flush
-    """
-    # TODO: shorter + clearer variable names
-    highest_straight_flush_hand_index = None
-    overall_max_connecting_card_value = 0
-    for ii, hand in enumerate(hands):
-        # TODO: this is terrible, clean up
-        hand_set = set(hand)
-        for sf_set in possible_straight_flushes:
-            connecting_cards = sf_set.union(hand_set)
-            if len(connecting_cards) == 2:
-                if connecting_cards < {f'{r}{suit}' for r in broadway_ranks}:
-                    # royal flush! can return here, since it is unique in omaha
-                    return ii
-                max_connecting_value = max(rank_to_value[r] for r, _ in connecting_cards)
-                if max_connecting_value > overall_max_connecting_card_value:
-                    highest_straight_flush_hand_index = ii
-                    overall_max_connecting_card_value = max_connecting_value
-
-    return highest_straight_flush_hand_index
-
-
 def get_best_straights(possible_straights, hands):
     """ get list of indices of hands that make the strongest straight
         if no one makes a straight, return empty list
@@ -161,7 +134,13 @@ def get_best_straights(possible_straights, hands):
     best_straight_indices = []
     best_straight_highest_value = 0  # e.g. 14 for broadway, 5 for the wheel
     for ii, hand in enumerate(hands):
-        hand_values = set(rank_to_value[r] for r, _ in hand)
+        hand_values = set(
+            ranks_to_sorted_values(
+                ranks=[r for r, _ in hand],
+                aces_high=True,
+                aces_low=True
+            )
+        )
         for connecting_values, max_value in possible_straights.items():
             connecting_cards = set(connecting_values).union(hand_values)
             if len(connecting_cards) == 2:
@@ -175,29 +154,28 @@ def get_best_straights(possible_straights, hands):
     return best_straight_indices
 
 
-def get_best_flushes(hands_flush_ranks):
+def get_best_flushes(hands_flush_values):
     """ get indexes of hands that make the best flush
         in omaha, only one hand can make the same flush,
         since you must play exactly two cards from your hand.
         still, we return a list to keep the return type
         consistent with other functions
 
-    :param hands_flush_ranks: ([set(str)]
-    :param board_flush_ranks: ([str]) list of ranks of flush suit
+    :param hands_flush_values: ([set(int)]
     :return: ([int])
     """
     best_flush_indices = []
     best_flush_highest_value = 0
-    for ii, hand_flush_ranks in enumerate(hands_flush_ranks):
-        if len(hand_flush_ranks) >= 2:
-            max_flush_rank = max(rank_to_value[r] for r in hands_flush_ranks)
-            if max_flush_rank == best_flush_highest_value:
+    for ii, hand_flush_values in enumerate(hands_flush_values):
+        if len(hand_flush_values) >= 2:
+            max_flush_value = max(hand_flush_values)
+            if max_flush_value == best_flush_highest_value:
                 raise ValueError(
                     f'Two Omaha hands cannot make the same strength flush!'
                 )
-            if max_flush_rank > best_flush_highest_value:
+            if max_flush_value > best_flush_highest_value:
                 best_flush_indices = [ii]
-                best_flush_highest_value = max_flush_rank
+                best_flush_highest_value = max_flush_value
 
     return best_flush_indices
 
@@ -208,6 +186,7 @@ def get_best_quads(hands_values, board_values):
     :param board_values:
     :return:
     """
+    # TODO: check for quads
     best_quad_indices = []
 
     return best_quad_indices
@@ -219,6 +198,7 @@ def get_best_full_houses(hands_values, board_values):
     :param board_values:
     :return:
     """
+    # TODO: check for full houses
     best_full_house_indices = []
 
     return best_full_house_indices
@@ -294,14 +274,13 @@ def get_best_hand(board, hands):
     is_paired_board = any(len(suits) > 1 for suits in board_by_ranks.values())
 
     if is_paired_board:
-        # TODO: check for quads
-        # TODO: check for full houses
         hands_values = [
-            collections.Counter(rank_to_value[r] for r, _ in hand)
+            dict(collections.Counter(ace_high_rank_to_value[r] for r, _ in hand))
             for hand in hands
         ]
         board_values = {
-            14 if r == 'A' else rank_to_value[r]
+            ace_high_rank_to_value[rank]: len(suits)
+            for rank, suits in board_by_ranks.items()
         }
         best_quads = get_best_quads(hands_values, board_values)
         if best_quads:
@@ -313,8 +292,12 @@ def get_best_hand(board, hands):
 
     if flush_suit is not None:
         best_flushes = get_best_flushes(
-            hands_flush_ranks=[
-                set(r for r, s in hand if s == flush_suit)
+            hands_flush_values=[
+                set(
+                    ace_high_rank_to_value[r]
+                    for r, s in hand
+                    if s == flush_suit
+                )
                 for hand in hands
             ]
         )
