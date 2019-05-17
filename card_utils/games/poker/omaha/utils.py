@@ -1,10 +1,11 @@
 """ util functions for omaha games """
-from card_utils.deck import value_to_rank
+from card_utils.deck import value_to_rank, rank_to_value
 from card_utils.deck.utils import (
     rank_partition,
     suit_partition,
     ranks_to_sorted_values,
 )
+from card_utils.games.poker import broadway_ranks
 
 
 def _validate_board(board):
@@ -109,6 +110,34 @@ def get_possible_straight_flushes(ranks, suit):
     ]
 
 
+def get_best_straight_flush_if_any(possible_straight_flushes, hands, suit):
+    """
+
+    :param possible_straight_flushes: (
+    :param hands: ([[str]])
+    :param suit: (str)
+    :return: (int) index of `hands` holding best straight flush
+    """
+    # TODO: shorter + clearer variable names
+    highest_straight_flush_hand_index = None
+    overall_max_connecting_card_value = 0
+    for ii, hand in enumerate(hands):
+        # TODO: this is terrible, clean up
+        hand_set = set(hand)
+        for sf in possible_straight_flushes:
+            connecting_cards = set(sf).union(hand_set)
+            if len(connecting_cards) == 2:
+                if connecting_cards < {f'{r}{suit}' for r in broadway_ranks}:
+                    # royal flush! can return here, since it is unique in omaha
+                    return ii
+                max_connecting_value = max(rank_to_value[r] for r, _ in connecting_cards)
+                if max_connecting_value > overall_max_connecting_card_value:
+                    highest_straight_flush_hand_index = ii
+                    overall_max_connecting_card_value = max_connecting_value
+
+    return highest_straight_flush_hand_index
+
+
 def get_best_hand(board, hands):
     """
     hand ranks go:
@@ -145,7 +174,9 @@ def get_best_hand(board, hands):
 
     :param board: ([str]) list of 5 cards
     :param hands: ([[str]]) list of list of 4 cards
-    :return: (int) index of `hands` that makes the strongest omaha hand
+    :return: ([int]) indices of `hands` that makes the strongest omaha hand,
+        --> this is a list because it is possible to "chop" with
+            every hand rank except straight flushes, quads and flushes
     """
     _validate_board(board)
     _validate_hands(hands)
@@ -159,6 +190,12 @@ def get_best_hand(board, hands):
             suit=flush_suit
         )
         if possible_straight_flushes:
-            pass
+            best_straight_flush_index = get_best_straight_flush_if_any(
+                possible_straight_flushes=possible_straight_flushes,
+                hands=hands,
+                suit=flush_suit
+            )
+            if best_straight_flush_index is not None:
+                return [best_straight_flush_index]
 
     board_by_ranks = rank_partition(board)
