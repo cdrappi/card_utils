@@ -24,7 +24,7 @@ from card_utils.games.poker import (
 
 def _validate_board(board):
     """ raise exception if board doesn't have exactly 5 cards
-    :param board: ([str]) list of 5 cards
+    :param board: (set(str)) set of 5 cards
     :return:
     """
     if len(board) != 5:
