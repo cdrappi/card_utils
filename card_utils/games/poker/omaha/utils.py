@@ -251,8 +251,71 @@ def get_best_full_house(hands_values, board_values):
     return best_boat
 
 
+def get_best_three_of_a_kind(hand_values, board_values):
+    """
+    :param hand_values:
+    :param board_values:
+    :return:
+    """
+    # TODO
+    return tuple()
+
+
+def get_best_two_pair(hand_values, board_values):
+    """
+    :param hand_values:
+    :param board_values:
+    :return:
+    """
+    # TODO
+    return tuple()
+
+
+def get_best_pair(hand_values, board_values):
+    """
+    :param hand_values:
+    :param board_values:
+    :return:
+    """
+    # TODO
+    return tuple()
+
+
 def get_hand_strength(board, hand) -> Tuple:
     """
+    hand ranks go:
+
+    STRAIGHT FLUSH:  starting with A-high (T-J-Q-K-A)
+                     down to       A-low  (A-2-3-4-5)
+
+    FOUR OF A KIND:  starting with quad A (A-A-A-A-x)
+                     down to       quad 2 (2-2-2-2-x)
+        --> though this is irrelevant in omaha,
+            tiebreaker goes to best kicker.
+            (this applies to all non-straight/flush hands)
+
+    FULL HOUSE:      starting with A full of K (A-A-A-K-K)
+                     down to       2 full of 3 (2-2-2-3-3)
+
+    FLUSH:           starting with A-high (A-K-Q-J-9)
+                     down to       7-high (7-5-4-3-2)
+
+    STRAIGHT:        starting with "broadway" (T-J-Q-K-A)
+                     down to      "the wheel" (A-2-3-4-5)
+
+    THREE OF A KIND: starting with three aces (A-A-A-K-Q)
+                     down to     three deuces  (2-2-2-3-4)
+
+    TWO-PAIR:        starting with aces up (A-A-K-K-Q)
+                     down to    3s over 2s (3-3-2-2-4)
+
+    ONE-PAIR:        starting with aces (A-A-K-Q-J)
+                     down to deuces     (2-2-5-4-3)
+
+    HIGH CARD:       starting with ace high (A-K-Q-J-9)
+                     down to         7 high (7-5-4-3-2)
+
+
     :param board: (set(str)) set of 5 cards
     :param hand: (set(str)) set of 4 cards
     :return: (tuple)
@@ -320,55 +383,24 @@ def get_hand_strength(board, hand) -> Tuple:
         if best_straight:
             return hand_order[STRAIGHT], best_straight
 
-    # TODO: check for three of a kind
-    if False:
-        return hand_order[THREE_OF_A_KIND],
+    best_three_of_a_kind = get_best_three_of_a_kind(hand_values, board_values)
+    if best_three_of_a_kind:
+        return (hand_order[THREE_OF_A_KIND], *best_three_of_a_kind)
 
-        # TODO: check for two pairs
-    if False:
-        return hand_order[TWO_PAIR]
+    best_two_pair = get_best_two_pair(hand_values, board_values)
+    if best_two_pair:
+        return (hand_order[TWO_PAIR], *best_two_pair)
 
-    # TODO: check for pairs
-    if False:
-        return hand_order[ONE_PAIR]
+    best_pair = get_best_pair(hand_values, board_values)
+    if best_pair:
+        return (hand_order[ONE_PAIR], *best_pair)
 
     # TODO: check for high cards
-    return hand_order[HIGH_CARD], hand_values
+    return (hand_order[HIGH_CARD], *hand_values)
 
 
 def get_best_hand(board, hands):
-    """
-    hand ranks go:
-
-    STRAIGHT FLUSH:  starting with A-high (T-J-Q-K-A)
-                     down to       A-low  (A-2-3-4-5)
-
-    FOUR OF A KIND:  starting with quad A (A-A-A-A-x)
-                     down to       quad 2 (2-2-2-2-x)
-        --> though this is irrelevant in omaha,
-            tiebreaker goes to best kicker.
-            (this applies to all non-straight/flush hands)
-
-    FULL HOUSE:      starting with A full of K (A-A-A-K-K)
-                     down to       2 full of 3 (2-2-2-3-3)
-
-    FLUSH:           starting with A-high (A-K-Q-J-9)
-                     down to       7-high (7-5-4-3-2)
-
-    STRAIGHT:        starting with "broadway" (T-J-Q-K-A)
-                     down to      "the wheel" (A-2-3-4-5)
-
-    THREE OF A KIND: starting with three aces (A-A-A-K-Q)
-                     down to     three deuces  (2-2-2-3-4)
-
-    TWO-PAIR:        starting with aces up (A-A-K-K-Q)
-                     down to    3s over 2s (3-3-2-2-4)
-
-    ONE-PAIR:        starting with aces (A-A-K-Q-J)
-                     down to deuces     (2-2-5-4-3)
-
-    HIGH CARD:       starting with ace high (A-K-Q-J-9)
-                     down to         7 high (7-5-4-3-2)
+    """ get the index of the best omaha hand given a board
 
     :param board: ([str]) list of 5 cards
     :param hands: ([set(str)]) list of sets of 4 cards
