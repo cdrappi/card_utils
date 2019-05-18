@@ -57,6 +57,15 @@ def _get_suit_with_gte_3_cards(board_by_suits):
     return None
 
 
+def _get_highest_except(values, excluded_value):
+    """
+    :param values: ([int])
+    :param excluded_value: (int)
+    :return: (int) highest value in values except the excluded value
+    """
+    return max(values, key=lambda v: (v != excluded_value, v))
+
+
 def _get_connecting_values(v1, v2, v3):
     """ get tuples of card values that could make a straight
         given cards with values v1, v2, v3 are on the board
@@ -125,7 +134,7 @@ def get_best_straight(possible_straights, hand):
     :param possible_straights: ({tuple(str): int})
         map tuple of connecting cards --> best straight value they make
     :param hand: (set(str)) set of strings
-    :return: (int|None) top value in the straight, or None if no straight
+    :return: (int) top value in the straight, or 0 if no straight
     """
     highest_straight_value = 0  # e.g. 14 for broadway, 5 for the wheel
     hand_values = set(
@@ -142,7 +151,7 @@ def get_best_straight(possible_straights, hand):
             if max_value > highest_straight_value:
                 highest_straight_value = max_value
 
-    return highest_straight_value or None
+    return highest_straight_value
 
 
 def get_best_flush(hand_flush_values):
@@ -153,7 +162,7 @@ def get_best_flush(hand_flush_values):
         consistent with other functions
 
     :param hand_flush_values: ([set(int)]
-    :return: (int|None) top value in the flush, or None if no flush
+    :return: (int|None) top value in the flush, or 0 if no flush
     """
     highest_flush_value = 0
     if len(hand_flush_values) >= 2:
@@ -161,26 +170,18 @@ def get_best_flush(hand_flush_values):
         if max_flush_value > highest_flush_value:
             highest_flush_value = max_flush_value
 
-    return highest_flush_value or None
-
-
-def _get_highest_except(values, excluded_value):
-    """
-    :param values: ([int])
-    :param excluded_value: (int)
-    :return: (int) highest value in values except the excluded value
-    """
-    return max(values, key=lambda v: (v != excluded_value, v))
+    return highest_flush_value
 
 
 def get_best_quads(hands_values, board_values):
     """
     :param hands_values: ({int: int}) value --> count of value
     :param board_values: ({int: int}) value --> count of value
-    :return:
+    :return: (int, int) quads value, kicker
     """
     # TODO: check for quads
-    best_quads = (0, 0)
+    best_quads = tuple()
+
     for board_value, board_ct in board_values.items():
         # only 2 ways to make quads:
         if board_ct == 2 and hands_values.get(board_value) == 2:
@@ -194,9 +195,6 @@ def get_best_quads(hands_values, board_values):
             if quads > best_quads:
                 best_quads = quads
 
-    if best_quads == (0, 0):
-        return None
-
     return best_quads
 
 
@@ -204,9 +202,9 @@ def get_best_full_house(hands_values, board_values):
     """
     :param hands_values: ({int: int})
     :param board_values: ({int: int})
-    :return:
+    :return: (int, int) trips value, pair value
     """
-    best_boat = (0, 0)  # "boat" is another term for full house
+    best_boat = tuple()  # "boat" is another term for full house
 
     for board_value, board_ct in board_values.items():
         if board_ct == 3:
@@ -245,40 +243,41 @@ def get_best_full_house(hands_values, board_values):
                     if boat > best_boat:
                         best_boat = boat
 
-    if best_boat == (0, 0):
-        return None
-
     return best_boat
 
 
 def get_best_three_of_a_kind(hand_values, board_values):
     """
-    :param hand_values:
-    :param board_values:
-    :return:
+    :param hand_values: ({int: int})
+    :param board_values: ({int: int})
+    :return: (int, int, int) trips value, best kicker, 2nd best kicker
     """
+    best_three_of_a_kind = tuple()
     # TODO
-    return tuple()
+    return best_three_of_a_kind
 
 
 def get_best_two_pair(hand_values, board_values):
     """
-    :param hand_values:
-    :param board_values:
-    :return:
+    :param hand_values: ({int: int})
+    :param board_values: ({int: int})
+    :return: (int, int, int) top pair, bottom pair, kicker
     """
+    best_two_pair = tuple()
     # TODO
-    return tuple()
+    return best_two_pair
 
 
 def get_best_pair(hand_values, board_values):
     """
-    :param hand_values:
-    :param board_values:
-    :return:
+    :param hand_values: ({int: int})
+    :param board_values: ({int: int})
+    :return: (int, int, int, int) pair, best kicker, 2nd best, 3rd best
     """
+    best_pair = tuple()
+
     # TODO
-    return tuple()
+    return best_pair
 
 
 def get_hand_strength(board, hand) -> Tuple:
