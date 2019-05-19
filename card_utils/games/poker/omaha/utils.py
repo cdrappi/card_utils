@@ -57,13 +57,13 @@ def _get_suit_with_gte_3_cards(board_by_suits):
     return None
 
 
-def _get_highest_except(values, excluded_value):
+def _get_highest_except(values, excluded_values):
     """
     :param values: ([int])
-    :param excluded_value: (int)
+    :param excluded_values: (set(int))
     :return: (int) highest value in values except the excluded value
     """
-    return max(values, key=lambda v: (v != excluded_value, v))
+    return max(set(values).difference(excluded_values))
 
 
 def _get_connecting_values(v1, v2, v3):
@@ -185,12 +185,12 @@ def get_best_quads(hands_values, board_values):
     for board_value, board_ct in board_values.items():
         # only 2 ways to make quads:
         if board_ct == 2 and hands_values[board_value] == 2:
-            best_kicker = _get_highest_except(board_values, board_value)
+            best_kicker = _get_highest_except(board_values, {board_value})
             quads = (board_value, best_kicker)
             if quads > best_quads:
                 best_quads = quads
         elif board_ct == 3 and hands_values[board_value] == 1:
-            best_kicker = _get_highest_except(hands_values, board_value)
+            best_kicker = _get_highest_except(hands_values, {board_value})
             quads = (board_value, best_kicker)
             if quads > best_quads:
                 best_quads = quads
@@ -253,7 +253,67 @@ def get_best_three_of_a_kind(hand_values, board_values):
     :return: (int, int, int) trips value, best kicker, 2nd best kicker
     """
     best_three_of_a_kind = tuple()
-    # TODO
+
+    for board_value, board_ct in board_values.items():
+        # there can be three of a kind on the board
+        if board_ct == 3:
+            # in this case, the hand's biggest 2 kickers play
+            # if they have 2+ distinct cards
+            # (e.g. if they have quads in their hand,
+            #       then they have a full house,
+            #       which would have returned
+            #       before this function was called)
+            if len(set(hand_values).difference({board_value})) >= 2:
+                k_1 = _get_highest_except(hand_values, {board_value})
+                k_2 = _get_highest_except(hand_values, {board_value, k_1})
+                three_of_a_kind = (board_value, k_1, k_2)
+                if three_of_a_kind > best_three_of_a_kind:
+                    best_three_of_a_kind = three_of_a_kind
+        elif board_ct == 2:
+            # if the board is paired, search for cases where
+            # the player has this paired card in their hand once
+            if hand_values[board_value] == 1:
+                # the player's 5-card omaha hand is then
+                # the trips, plus the best kicker from the hand
+                # and the best kicker from the board
+                k_1 = _get_highest_except(
+                    values=set(board_values).union(hand_values),
+                    excluded_values={board_value}
+                )
+                if k_1 in board_values and k_1 not in hand_values:
+                    # then k_2 has to come from the hand
+                    k_2 = _get_highest_except(hand_values, {board_value})
+                elif k_1 in hand_values and k_1 not in board_values:
+                    # then k_2 has to come from the hand
+                    k_2 = _get_highest_except(board_values, {board_value})
+                else:
+                    # the player would have a full house,
+                    # so we should never get here unless calling
+                    # get_best_three_of_a_kind directly
+                    # however, we then choose the 2nd best kicker
+                    # from either board or hand
+                    k_2 = _get_highest_except(
+                        values=set(board_values).union(hand_values),
+                        excluded_values={board_value, k_1}
+                    )
+                three_of_a_kind = (board_value, k_1, k_2)
+                if three_of_a_kind > best_three_of_a_kind:
+                    best_three_of_a_kind = three_of_a_kind
+
+        elif board_ct == 1:
+            # check for sets
+            if hand_values[board_value] >= 2 and len(board_values) >= 3:
+                # we have a set,
+                # AND there are at least 3 distinct cards on the board
+                # if there are not, then we would have made a full house,
+                # our set + two of the quads on the board,
+                # and this is not three-of-a-kind, but much better.
+                k_1 = _get_highest_except(board_values, {board_value})
+                k_2 = _get_highest_except(board_values, {board_value, k_1})
+                three_of_a_kind = (board_value, k_1, k_2)
+                if three_of_a_kind > best_three_of_a_kind:
+                    best_three_of_a_kind = three_of_a_kind
+
     return best_three_of_a_kind
 
 
@@ -275,7 +335,6 @@ def get_best_pair(hand_values, board_values):
     :return: (int, int, int, int) pair, best kicker, 2nd best, 3rd best
     """
     best_pair = tuple()
-
 
     # TODO
     return best_pair
