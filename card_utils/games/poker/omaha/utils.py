@@ -78,7 +78,7 @@ def _get_connecting_values(v1, v2, v3):
     n_gaps = v3 - v1 - 1
     if n_gaps > 2:
         # can't make a straight if there are 3+ gaps
-        # e.g. 5-GAP-6-GAP-GAP-9
+        # e.g. 4-GAP-6-GAP-GAP-9
         return set()
 
     cards_on_board = {v1, v2, v3}
@@ -175,8 +175,8 @@ def get_best_flush(hand_flush_values):
 
 def get_best_quads(hands_values, board_values):
     """
-    :param hands_values: ({int: int}) value --> count of value
-    :param board_values: ({int: int}) value --> count of value
+    :param hands_values: (collections.Counter({int: int}))
+    :param board_values: (collections.Counter({int: int}))
     :return: (int, int) quads value, kicker
     """
     # TODO: check for quads
@@ -184,12 +184,12 @@ def get_best_quads(hands_values, board_values):
 
     for board_value, board_ct in board_values.items():
         # only 2 ways to make quads:
-        if board_ct == 2 and hands_values.get(board_value) == 2:
+        if board_ct == 2 and hands_values[board_value] == 2:
             best_kicker = _get_highest_except(board_values, board_value)
             quads = (board_value, best_kicker)
             if quads > best_quads:
                 best_quads = quads
-        elif board_ct == 3 and hands_values.get(board_value) == 1:
+        elif board_ct == 3 and hands_values[board_value] == 1:
             best_kicker = _get_highest_except(hands_values, board_value)
             quads = (board_value, best_kicker)
             if quads > best_quads:
@@ -200,8 +200,8 @@ def get_best_quads(hands_values, board_values):
 
 def get_best_full_house(hands_values, board_values):
     """
-    :param hands_values: ({int: int})
-    :param board_values: ({int: int})
+    :param hands_values: (collections.Counter({int: int}))
+    :param board_values: (collections.Counter({int: int}))
     :return: (int, int) trips value, pair value
     """
     best_boat = tuple()  # "boat" is another term for full house
@@ -219,14 +219,14 @@ def get_best_full_house(hands_values, board_values):
         elif board_ct == 2:
             # if the board is paired:
             for hand_value, hand_ct in hands_values.items():
-                if hand_ct >= 2 and board_value.get(hand_value) == 1:
+                if hand_ct >= 2 and board_value[hand_value] == 1:
                     # first look for pairs in the hand
                     # that also have 1 card on the board
                     boat = (hand_value, board_value)
                     if boat > best_boat:
                         best_boat = boat
 
-            if hands_values.get(board_value) == 1:
+            if hands_values[board_value] == 1:
                 # if we have one of the pair cards on the board,
                 # see if we have any other pairs,
                 # making a boat the hard way
@@ -235,7 +235,7 @@ def get_best_full_house(hands_values, board_values):
                     for hand_value, hand_count in hands_values.items()
                     if bool(
                         hand_value != board_value
-                        and (board_values.get(hand_value) >= 1)
+                        and board_values[hand_value] >= 1
                     )
                 ]
                 for hv in other_pairs:
@@ -248,8 +248,8 @@ def get_best_full_house(hands_values, board_values):
 
 def get_best_three_of_a_kind(hand_values, board_values):
     """
-    :param hand_values: ({int: int})
-    :param board_values: ({int: int})
+    :param hand_values: (collections.Counter({int: int}))
+    :param board_values: (collections.Counter({int: int}))
     :return: (int, int, int) trips value, best kicker, 2nd best kicker
     """
     best_three_of_a_kind = tuple()
@@ -259,8 +259,8 @@ def get_best_three_of_a_kind(hand_values, board_values):
 
 def get_best_two_pair(hand_values, board_values):
     """
-    :param hand_values: ({int: int})
-    :param board_values: ({int: int})
+    :param hand_values: (collections.Counter({int: int}))
+    :param board_values: (collections.Counter({int: int}))
     :return: (int, int, int) top pair, bottom pair, kicker
     """
     best_two_pair = tuple()
@@ -270,11 +270,12 @@ def get_best_two_pair(hand_values, board_values):
 
 def get_best_pair(hand_values, board_values):
     """
-    :param hand_values: ({int: int})
-    :param board_values: ({int: int})
+    :param hand_values: (collections.Counter({int: int}))
+    :param board_values: (collections.Counter({int: int}))
     :return: (int, int, int, int) pair, best kicker, 2nd best, 3rd best
     """
     best_pair = tuple()
+
 
     # TODO
     return best_pair
@@ -348,10 +349,10 @@ def get_hand_strength(board, hand) -> Tuple:
     hand_values_list = [ace_high_rank_to_value[r] for r, _ in hand]
 
     hand_values = collections.Counter(hand_values_list)
-    board_values = {
+    board_values = collections.Counter({
         ace_high_rank_to_value[rank]: len(suits)
         for rank, suits in board_by_ranks.items()
-    }
+    })
 
     if is_paired_board:
         best_quads = get_best_quads(hand_values, board_values)
