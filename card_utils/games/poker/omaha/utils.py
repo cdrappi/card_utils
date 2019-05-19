@@ -326,6 +326,17 @@ def get_best_two_pair(hand_values, board_values):
     :return: (int, int, int) top pair, bottom pair, kicker
     """
     best_two_pair = tuple()
+
+    for board_value, board_ct in board_values.items():
+        if board_ct == 2:
+            # this is a pair on the board,
+            # so we need to find a pair in the hand
+            # or a match between pair and board
+            pass
+        elif board_ct == 1:
+            # we need to search for a 
+            pass
+
     # TODO
     return best_two_pair
 
