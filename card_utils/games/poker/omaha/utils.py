@@ -269,6 +269,8 @@ def get_best_three_of_a_kind(hand_values, board_values):
                 three_of_a_kind = (board_value, k_1, k_2)
                 if three_of_a_kind > best_three_of_a_kind:
                     best_three_of_a_kind = three_of_a_kind
+
+        # or a paired board, and the hand can make trips
         elif board_ct == 2:
             # if the board is paired, search for cases where
             # the player has this paired card in their hand once
@@ -300,8 +302,8 @@ def get_best_three_of_a_kind(hand_values, board_values):
                 if three_of_a_kind > best_three_of_a_kind:
                     best_three_of_a_kind = three_of_a_kind
 
+        # or can have a set
         elif board_ct == 1:
-            # check for sets
             if hand_values[board_value] >= 2 and len(board_values) >= 3:
                 # we have a set,
                 # AND there are at least 3 distinct cards on the board
