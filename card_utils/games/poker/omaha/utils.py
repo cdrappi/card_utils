@@ -456,7 +456,6 @@ def get_hand_strength(board, hand) -> Tuple:
     if best_pair:
         return (hand_order[ONE_PAIR], *best_pair)
 
-    # TODO: check for high cards
     return (hand_order[HIGH_CARD], *hand_values)
 
 
