@@ -95,29 +95,6 @@ def _get_connecting_values(v1, v2, v3):
     return straight_values
 
 
-def _best_straight_from_sorted_values(card_values):
-    """
-    :param card_values: ([int])
-    :return: (int) best straight or 0 if none
-    """
-    if len(card_values) == 5:
-        max_value = max(card_values)
-        is_straight = (
-            # we make a straight if there are 5 distinct values
-            len(set(card_values)) == 5 and
-            # and the top value minus the bottom value is equal to 4
-            max_value - min(card_values) == 4
-        )
-        return max_value if is_straight else 0
-    elif len(card_values) == 6:
-        return max(
-            # recursively call for ace-low straights
-            _best_straight_from_sorted_values(card_values[:-1]),
-            # recursively call for ace-high straights
-            _best_straight_from_sorted_values(card_values[1:])
-        )
-
-
 def get_possible_straights(ranks):
     """ get a list of hole card combinations
         that could make a straight
@@ -518,51 +495,5 @@ def get_best_hand(board, hands):
         range(len(hands)),
         key=lambda ii: get_hand_strength(board, hands[ii])
     )
-
-
-def five_card_hand_rank(five_card_hand):
-    """
-
-    :param five_card_hand: ([str]) a hand of exactly 5 cards
-    :return:
-    """
-    if len(five_card_hand) != 5:
-        raise ValueError(
-            f'input to five_card_hand_rank must be a list of 5 cards'
-        )
-
-    sorted_values = ranks_to_sorted_values(
-        ranks=[rank for rank, _ in five_card_hand],
-        aces_low=True,
-        aces_high=True
-    )
-    is_flush = len(set(suit for _, suit in five_card_hand)) == 1
-    straight_value = _best_straight_from_sorted_values(sorted_values)
-    if is_flush and straight_value:
-        return hand_order[STRAIGHT_FLUSH], straight_value
-
-    aces_high_values = ranks_to_sorted_values(
-        ranks=[rank for rank, _ in five_card_hand],
-        aces_low=False,
-        aces_high=True
-    )
-    value_counts = collections.Counter(aces_high_values)
-
-
-def brute_force_omaha_hi_rank(board, hand):
-    """
-    :param board: ([str]) 5 board cards
-    :param hand: ([str]) 4 hole cards
-    :return: ([str], tuple) list of five card hand, and its tuple-rank
-        a combo of 3 board cards and 2 hole cards
-    """
-    possible_combinations = (
-        list(board_cards) + list(hole_cards)
-        for board_cards in itertools.combinations(board, 3)
-        for hole_cards in itertools.combinations(hand, 2)
-    )
-    best_hand = max(possible_combinations, key=five_card_hand_rank)
-    return best_hand, five_card_hand_rank(best_hand)
-
 
 """ fin """
