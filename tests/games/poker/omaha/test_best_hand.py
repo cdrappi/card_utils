@@ -29,9 +29,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
     """ Test for the best Omaha high hand """
 
     n_random_cases = 0
-
-    # n_random_cases = 1000
-    print_every_n_cases = 100
+    n_random_cases = 10000
 
     def setUp(self):
         pass
@@ -40,12 +38,9 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         pass
 
     def test_random_cases(self):
-        print(f'running {self.n_random_cases} random test cases ... ', end='')
-        for ii in range(self.n_random_cases):
+        for _ in range(self.n_random_cases):
             board, hands = deal_random_board_hands(n_hands=8, n_cards=4)
             self._test_best_hand(board, hands)
-            if ii % self.print_every_n_cases == 0:
-                print(f' {ii} ', end='')
 
     def _test_best_hand(self, board, hands):
         """
