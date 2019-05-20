@@ -237,7 +237,7 @@ def get_best_full_house(hands_values, board_values):
     pairs_on_board = set(bv for bv, bc in board_values.items() if bc >= 2)
 
     for board_value, board_ct in board_values.items():
-        if board_ct == 3:
+        if board_ct >= 3:
             # if there are three of a kind on the board,
             # then we have a full house if there is a pair in our hand
             for hand_value, hand_ct in hands_values.items():

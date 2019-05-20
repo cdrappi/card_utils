@@ -30,7 +30,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
 
     n_random_cases = 0
 
-    # n_random_cases = 10000
+    # n_random_cases = 1000
     print_every_n_cases = 100
 
     def setUp(self):
@@ -151,6 +151,11 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         best_straight = get_best_straight(possible_straights, hand)
         self.assertEqual(best_straight, expected_high_card)
         self._test_both_hand_orders(board, hand, hand_order[STRAIGHT])
+
+    def test_boat_with_quads_on_board(self):
+        board = ['Qc', 'Qs', 'Qd', 'Qh', 'Kc']
+        hand = ['As', 'Jd', 'Jc', '5h']
+        self._test_both_hand_orders(board, hand, hand_order[FULL_HOUSE])
 
     def test_pocket_pair(self):
         board = ['3c', 'Qh', 'Kd', '2s', '7h']
