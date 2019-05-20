@@ -5,6 +5,7 @@ from card_utils.games.poker import (
     inverse_hand_order,
     STRAIGHT_FLUSH,
     FULL_HOUSE,
+    STRAIGHT,
 )
 from card_utils.games.poker.five_card_hand_rank import five_card_hand_rank
 from card_utils.games.poker.omaha.brute_force import (
@@ -101,6 +102,11 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
                 f'Calculated: {calc_pretty_rank}'
             )
         )
+
+    def test_broadway(self):
+        board = ['As', '2d', 'Jc', 'Tc', 'Jh']
+        hand = ['9h', 'Kh', '2s', 'Qh']
+        self._test_both_hand_orders(board, hand, hand_order[STRAIGHT])
 
     def test_nut_flush_over_second_nut_flush(self):
         board = ['2h', 'Qs', '9d', '5s', '3s']
