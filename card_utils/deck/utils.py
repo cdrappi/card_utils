@@ -57,13 +57,15 @@ def ranks_to_sorted_values(ranks, aces_high, aces_low):
             'Aces cannot be neither high nor low! Makes no sense'
         )
 
-    values = sorted(deck.rank_to_value[rank] for rank in ranks)
-    if values[0] == deck.rank_to_value['A']:
-        # if we have an ace...
-        if aces_high:
-            values.append(14)
-        if not aces_low:
-            # get rid of first card
-            values.pop(0)
+    values = []
+    for rank in ranks:
+        value = deck.rank_to_value[rank]
+        if value == deck.rank_to_value['A']:
+            if aces_low:
+                values.append(1)
+            if aces_high:
+                values.append(14)
+        else:
+            values.append(value)
 
-    return values
+    return sorted(values)

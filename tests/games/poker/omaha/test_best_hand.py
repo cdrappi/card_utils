@@ -1,6 +1,14 @@
 import unittest
 
-from card_utils.games.poker.omaha.brute_force import get_best_hand_brute_force, brute_force_omaha_hi_rank
+from card_utils.games.poker import (
+    hand_order,
+    FULL_HOUSE,
+)
+from card_utils.games.poker.five_card_hand_rank import five_card_hand_rank
+from card_utils.games.poker.omaha.brute_force import (
+    get_best_hand_brute_force,
+    brute_force_omaha_hi_rank,
+)
 from card_utils.games.poker.omaha.utils import (
     get_best_hand,
     get_hand_strength,
@@ -14,7 +22,7 @@ from tests.games.poker.util import deal_random_board_hands
 class BestOmahaHighHandTestCase(unittest.TestCase):
     """ Test for the best Omaha high hand """
 
-    n_random_cases = 10
+    n_random_cases = 0
 
     def setUp(self):
         pass
@@ -40,6 +48,13 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         )
         best_straight = get_best_straight(possible_straights, hand)
         self.assertEqual(best_straight, 8)
+
+    def test_brute_force_full_house(self):
+        board = ['2c', 'Ac', '4h', 'Ad', '3c']
+        hand = ['8h', '2d', '9d', 'As']
+        # hand_order_, *cards = brute_force_omaha_hi_rank(board, hand)
+        hand_order_, *cards = five_card_hand_rank(['2c', 'Ac', 'Ad'] + ['2d', 'As'])
+        self.assertEqual(hand_order_, hand_order[FULL_HOUSE])
 
     @unittest.skip('passes')
     def test_straight_over_trips(self):
