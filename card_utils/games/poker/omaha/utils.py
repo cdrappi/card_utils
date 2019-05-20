@@ -295,7 +295,7 @@ def _get_best_three_of_a_kind(hand_values, board_values):
 
     for board_value, board_ct in board_values.items():
         # there can be three of a kind on the board
-        if board_ct == 3:
+        if board_ct >= 3:
             # in this case, the hand's biggest 2 kickers play
             # if they have 2+ distinct cards
             # (e.g. if they have quads in their hand,

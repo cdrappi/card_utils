@@ -337,3 +337,8 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         board = ['Kh', 'Qc', 'Ks', 'Qh', '6h']
         hand = ['4c', '5d', '8d', '4d']
         self._test_equal_hands(board, hand)
+
+    def test_three_of_a_kind_on_quads_board(self):
+        board = ['Qh', 'Qs', 'Qc', 'Qd', '8d']
+        hand = ['2h', 'Ts', 'Jd', '4d']
+        self._test_equal_hands(board, hand)
