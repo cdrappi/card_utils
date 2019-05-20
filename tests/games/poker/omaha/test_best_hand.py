@@ -109,14 +109,37 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         board_ranks = [r for r, _ in board]
         possible_straights = get_possible_straights(board_ranks)
 
+        tested_not_correct = set(possible_straights) - set(expected_possible_straights)
+        correct_not_tested = set(expected_possible_straights) - set(possible_straights)
+
+        incorrect_items = {k: v for k, v in possible_straights if k in tested_not_correct}
+        missing_items = {k: v for k, v in expected_possible_straights if k in correct_not_tested}
+
+        self.assertFalse(
+            expr=tested_not_correct,
+            msg=(
+                f'Board: {board}\n'
+                f'Incorrect items in tested possible straights:\n'
+                f'{incorrect_items}\n'
+            )
+        )
+        self.assertFalse(
+            expr=correct_not_tested,
+            msg=(
+                f'Board: {board}\n'
+                f'Missing items in tested possible straights:\n'
+                f'{missing_items}\n'
+            )
+        )
+
         self.assertEqual(
             first=possible_straights,
             second=expected_possible_straights,
             msg=(
                 f'Incorrect possible straights on board {board}\n'
-                f'Correct: '
+                f'Correct: \n'
                 f'{json.dumps(json_dumpable_tuple_dict(expected_possible_straights), indent=4)}\n'
-                f'Tested: '
+                f'Tested: \n'
                 f'{json.dumps(json_dumpable_tuple_dict(possible_straights), indent=4)}'
             )
         )
@@ -132,6 +155,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             (2, 3): 5,
             (2, 4): 5,
             (2, 5): 5,
+            (2, 6): 6,
             (3, 6): 7,
             (4, 6): 7,
             (5, 6): 7,
