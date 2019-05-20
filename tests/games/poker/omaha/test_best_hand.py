@@ -29,7 +29,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
 
     n_random_cases = 0
 
-    n_random_cases = 100
+    # n_random_cases = 100
 
     def setUp(self):
         pass
@@ -146,6 +146,25 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         best_straight = get_best_straight(possible_straights, hand)
         self.assertEqual(best_straight, expected_high_card)
         self._test_both_hand_orders(board, hand, hand_order[STRAIGHT])
+
+    def test_two_boats(self):
+        board = ['3d', '2c', '8s', '3h', '3c']
+        hand = ['5s', '2h', '8h', '8c']
+        test_order, *test_kickers = brute_force_omaha_hi_rank(board, hand)
+        calc_order, *calc_kickers = get_hand_strength(board, hand)
+
+        self._test_both_hand_orders(board, hand, hand_order[FULL_HOUSE])
+        self.assertEqual(
+            first=test_kickers,
+            second=calc_kickers,
+            msg=(
+                f'\n'
+                f'Board: {board}\n'
+                f'Hand: {hand}\n'
+                f'Brute force says {test_kickers[0]} full of {test_kickers[1]}\n'
+                f'Speed calc says {calc_kickers[0]} full of {calc_kickers[1]}'
+            )
+        )
 
     def test_multiple_possible_straights(self):
         board = ['Ah', '7s', '3h', '4c', '5s']

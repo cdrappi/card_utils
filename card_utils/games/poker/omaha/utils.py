@@ -234,6 +234,8 @@ def get_best_full_house(hands_values, board_values):
     """
     best_boat = tuple()  # "boat" is another term for full house
 
+    pairs_on_board = set(bv for bv, bc in board_values.items() if bc >= 2)
+
     for board_value, board_ct in board_values.items():
         if board_ct == 3:
             # if there are three of a kind on the board,
@@ -270,6 +272,13 @@ def get_best_full_house(hands_values, board_values):
                     boat = (board_value, hv)
                     if boat > best_boat:
                         best_boat = boat
+
+        elif board_ct == 1 and pairs_on_board:
+            if hands_values[board_value] == 2:
+                max_board_pair = max(pairs_on_board)
+                boat = (board_value, max_board_pair)
+                if boat > best_boat:
+                    best_boat = boat
 
     return best_boat
 
@@ -469,11 +478,11 @@ def get_hand_strength(board, hand) -> Tuple:
     if is_paired_board:
         best_quads = get_best_quads(hand_values, board_values)
         if best_quads:
-            return hand_order[QUADS], best_quads
+            return (hand_order[QUADS], *best_quads)
 
         best_full_houses = get_best_full_house(hand_values, board_values)
         if best_full_houses:
-            return hand_order[FULL_HOUSE], best_full_houses
+            return (hand_order[FULL_HOUSE], *best_full_houses)
 
     if flush_suit is not None:
         best_flush = get_best_flush(
