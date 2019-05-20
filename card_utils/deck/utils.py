@@ -41,11 +41,12 @@ def suit_partition(cards):
     return suit_to_ranks
 
 
-def ranks_to_sorted_values(ranks, aces_high, aces_low, reverse=False):
+def ranks_to_sorted_values(ranks, aces_high, aces_low, distinct=False, reverse=False):
     """
     :param ranks: ([str])
     :param aces_high: (bool)
     :param aces_low: (bool)
+    :param distinct: (bool) if True, only return distinct values
     :param reverse: (bool) if True, sort in reverse order (high cards first)
     :return: ([int])
     """
@@ -58,7 +59,11 @@ def ranks_to_sorted_values(ranks, aces_high, aces_low, reverse=False):
             'Aces cannot be neither high nor low! Makes no sense'
         )
 
+    if distinct:
+        ranks = set(ranks)
+
     values = []
+
     for rank in ranks:
         value = deck.rank_to_value[rank]
         if value == deck.rank_to_value['A']:

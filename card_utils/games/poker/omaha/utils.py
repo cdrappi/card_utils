@@ -123,7 +123,8 @@ def get_possible_straights(ranks):
     values = ranks_to_sorted_values(
         ranks=ranks,
         aces_high=True,
-        aces_low=True
+        aces_low=True,
+        distinct=True
     )
 
     connecting_values = {}
