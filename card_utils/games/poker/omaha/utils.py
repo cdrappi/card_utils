@@ -1,5 +1,6 @@
 """ util functions for omaha games """
 import collections
+import itertools
 from typing import Tuple
 
 from card_utils.deck import ace_high_rank_to_value
@@ -513,4 +514,22 @@ def five_card_hand_rank(five_card_hand):
         aces_high=True
     )
     is_flush = set(suit for _, suit in five_card_hand)
-    
+
+
+def brute_force_omaha_hi_rank(board, hand):
+    """
+    :param board: ([str]) 5 board cards
+    :param hand: ([str]) 4 hole cards
+    :return: ([str]) list of five card hand,
+        a combo of 3 board cards and 2 hole cards
+    """
+    possible_combinations = (
+        list(board_cards) + list(hole_cards)
+        for board_cards in itertools.combinations(board, 3)
+        for hole_cards in itertools.combinations(hand, 2)
+    )
+    best_hand = max(possible_combinations, key=five_card_hand_rank)
+    return best_hand, five_card_hand_rank(best_hand)
+
+
+""" fin """
