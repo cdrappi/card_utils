@@ -59,6 +59,20 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             )
         )
 
+    def test_steel_wheel(self):
+        board = ['5h', 'Ah', 'Tc', '3h', 'Ts']
+        hand = ['7d', '8s', '2h', '4h']
+        board_ranks = [r for r, _ in board]
+        possible_straights = get_possible_straights(board_ranks)
+        expected_possible_straights = {
+            (2, 4): 5,
+        }
+        self.assertEqual(
+            first=possible_straights,
+            second=expected_possible_straights
+        )
+
+    @unittest.skip('passes')
     def test_non_straight(self):
         board = ['3h', '9d', 'Js', '2c', '4h']
         hand = ['9h', '5h', '7s', '8c']

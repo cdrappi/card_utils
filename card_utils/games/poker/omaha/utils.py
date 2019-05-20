@@ -90,7 +90,9 @@ def _get_connecting_values(v1, v2, v3):
     # worst straight is the wheel A-2-3-4-5
     worst_straight_start = max(1, v1 + n_gaps - 2)
     # best straight is broadway T-J-Q-K-A
-    best_straight_start = min(10, v1 - n_gaps)
+    best_straight_start = min(10, v1 - n_gaps + 2)
+
+    print(cards_on_board, worst_straight_start, best_straight_start)
 
     connecting_values = set()
     for bottom_value in range(worst_straight_start, best_straight_start + 1):
