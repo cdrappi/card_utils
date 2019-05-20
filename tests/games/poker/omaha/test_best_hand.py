@@ -27,9 +27,9 @@ from tests.games.poker.util import deal_random_board_hands
 class BestOmahaHighHandTestCase(unittest.TestCase):
     """ Test for the best Omaha high hand """
 
-    n_random_cases = 0
+    # n_random_cases = 0
 
-    # n_random_cases = 100
+    n_random_cases = 100
 
     def setUp(self):
         pass

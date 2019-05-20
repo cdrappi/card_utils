@@ -376,16 +376,28 @@ def get_best_two_pair(hand_values, board_values):
         best_two_pair = (top_pair, second_pair, kicker)
 
     if pairs_on_board:
-        # TODO
-        # next case: our board can have a pair, and
-        # our hand can make a pair connecting with the board
-        pass
+        non_pairs = set(board_values) - pairs_on_board
+        paired_with_hole_cards = non_pairs & set(hand_values)
+        if paired_with_hole_cards:
+            board_pair = max(pairs_on_board)
+            connecting_pair = max(paired_with_hole_cards)
+            kicker = _get_highest_except(hand_values, {connecting_pair})
+            two_pair = (
+                (board_pair, connecting_pair, kicker)
+                if board_pair > connecting_pair
+                else (connecting_pair, board_pair, kicker)
+            )
+            if two_pair > best_two_pair:
+                best_two_pair = two_pair
 
     common_cards = set(board_values) & set(hand_values)
     if len(common_cards) >= 2:
-        # we have 2 pair!
-        # TODO
-        pass
+        first_pair = max(common_cards)
+        second_pair = _get_highest_except(common_cards, {first_pair})
+        kicker = _get_highest_except(board_values, {first_pair, second_pair})
+        two_pair = (first_pair, second_pair, kicker)
+        if two_pair > best_two_pair:
+            best_two_pair = two_pair
 
     return best_two_pair
 
@@ -398,7 +410,15 @@ def get_best_pair(hand_values, board_values):
     """
     best_pair = tuple()
 
-    # TODO
+    common_cards = set(board_values) & set(hand_values)
+    if common_cards:
+        pair_value = max(common_cards)
+        hand_kicker = _get_highest_except(hand_values, {pair_value})
+        bk_1 = _get_highest_except(board_values, {pair_value})
+        bk_2 = _get_highest_except(board_values, {pair_value, bk_1})
+        sorted_kickers = sorted([hand_kicker, bk_1, bk_2])
+        best_pair = (pair_value, *sorted_kickers)
+
     return best_pair
 
 
