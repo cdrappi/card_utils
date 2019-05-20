@@ -29,7 +29,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
 
     n_random_cases = 0
 
-    # n_random_cases = 10000
+    n_random_cases = 10000
     print_every_n_cases = 100
 
     def setUp(self):

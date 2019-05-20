@@ -410,6 +410,28 @@ def get_best_pair(hand_values, board_values):
     """
     best_pair = tuple()
 
+    pairs_on_board = set(bv for bv, bc in board_values.items() if bc >= 2)
+    pairs_in_hand = set(hv for hv, hc in hand_values.items() if hc >= 2)
+
+    if pairs_on_board:
+        board_pair = max(pairs_on_board)
+        bk = _get_highest_except(board_values, {board_pair})
+        hk_1 = _get_highest_except(hand_values, {board_pair, bk})
+        hk_2 = _get_highest_except(hand_values, {board_pair, bk, hk_1})
+        sorted_kickers = sorted([bk, hk_1, hk_2])
+        pair = (board_pair, *sorted_kickers)
+        if pair > best_pair:
+            best_pair = pair
+
+    if pairs_in_hand:
+        pocket_pair = max(pairs_in_hand)
+        bk_1 = max(board_values)
+        bk_2 = _get_highest_except(board_values, {bk_1})
+        bk_3 = _get_highest_except(board_values, {bk_1, bk_2})
+        pair = (pocket_pair, bk_1, bk_2, bk_3)
+        if pair > best_pair:
+            best_pair = pair
+
     common_cards = set(board_values) & set(hand_values)
     if common_cards:
         pair_value = max(common_cards)
@@ -417,7 +439,9 @@ def get_best_pair(hand_values, board_values):
         bk_1 = _get_highest_except(board_values, {pair_value})
         bk_2 = _get_highest_except(board_values, {pair_value, bk_1})
         sorted_kickers = sorted([hand_kicker, bk_1, bk_2])
-        best_pair = (pair_value, *sorted_kickers)
+        pair = (pair_value, *sorted_kickers)
+        if pair > best_pair:
+            best_pair = pair
 
     return best_pair
 
