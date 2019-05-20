@@ -65,8 +65,8 @@ def ranks_to_sorted_values(ranks, aces_high, aces_low, distinct=False, reverse=F
     values = []
 
     for rank in ranks:
-        value = deck.rank_to_value[rank]
-        if value == deck.rank_to_value['A']:
+        value = deck.ace_low_rank_to_value[rank]
+        if value == deck.ace_low_rank_to_value['A']:
             if aces_low:
                 values.append(1)
             if aces_high:
