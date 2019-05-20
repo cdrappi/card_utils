@@ -92,10 +92,6 @@ def _get_connecting_values(v1, v2, v3):
     # best straight is broadway T-J-Q-K-A
     best_straight_start = min(10, v1 - n_gaps + 2)
 
-    print(cards_on_board)
-    print(n_gaps)
-    print(worst_straight_start, best_straight_start)
-
     connecting_values = set()
     for bottom_value in range(worst_straight_start, best_straight_start):
         straight_values = set(range(bottom_value, bottom_value + 5))
@@ -156,7 +152,7 @@ def get_best_straight(possible_straights, hand):
         )
     )
     for connecting_values, max_value in possible_straights.items():
-        connecting_cards = set(connecting_values).union(hand_values)
+        connecting_cards = set(connecting_values) & hand_values
         if len(connecting_cards) == 2:
             # we've made a straight!
             if max_value > highest_straight_value:
