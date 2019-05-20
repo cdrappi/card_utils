@@ -43,7 +43,8 @@ def five_card_hand_rank(five_card_hand):
     ah_sorted_values = ranks_to_sorted_values(
         ranks=[rank for rank, _ in five_card_hand],
         aces_low=False,
-        aces_high=True
+        aces_high=True,
+        reverse=True
     )
     inverse_ah_value_counts = _get_inverse_ah_value_counts(ah_sorted_values)
     if inverse_ah_value_counts[4] and inverse_ah_value_counts[1]:
@@ -59,7 +60,7 @@ def five_card_hand_rank(five_card_hand):
         return hand_order[FULL_HOUSE], trips_value, pair_value
 
     if is_flush:
-        return (hand_order[FLUSH], *ah_sorted_values)
+        return (hand_order[FLUSH], *inverse_ah_value_counts[1])
 
     if straight_value:
         return hand_order[STRAIGHT], straight_value

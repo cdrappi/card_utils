@@ -41,11 +41,12 @@ def suit_partition(cards):
     return suit_to_ranks
 
 
-def ranks_to_sorted_values(ranks, aces_high, aces_low):
+def ranks_to_sorted_values(ranks, aces_high, aces_low, reverse=False):
     """
     :param ranks: ([str])
     :param aces_high: (bool)
     :param aces_low: (bool)
+    :param reverse: (bool) if True, sort in reverse order (high cards first)
     :return: ([int])
     """
     if not ranks:
@@ -68,4 +69,4 @@ def ranks_to_sorted_values(ranks, aces_high, aces_low):
         else:
             values.append(value)
 
-    return sorted(values)
+    return sorted(values, reverse=reverse)
