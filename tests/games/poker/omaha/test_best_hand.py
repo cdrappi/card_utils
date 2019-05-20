@@ -66,7 +66,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             f'\n'
         )
 
-    @unittest.skip("uncomment me if we don't want to test random cases")
+    # @unittest.skip("uncomment me if we don't want to test random cases")
     def test_random_cases(self):
         for _ in range(self.n_random_cases):
             board, hands = deal_random_board_hands(n_hands=8, n_cards=4)
