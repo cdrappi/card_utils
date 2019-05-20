@@ -23,3 +23,8 @@ hand_order = {
     QUADS: 7,
     STRAIGHT_FLUSH: 8
 }
+
+inverse_hand_order = {
+    int_order: str_order
+    for str_order, int_order in hand_order.items()
+}
