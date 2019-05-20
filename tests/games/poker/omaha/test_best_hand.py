@@ -23,7 +23,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
     """ Test for the best Omaha high hand """
 
     n_random_cases = 0
-    n_random_cases = 100
+    # n_random_cases = 100
 
     def setUp(self):
         pass
@@ -77,13 +77,13 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             )
         )
 
-    def test_nut_flush(self):
+    def test_nut_flush_over_second_nut_flush(self):
         board = ['2h', 'Qs', '9d', '5s', '3s']
         hands = [
             ['7d', 'Ts', 'Tc', 'Ks'],
             ['7s', '4d', 'As', 'Jh']
         ]
-        
+        self._test_best_hand(board, hands)
 
     @unittest.skip('passes')
     def test_steel_wheel(self):
