@@ -156,7 +156,7 @@ def get_possible_straights(ranks):
     return connecting_values
 
 
-def get_best_straight(possible_straights, hand):
+def _get_best_straight(possible_straights, hand):
     """ get list of indices of hands that make the strongest straight
         if no one makes a straight, return empty list
 
@@ -183,7 +183,7 @@ def get_best_straight(possible_straights, hand):
     return highest_straight_value
 
 
-def get_best_flush(hand_flush_values):
+def _get_best_flush(hand_flush_values):
     """ get indexes of hands that make the best flush
         in omaha, only one hand can make the same flush,
         since you must play exactly two cards from your hand.
@@ -204,7 +204,7 @@ def get_best_flush(hand_flush_values):
     return highest_flush_value
 
 
-def get_best_quads(hands_values, board_values):
+def _get_best_quads(hands_values, board_values):
     """
     :param hands_values: (collections.Counter({int: int}))
     :param board_values: (collections.Counter({int: int}))
@@ -228,7 +228,7 @@ def get_best_quads(hands_values, board_values):
     return best_quads
 
 
-def get_best_full_house(hands_values, board_values):
+def _get_best_full_house(hands_values, board_values):
     """
     :param hands_values: (collections.Counter({int: int}))
     :param board_values: (collections.Counter({int: int}))
@@ -285,7 +285,7 @@ def get_best_full_house(hands_values, board_values):
     return best_boat
 
 
-def get_best_three_of_a_kind(hand_values, board_values):
+def _get_best_three_of_a_kind(hand_values, board_values):
     """
     :param hand_values: (collections.Counter({int: int}))
     :param board_values: (collections.Counter({int: int}))
@@ -358,7 +358,7 @@ def get_best_three_of_a_kind(hand_values, board_values):
     return best_three_of_a_kind
 
 
-def get_best_two_pair(hand_values, board_values):
+def _get_best_two_pair(hand_values, board_values):
     """
     :param hand_values: (collections.Counter({int: int}))
     :param board_values: (collections.Counter({int: int}))
@@ -408,7 +408,7 @@ def get_best_two_pair(hand_values, board_values):
     return best_two_pair
 
 
-def get_best_pair(hand_values, board_values):
+def _get_best_pair(hand_values, board_values):
     """
     :param hand_values: (collections.Counter({int: int}))
     :param board_values: (collections.Counter({int: int}))
@@ -452,7 +452,7 @@ def get_best_pair(hand_values, board_values):
     return best_pair
 
 
-def get_best_high_card(hand_values, board_values):
+def _get_best_high_card(hand_values, board_values):
     """
     :param hand_values: (collections.Counter({int: int}))
     :param board_values: (collections.Counter({int: int}))
@@ -514,7 +514,7 @@ def get_hand_strength(board, hand) -> Tuple:
             ranks=board_by_suits[flush_suit]
         )
         if possible_straight_flushes:
-            best_straight_flush = get_best_straight(
+            best_straight_flush = _get_best_straight(
                 possible_straights=possible_straight_flushes,
                 # filter hands by suit, and then we can use the
                 # same function for straight flushes
@@ -537,16 +537,16 @@ def get_hand_strength(board, hand) -> Tuple:
     })
 
     if is_paired_board:
-        best_quads = get_best_quads(hand_values, board_values)
+        best_quads = _get_best_quads(hand_values, board_values)
         if best_quads:
             return (hand_order[QUADS], *best_quads)
 
-        best_full_houses = get_best_full_house(hand_values, board_values)
+        best_full_houses = _get_best_full_house(hand_values, board_values)
         if best_full_houses:
             return (hand_order[FULL_HOUSE], *best_full_houses)
 
     if flush_suit is not None:
-        best_hand_flush = get_best_flush(
+        best_hand_flush = _get_best_flush(
             hand_flush_values=set(
                 ace_high_rank_to_value[r]
                 for r, s in hand
@@ -565,26 +565,26 @@ def get_hand_strength(board, hand) -> Tuple:
 
     possible_straights = get_possible_straights([r for r, _ in board])
     if possible_straights:
-        best_straight = get_best_straight(
+        best_straight = _get_best_straight(
             possible_straights=possible_straights,
             hand=hand
         )
         if best_straight:
             return hand_order[STRAIGHT], best_straight
 
-    best_three_of_a_kind = get_best_three_of_a_kind(hand_values, board_values)
+    best_three_of_a_kind = _get_best_three_of_a_kind(hand_values, board_values)
     if best_three_of_a_kind:
         return (hand_order[THREE_OF_A_KIND], *best_three_of_a_kind)
 
-    best_two_pair = get_best_two_pair(hand_values, board_values)
+    best_two_pair = _get_best_two_pair(hand_values, board_values)
     if best_two_pair:
         return (hand_order[TWO_PAIR], *best_two_pair)
 
-    best_pair = get_best_pair(hand_values, board_values)
+    best_pair = _get_best_pair(hand_values, board_values)
     if best_pair:
         return (hand_order[ONE_PAIR], *best_pair)
 
-    best_high_card = get_best_high_card(hand_values, board_values)
+    best_high_card = _get_best_high_card(hand_values, board_values)
     return (hand_order[HIGH_CARD], *best_high_card)
 
 

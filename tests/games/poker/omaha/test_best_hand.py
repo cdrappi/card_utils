@@ -18,7 +18,7 @@ from card_utils.games.poker.omaha.brute_force import (
 from card_utils.games.poker.omaha.utils import (
     get_best_hand,
     get_hand_strength,
-    get_best_straight,
+    _get_best_straight,
     get_possible_straights,
 )
 from card_utils.games.poker.util import pretty_hand_rank
@@ -202,7 +202,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
                 f'{json.dumps(json_dumpable_tuple_dict(possible_straights), indent=4)}'
             )
         )
-        best_straight = get_best_straight(possible_straights, hand)
+        best_straight = _get_best_straight(possible_straights, hand)
         self.assertEqual(best_straight, expected_high_card)
         self._test_both_hand_orders(board, hand, hand_order[STRAIGHT])
 
@@ -300,7 +300,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             first=possible_straights,
             second=expected_possible_straights
         )
-        best_straight = get_best_straight(possible_straights, hand)
+        best_straight = _get_best_straight(possible_straights, hand)
         self.assertEqual(best_straight, 0)
 
     def test_broadway(self):
