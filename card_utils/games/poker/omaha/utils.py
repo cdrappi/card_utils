@@ -1,5 +1,6 @@
 """ util functions for omaha games """
 import collections
+import itertools
 from typing import Tuple
 
 from card_utils.deck import ace_high_rank_to_value
@@ -66,6 +67,21 @@ def _get_highest_except(values, excluded_values):
     return max(set(values).difference(excluded_values))
 
 
+def _get_value_triplets_to_search(distinct_sorted_values):
+    """
+    :param distinct_sorted_values:
+    :return:
+    """
+    # TODO: optimise
+    triplets = []
+    for v1, v2, v3 in itertools.combinations(distinct_sorted_values, 3):
+        n_gaps = v3 - v1 - 2
+        if n_gaps <= 2:
+            triplets.append((v1, v2, v3))
+
+    return triplets
+
+
 def _get_connecting_values(v1, v2, v3):
     """ get tuples of card values that could make a straight
         given cards with values v1, v2, v3 are on the board
@@ -75,15 +91,15 @@ def _get_connecting_values(v1, v2, v3):
     :param v3: (int)
     :return: (set(tuple(int))) set of tuples of ints
     """
-    if len({v3, v2, v1}) < 3:
-        # can't make a straight without 3 distinct values
-        return set()
+    # if len({v3, v2, v1}) < 3:
+    #     # can't make a straight without 3 distinct values
+    #     return set()
 
     n_gaps = v3 - v1 - 2
-    if n_gaps > 2:
-        # can't make a straight if there are 3+ gaps
-        # e.g. 4-GAP-6-GAP-GAP-9
-        return set()
+    # if n_gaps > 2:
+    #     # can't make a straight if there are 3+ gaps
+    #     # e.g. 4-GAP-6-GAP-GAP-9
+    #     return set()
 
     cards_on_board = {v1, v2, v3}
 
@@ -128,7 +144,7 @@ def get_possible_straights(ranks):
     )
 
     connecting_values = {}
-    for v1, v2, v3 in zip(values[0:-2], values[1:-1], values[2:]):
+    for v1, v2, v3 in _get_value_triplets_to_search(values):
         connectors_set = _get_connecting_values(v1, v2, v3)
         for connectors in connectors_set:
             highest_straight_value = max({v3, *connectors})
