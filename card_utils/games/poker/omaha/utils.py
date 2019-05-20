@@ -197,8 +197,9 @@ def get_best_flush(hand_flush_values):
     if len(hand_flush_values) >= 2:
         max_flush_value = max(hand_flush_values)
         second_flush_value = _get_highest_except(hand_flush_values, {max_flush_value})
-        if max_flush_value > highest_flush_value:
-            highest_flush_value = (max_flush_value, second_flush_value)
+        flush = (max_flush_value, second_flush_value)
+        if flush > highest_flush_value:
+            highest_flush_value = flush
 
     return highest_flush_value
 
@@ -538,8 +539,13 @@ def get_hand_strength(board, hand) -> Tuple:
             )
         )
         if best_hand_flush:
-            board_flush_cards = sorted(board_by_suits[flush_suit])[0:3]
-            best_total_flush = sorted(board_flush_cards + list(best_hand_flush))
+            board_suit_values = ranks_to_sorted_values(
+                ranks=board_by_suits[flush_suit],
+                aces_high=True,
+                aces_low=False,
+                reverse=True
+            )
+            best_total_flush = sorted(board_suit_values[0:3] + list(best_hand_flush), reverse=True)
             return (hand_order[FLUSH], *best_total_flush)
 
     possible_straights = get_possible_straights([r for r, _ in board])
