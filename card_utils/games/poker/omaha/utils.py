@@ -241,7 +241,7 @@ def get_best_full_house(hands_values, board_values):
             # if there are three of a kind on the board,
             # then we have a full house if there is a pair in our hand
             for hand_value, hand_ct in hands_values.items():
-                if hand_ct == 2:
+                if hand_ct >= 2:
                     boat = (board_value, hand_value)
                     if boat > best_boat:
                         best_boat = boat

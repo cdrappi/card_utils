@@ -27,9 +27,10 @@ from tests.games.poker.util import deal_random_board_hands
 class BestOmahaHighHandTestCase(unittest.TestCase):
     """ Test for the best Omaha high hand """
 
-    # n_random_cases = 0
+    n_random_cases = 0
 
-    n_random_cases = 100
+    # n_random_cases = 10000
+    print_every_n_cases = 100
 
     def setUp(self):
         pass
@@ -38,9 +39,12 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         pass
 
     def test_random_cases(self):
-        for _ in range(self.n_random_cases):
+        print(f'running {self.n_random_cases} random test cases ... ', end='')
+        for ii in range(self.n_random_cases):
             board, hands = deal_random_board_hands(n_hands=8, n_cards=4)
             self._test_best_hand(board, hands)
+            if ii % self.print_every_n_cases == 0:
+                print(f' {ii} ', end='')
 
     def _test_best_hand(self, board, hands):
         """
@@ -163,6 +167,22 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
                 f'Hand: {hand}\n'
                 f'Brute force says {test_kickers[0]} full of {test_kickers[1]}\n'
                 f'Speed calc says {calc_kickers[0]} full of {calc_kickers[1]}'
+            )
+        )
+
+    def test_boat_with_trips_in_hand(self):
+        board = ['Ad', 'Jc', '4s', '4c', '4d']
+        hand = ['7h', 'Ts', '7c', '7d']
+        calc_order, *calc_kickers = get_hand_strength(board, hand)
+
+        self._test_both_hand_orders(board, hand, hand_order[FULL_HOUSE])
+        self.assertEqual(
+            first=calc_kickers,
+            second=[4, 7],
+            msg=(
+                f'Incorrect full house calculation\n'
+                f'Expected 4 full of 7, ',
+                f'received {calc_kickers[0]} full of {calc_kickers[1]}'
             )
         )
 
