@@ -27,7 +27,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
 
     n_random_cases = 0
 
-    # n_random_cases = 100
+    n_random_cases = 100
 
     def setUp(self):
         pass
