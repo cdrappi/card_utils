@@ -1,4 +1,5 @@
 import json
+import time
 import unittest
 
 from card_utils.games.poker import (
@@ -29,13 +30,41 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
     """ Test for the best Omaha high hand """
 
     n_random_cases = 0
-    n_random_cases = 10000
+    n_random_cases = 100
+    n_cases_speed_test = 100
 
     def setUp(self):
         pass
 
     def tearDown(self):
         pass
+
+    def test_speeds(self):
+        speed_test_cases = [
+            deal_random_board_hands(n_hands=8, n_cards=4)
+            for _ in range(self.n_cases_speed_test)
+        ]
+        start_brute_force = time.time()
+        brute_force_results = [
+            get_best_hand_brute_force(board, hands)
+            for board, hands in speed_test_cases
+        ]
+        brute_force_time = time.time() - start_brute_force
+
+        start_calc = time.time()
+        calc_results = [
+            get_best_hand(board, hands)
+            for board, hands in speed_test_cases
+        ]
+        calc_time = time.time() - start_calc
+
+        self.assertEqual(brute_force_results, calc_results)
+        self.assertGreater(brute_force_time, calc_time)
+        print(
+            f'\nbrute force time: {brute_force_time:.2f}'
+            f'\ncalc time: {calc_time:.2f}'
+            f'\n'
+        )
 
     def test_random_cases(self):
         for _ in range(self.n_random_cases):
