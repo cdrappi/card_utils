@@ -69,6 +69,8 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         for _ in range(self.n_random_cases):
             board, hands = deal_random_board_hands(n_hands=8, n_cards=4)
             self._test_best_hand(board, hands)
+            for hand in hands:
+                self._test_equal_hand_orders(board, hand)
 
     def _test_best_hand(self, board, hands):
         """
@@ -131,6 +133,21 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
                 f'Brute force: {bf_pretty_rank}\n'
                 f'Calculated: {calc_pretty_rank}'
             )
+        )
+
+    def _test_equal_hand_orders(self, board, hand):
+        """
+        :param board: ([str])
+        :param hand: ([str])
+        """
+        bf_order, *true_kickers = brute_force_omaha_hi_rank(board, hand)
+        calc_order, *calc_kickers = get_hand_strength(board, hand)
+        self._assert_equal_orders(
+            board=board,
+            hand=hand,
+            correct_order=bf_order,
+            test_order=calc_order,
+            test_name='calc vs. brute force'
         )
 
     def _test_straight(self, board, hand, expected_possible_straights, expected_high_card):
