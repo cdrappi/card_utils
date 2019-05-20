@@ -1,6 +1,5 @@
 """ util functions for omaha games """
 import collections
-import itertools
 from typing import Tuple
 
 from card_utils.deck import ace_high_rank_to_value
@@ -76,6 +75,10 @@ def _get_connecting_values(v1, v2, v3):
     :param v3: (int)
     :return: (set(tuple(int))) set of tuples of ints
     """
+    if len({v3, v2, v1}) < 3:
+        # can't make a straight without 3 distinct values
+        return set()
+
     n_gaps = v3 - v1 - 1
     if n_gaps > 2:
         # can't make a straight if there are 3+ gaps
@@ -86,13 +89,13 @@ def _get_connecting_values(v1, v2, v3):
     worst_straight_start = max(1, v1 + n_gaps - 2)
     best_straight_start = min(14, v1 - n_gaps + 2)
 
-    straight_values = set()
+    connecting_values = set()
     for bottom_value in range(worst_straight_start, best_straight_start):
         straight_values = set(range(bottom_value, bottom_value + 5))
         values_to_make_straight = straight_values.difference(cards_on_board)
-        straight_values.add(tuple(values_to_make_straight))
+        connecting_values.add(tuple(values_to_make_straight))
 
-    return straight_values
+    return connecting_values
 
 
 def get_possible_straights(ranks):
@@ -180,7 +183,6 @@ def get_best_quads(hands_values, board_values):
     :param board_values: (collections.Counter({int: int}))
     :return: (int, int) quads value, kicker
     """
-    # TODO: check for quads
     best_quads = tuple()
 
     for board_value, board_ct in board_values.items():
@@ -220,7 +222,7 @@ def get_best_full_house(hands_values, board_values):
         elif board_ct == 2:
             # if the board is paired:
             for hand_value, hand_ct in hands_values.items():
-                if hand_ct >= 2 and board_value[hand_value] == 1:
+                if hand_ct >= 2 and board_values[hand_value] == 1:
                     # first look for pairs in the hand
                     # that also have 1 card on the board
                     boat = (hand_value, board_value)
@@ -340,6 +342,7 @@ def get_best_two_pair(hand_values, board_values):
         best_two_pair = (top_pair, second_pair, kicker)
 
     if pairs_on_board:
+        # TODO
         # next case: our board can have a pair, and
         # our hand can make a pair connecting with the board
         pass
@@ -347,9 +350,9 @@ def get_best_two_pair(hand_values, board_values):
     common_cards = set(board_values) & set(hand_values)
     if len(common_cards) >= 2:
         # we have 2 pair!
+        # TODO
         pass
 
-    # TODO
     return best_two_pair
 
 
@@ -495,5 +498,6 @@ def get_best_hand(board, hands):
         range(len(hands)),
         key=lambda ii: get_hand_strength(board, hands[ii])
     )
+
 
 """ fin """

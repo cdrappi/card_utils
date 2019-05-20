@@ -5,7 +5,7 @@ from card_utils.games.poker.omaha.utils import get_best_hand
 from tests.games.poker.util import deal_random_board_hands
 
 
-class TestBestOmahaHighHand(unittest.TestCase):
+class BestOmahaHighHandTestCase(unittest.TestCase):
     """ Test for the best Omaha high hand """
 
     n_random_cases = 100
