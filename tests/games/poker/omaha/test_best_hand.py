@@ -70,7 +70,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             board, hands = deal_random_board_hands(n_hands=8, n_cards=4)
             self._test_best_hand(board, hands)
             for hand in hands:
-                self._test_equal_hand_orders(board, hand)
+                self._test_equal_hands(board, hand)
 
     def _test_best_hand(self, board, hands):
         """
@@ -135,12 +135,12 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             )
         )
 
-    def _test_equal_hand_orders(self, board, hand):
+    def _test_equal_hands(self, board, hand):
         """
         :param board: ([str])
         :param hand: ([str])
         """
-        bf_order, *true_kickers = brute_force_omaha_hi_rank(board, hand)
+        bf_order, *bf_kickers = brute_force_omaha_hi_rank(board, hand)
         calc_order, *calc_kickers = get_hand_strength(board, hand)
         self._assert_equal_orders(
             board=board,
@@ -148,6 +148,17 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             correct_order=bf_order,
             test_order=calc_order,
             test_name='calc vs. brute force'
+        )
+        self.assertEqual(
+            first=bf_kickers,
+            second=calc_kickers,
+            msg=(
+                f'\n'
+                f'Incorrect kickers for hand {hand}\n'
+                f'on board {board}:\n'
+                f'BF kickers:   {bf_kickers}\n'
+                f'Calc kickers: {calc_kickers}'
+            )
         )
 
     def _test_straight(self, board, hand, expected_possible_straights, expected_high_card):
