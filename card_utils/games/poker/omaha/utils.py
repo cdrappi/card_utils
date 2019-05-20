@@ -92,8 +92,6 @@ def _get_connecting_values(v1, v2, v3):
     # best straight is broadway T-J-Q-K-A
     best_straight_start = min(10, v1 - n_gaps + 2)
 
-    print(cards_on_board, worst_straight_start, best_straight_start)
-
     connecting_values = set()
     for bottom_value in range(worst_straight_start, best_straight_start + 1):
         straight_values = set(range(bottom_value, bottom_value + 5))

@@ -59,18 +59,29 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             )
         )
 
+    def _test_equal_hand_ranks(self, board, hand):
+        brute_force_hand_order, *true_kickers = brute_force_omaha_hi_rank(board, hand)
+        calc_hand_order, *calc_kickers = get_hand_strength(board, hand)
+
+        brute_force_pretty_rank = pretty_hand_rank((brute_force_hand_order, *true_kickers))
+        calc_pretty_rank = pretty_hand_rank((calc_hand_order, *calc_kickers))
+
+        self.assertEqual(
+            first=brute_force_hand_order,
+            second=calc_hand_order,
+            msg=(
+                f'Unequal hand ranks for {hand} on {board}:\n'
+                f'Brute force: {brute_force_pretty_rank}\n'
+                f'Calculated: {calc_pretty_rank}'
+            )
+        )
+
+    @unittest.skip('passes')
     def test_steel_wheel(self):
         board = ['5h', 'Ah', 'Tc', '3h', 'Ts']
         hand = ['7d', '8s', '2h', '4h']
-        board_ranks = [r for r, _ in board]
-        possible_straights = get_possible_straights(board_ranks)
-        expected_possible_straights = {
-            (2, 4): 5,
-        }
-        self.assertEqual(
-            first=possible_straights,
-            second=expected_possible_straights
-        )
+
+        self._test_equal_hand_ranks(board, hand)
 
     @unittest.skip('passes')
     def test_non_straight(self):
