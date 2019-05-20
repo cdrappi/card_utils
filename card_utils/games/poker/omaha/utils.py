@@ -343,15 +343,10 @@ def get_best_two_pair(hand_values, board_values):
         # our hand can make a pair connecting with the board
         pass
 
-    for board_value, board_ct in board_values.items():
-        if board_ct == 2:
-            # this is a pair on the board,
-            # so we need to find a pair in the hand
-            # or a match between pair and board
-            pass
-        elif board_ct == 1:
-            # we need to search for a
-            pass
+    common_cards = set(board_values) & set(hand_values)
+    if len(common_cards) >= 2:
+        # we have 2 pair!
+        pass
 
     # TODO
     return best_two_pair
@@ -499,3 +494,23 @@ def get_best_hand(board, hands):
         range(len(hands)),
         key=lambda ii: get_hand_strength(board, hands[ii])
     )
+
+
+def five_card_hand_rank(five_card_hand):
+    """
+
+    :param five_card_hand: ([str]) a hand of exactly 5 cards
+    :return:
+    """
+    if len(five_card_hand) != 5:
+        raise ValueError(
+            f'input to five_card_hand_rank must be a list of 5 cards'
+        )
+
+    card_values = ranks_to_sorted_values(
+        ranks=[rank for rank, _ in five_card_hand],
+        aces_low=True,
+        aces_high=True
+    )
+    is_flush = set(suit for _, suit in five_card_hand)
+    
