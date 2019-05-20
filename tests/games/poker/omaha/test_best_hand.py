@@ -2,6 +2,7 @@ import unittest
 
 from card_utils.games.poker import (
     hand_order,
+    STRAIGHT_FLUSH,
     FULL_HOUSE,
 )
 from card_utils.games.poker.five_card_hand_rank import five_card_hand_rank
@@ -23,6 +24,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
     """ Test for the best Omaha high hand """
 
     n_random_cases = 0
+
     # n_random_cases = 100
 
     def setUp(self):
@@ -60,19 +62,36 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             )
         )
 
-    def _test_equal_hand_ranks(self, board, hand):
-        brute_force_hand_order, *true_kickers = brute_force_omaha_hi_rank(board, hand)
-        calc_hand_order, *calc_kickers = get_hand_strength(board, hand)
+    def _assert_equal_orders(self, board, hand,
+                             correct_order, test_order,
+                             test_name):
+        self.assertEqual(
+            first=correct_order,
+            second=test_order,
+            msg=(
+                f'Error in {test_name} hand order: \n'
+                f'For hand {hand}\n'
+                f'on board {board}\n'
+                f'Expected {hand_order[correct_order]}, '
+                f'received {hand_order[test_order]}')
+        )
 
-        brute_force_pretty_rank = pretty_hand_rank((brute_force_hand_order, *true_kickers))
-        calc_pretty_rank = pretty_hand_rank((calc_hand_order, *calc_kickers))
+    def _test_both_hand_orders(self, board, hand, correct_order):
+        bf_order, *true_kickers = brute_force_omaha_hi_rank(board, hand)
+        calc_order, *calc_kickers = get_hand_strength(board, hand)
+
+        bf_pretty_rank = pretty_hand_rank((bf_order, *true_kickers))
+        calc_pretty_rank = pretty_hand_rank((calc_order, *calc_kickers))
+
+        self._assert_equal_orders(board, hand, correct_order, bf_order, 'brute force')
+        self._assert_equal_orders(board, hand, correct_order, calc_order, 'calculated')
 
         self.assertEqual(
-            first=brute_force_hand_order,
-            second=calc_hand_order,
+            first=bf_order,
+            second=calc_order,
             msg=(
                 f'Unequal hand ranks for {hand} on {board}:\n'
-                f'Brute force: {brute_force_pretty_rank}\n'
+                f'Brute force: {bf_pretty_rank}\n'
                 f'Calculated: {calc_pretty_rank}'
             )
         )
@@ -85,14 +104,12 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         ]
         self._test_best_hand(board, hands)
 
-    @unittest.skip('passes')
     def test_steel_wheel(self):
         board = ['5h', 'Ah', 'Tc', '3h', 'Ts']
         hand = ['7d', '8s', '2h', '4h']
 
-        self._test_equal_hand_ranks(board, hand)
+        self._test_both_hand_orders(board, hand, hand_order[STRAIGHT_FLUSH])
 
-    @unittest.skip('passes')
     def test_non_straight(self):
         board = ['3h', '9d', 'Js', '2c', '4h']
         hand = ['9h', '5h', '7s', '8c']
@@ -110,7 +127,6 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         best_straight = get_best_straight(possible_straights, hand)
         self.assertEqual(best_straight, 0)
 
-    @unittest.skip('passes')
     def test_straight(self):
         board = ['Ts', '7d', '4h', '2c', '5h']
         hand = ['8h', '9c', '8c', '6h']
@@ -129,15 +145,10 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         best_straight = get_best_straight(possible_straights, hand)
         self.assertEqual(best_straight, 8)
 
-    @unittest.skip('passes')
     def test_brute_force_full_house(self):
-        board = ['2c', 'Ac', '4h', 'Ad', '3c']
-        hand = ['8h', '2d', '9d', 'As']
-        # hand_order_, *cards = brute_force_omaha_hi_rank(board, hand)
         hand_order_, *cards = five_card_hand_rank(['2c', 'Ac', 'Ad'] + ['2d', 'As'])
         self.assertEqual(hand_order_, hand_order[FULL_HOUSE])
 
-    @unittest.skip('passes')
     def test_straight_over_trips(self):
         board = ['Ts', '7d', '4h', '2c', '5h']
         hands = [
