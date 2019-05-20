@@ -10,3 +10,27 @@ def pretty_hand_rank(hand_rank_tuple):
     """
     hand_order_, *kickers_ = hand_rank_tuple
     return inverse_hand_order[hand_order_]
+
+
+def get_best_hands_generic(board, hands, hand_strength_function):
+    """ get the index of the best omaha hand given a board
+
+    :param board: ([str]) list of 5 cards
+    :param hands: ([set(str)]) list of sets of 4 cards
+    :param hand_strength_function: (function)
+        inputs (board, hand), outputs (tuple)
+    :return: ([int]) indices of `hands` that makes the strongest omaha hand
+        --> this is a list because it is possible to "chop" with
+            every hand rank except straight flushes, quads and flushes
+    """
+    best_hand_strength = tuple()
+    best_hand_indices = []
+    for ii, hand in hands:
+        hand_strength = hand_strength_function(board, hand)
+        if hand_strength > best_hand_strength:
+            best_hand_strength = hand_strength
+            best_hand_indices = [ii]
+        elif hand_strength == best_hand_strength:
+            best_hand_indices.append(ii)
+
+    return best_hand_indices

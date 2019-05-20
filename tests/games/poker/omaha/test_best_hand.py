@@ -17,7 +17,7 @@ from card_utils.games.poker.omaha.brute_force import (
 )
 from card_utils.games.poker.omaha.utils import (
     get_best_hand,
-    get_hand_strength,
+    get_hand_strength_fast,
     _get_best_straight,
     get_possible_straights,
 )
@@ -86,7 +86,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             board=board,
             hand=hands[true_best_hand_index]
         )
-        calc_hand_rank = get_hand_strength(
+        calc_hand_rank = get_hand_strength_fast(
             board=board,
             hand=hands[test_best_hand_index]
         )
@@ -129,7 +129,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         :param correct_order: (int)
         """
         bf_order, *true_kickers = brute_force_omaha_hi_rank(board, hand)
-        calc_order, *calc_kickers = get_hand_strength(board, hand)
+        calc_order, *calc_kickers = get_hand_strength_fast(board, hand)
 
         bf_pretty_rank = pretty_hand_rank((bf_order, *true_kickers))
         calc_pretty_rank = pretty_hand_rank((calc_order, *calc_kickers))
@@ -165,7 +165,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         :param hand: ([str])
         """
         bf_order, *bf_kickers = brute_force_omaha_hi_rank(board, hand)
-        calc_order, *calc_kickers = get_hand_strength(board, hand)
+        calc_order, *calc_kickers = get_hand_strength_fast(board, hand)
         self._assert_equal_orders(
             board=board,
             hand=hand,
@@ -255,7 +255,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         board = ['3d', '2c', '8s', '3h', '3c']
         hand = ['5s', '2h', '8h', '8c']
         test_order, *test_kickers = brute_force_omaha_hi_rank(board, hand)
-        calc_order, *calc_kickers = get_hand_strength(board, hand)
+        calc_order, *calc_kickers = get_hand_strength_fast(board, hand)
 
         self._test_both_hand_orders(board, hand, hand_order[FULL_HOUSE])
         self.assertEqual(
@@ -278,7 +278,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
     def test_boat_with_trips_in_hand(self):
         board = ['Ad', 'Jc', '4s', '4c', '4d']
         hand = ['7h', 'Ts', '7c', '7d']
-        calc_order, *calc_kickers = get_hand_strength(board, hand)
+        calc_order, *calc_kickers = get_hand_strength_fast(board, hand)
 
         self._test_both_hand_orders(board, hand, hand_order[FULL_HOUSE])
         self.assertEqual(

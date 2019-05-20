@@ -3,6 +3,7 @@
 import itertools
 
 from card_utils.games.poker.five_card_hand_rank import five_card_hand_rank
+from card_utils.games.poker.util import get_best_hands_generic
 
 
 def brute_force_omaha_hi_rank(board, hand):
@@ -30,7 +31,8 @@ def get_best_hand_brute_force(board, hands):
         --> this is a list because it is possible to "chop" with
             every hand rank except straight flushes, quads and flushes
     """
-    return max(
-        range(len(hands)),
-        key=lambda ii: brute_force_omaha_hi_rank(board, hands[ii])
+    return get_best_hands_generic(
+        board=board,
+        hands=hands,
+        hand_strength_function=brute_force_omaha_hi_rank
     )

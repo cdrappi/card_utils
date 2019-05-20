@@ -21,6 +21,7 @@ from card_utils.games.poker import (
     ONE_PAIR,
     HIGH_CARD,
 )
+from card_utils.games.poker.util import get_best_hands_generic
 
 
 def _validate_board(board):
@@ -468,7 +469,7 @@ def _get_best_high_card(hand_values, board_values):
     )
 
 
-def get_hand_strength(board, hand) -> Tuple:
+def get_hand_strength_fast(board, hand) -> Tuple:
     """
     hand ranks go:
 
@@ -596,7 +597,7 @@ def get_hand_strength(board, hand) -> Tuple:
     return (hand_order[HIGH_CARD], *best_high_card)
 
 
-def get_best_hand(board, hands):
+def get_best_hands_fast(board, hands):
     """ get the index of the best omaha hand given a board
 
     :param board: ([str]) list of 5 cards
@@ -605,9 +606,10 @@ def get_best_hand(board, hands):
         --> this is a list because it is possible to "chop" with
             every hand rank except straight flushes, quads and flushes
     """
-    return max(
-        range(len(hands)),
-        key=lambda ii: get_hand_strength(board, hands[ii])
+    return get_best_hands_generic(
+        board=board,
+        hands=hands,
+        hand_strength_function=get_hand_strength_fast
     )
 
 
