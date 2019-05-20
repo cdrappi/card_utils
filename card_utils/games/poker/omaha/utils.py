@@ -196,7 +196,10 @@ def _get_best_flush(hand_flush_values):
     highest_flush_value = tuple()
     if len(hand_flush_values) >= 2:
         max_flush_value = max(hand_flush_values)
-        second_flush_value = _get_highest_except(hand_flush_values, {max_flush_value})
+        second_flush_value = _get_highest_except(
+            values=hand_flush_values,
+            excluded_values={max_flush_value}
+        )
         flush = (max_flush_value, second_flush_value)
         if flush > highest_flush_value:
             highest_flush_value = flush
@@ -276,7 +279,7 @@ def _get_best_full_house(hands_values, board_values):
                         best_boat = boat
 
         elif board_ct == 1 and pairs_on_board:
-            if hands_values[board_value] == 2:
+            if hands_values[board_value] >= 2:
                 max_board_pair = max(pairs_on_board)
                 boat = (board_value, max_board_pair)
                 if boat > best_boat:
@@ -460,7 +463,9 @@ def _get_best_high_card(hand_values, board_values):
     """
     best_3_board_values = sorted(board_values, reverse=True)[0:3]
     best_2_hand_values = sorted(hand_values, reverse=True)[0:2]
-    return tuple(sorted(best_3_board_values + best_2_hand_values, reverse=True))
+    return tuple(
+        sorted(best_3_board_values + best_2_hand_values, reverse=True)
+    )
 
 
 def get_hand_strength(board, hand) -> Tuple:
@@ -560,8 +565,8 @@ def get_hand_strength(board, hand) -> Tuple:
                 aces_low=False,
                 reverse=True
             )
-            best_total_flush = sorted(board_suit_values[0:3] + list(best_hand_flush), reverse=True)
-            return (hand_order[FLUSH], *best_total_flush)
+            all_flush_cards = board_suit_values[0:3] + list(best_hand_flush)
+            return (hand_order[FLUSH], *sorted(all_flush_cards, reverse=True))
 
     possible_straights = get_possible_straights([r for r, _ in board])
     if possible_straights:
@@ -572,7 +577,10 @@ def get_hand_strength(board, hand) -> Tuple:
         if best_straight:
             return hand_order[STRAIGHT], best_straight
 
-    best_three_of_a_kind = _get_best_three_of_a_kind(hand_values, board_values)
+    best_three_of_a_kind = _get_best_three_of_a_kind(
+        hand_values=hand_values,
+        board_values=board_values
+    )
     if best_three_of_a_kind:
         return (hand_order[THREE_OF_A_KIND], *best_three_of_a_kind)
 
@@ -593,7 +601,7 @@ def get_best_hand(board, hands):
 
     :param board: ([str]) list of 5 cards
     :param hands: ([set(str)]) list of sets of 4 cards
-    :return: ([int]) indices of `hands` that makes the strongest omaha hand,
+    :return: ([int]) indices of `hands` that makes the strongest omaha hand
         --> this is a list because it is possible to "chop" with
             every hand rank except straight flushes, quads and flushes
     """

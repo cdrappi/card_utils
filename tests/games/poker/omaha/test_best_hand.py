@@ -22,7 +22,7 @@ from card_utils.games.poker.omaha.utils import (
     get_possible_straights,
 )
 from card_utils.games.poker.util import pretty_hand_rank
-from card_utils.util import json_dumpable_tuple_dict
+from card_utils.util import untuple_dict
 from tests.games.poker.util import deal_random_board_hands
 
 
@@ -66,7 +66,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             f'\n'
         )
 
-    # @unittest.skip("uncomment me if we don't want to test random cases")
+    @unittest.skip("uncomment me if we don't want to test random cases")
     def test_random_cases(self):
         for _ in range(self.n_random_cases):
             board, hands = deal_random_board_hands(n_hands=8, n_cards=4)
@@ -82,8 +82,14 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         true_best_hand_index = get_best_hand_brute_force(board, hands)
         test_best_hand_index = get_best_hand(board, hands)
 
-        true_hand_rank = brute_force_omaha_hi_rank(board, hands[true_best_hand_index])
-        calc_hand_rank = get_hand_strength(board, hands[test_best_hand_index])
+        true_hand_rank = brute_force_omaha_hi_rank(
+            board=board,
+            hand=hands[true_best_hand_index]
+        )
+        calc_hand_rank = get_hand_strength(
+            board=board,
+            hand=hands[test_best_hand_index]
+        )
 
         true_pretty_rank = pretty_hand_rank(true_hand_rank)
         calc_pretty_rank = pretty_hand_rank(calc_hand_rank)
@@ -92,9 +98,13 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             first=true_best_hand_index,
             second=test_best_hand_index,
             msg=(
-                f'Board: {board}\n'
-                f'Best hand is {hands[true_best_hand_index]} ({true_pretty_rank})\n'
-                f'Test value: {hands[test_best_hand_index]} ({calc_pretty_rank})'
+                f'Board: {board}'
+                f'\n'
+                f'Best hand is {hands[true_best_hand_index]} '
+                f'({true_pretty_rank})'
+                f'\n'
+                f'Test value: {hands[test_best_hand_index]} '
+                f'({calc_pretty_rank})'
             )
         )
 
@@ -124,8 +134,20 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         bf_pretty_rank = pretty_hand_rank((bf_order, *true_kickers))
         calc_pretty_rank = pretty_hand_rank((calc_order, *calc_kickers))
 
-        self._assert_equal_orders(board, hand, correct_order, bf_order, 'brute force')
-        self._assert_equal_orders(board, hand, correct_order, calc_order, 'calculated')
+        self._assert_equal_orders(
+            board=board,
+            hand=hand,
+            correct_order=correct_order,
+            test_order=bf_order,
+            test_name='brute force'
+        )
+        self._assert_equal_orders(
+            board=board,
+            hand=hand,
+            correct_order=correct_order,
+            test_order=calc_order,
+            test_name='calculated'
+        )
 
         self.assertEqual(
             first=bf_order,
@@ -157,22 +179,31 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             second=calc_kickers,
             msg=(
                 f'\n'
-                f'Incorrect kickers for {inverse_hand_order[bf_order]} {hand}\n'
+                f'Incorrect kickers for {inverse_hand_order[bf_order]} '
+                f'{hand}\n'
                 f'on board {board}:\n'
                 f'BF kickers:   {bf_kickers}\n'
                 f'Calc kickers: {calc_kickers}'
             )
         )
 
-    def _test_straight(self, board, hand, expected_possible_straights, expected_high_card):
+    def _test_straight(self, board, hand, exp_poss_straights, expected_high_card):
         board_ranks = [r for r, _ in board]
-        possible_straights = get_possible_straights(board_ranks)
+        poss_straights = get_possible_straights(board_ranks)
 
-        tested_not_correct = set(possible_straights) - set(expected_possible_straights)
-        correct_not_tested = set(expected_possible_straights) - set(possible_straights)
+        tested_not_correct = set(poss_straights) - set(exp_poss_straights)
+        correct_not_tested = set(exp_poss_straights) - set(poss_straights)
 
-        incorrect_items = {k: v for k, v in possible_straights if k in tested_not_correct}
-        missing_items = {k: v for k, v in expected_possible_straights if k in correct_not_tested}
+        incorrect_items = {
+            hole_cards: highest_value
+            for hole_cards, highest_value in poss_straights
+            if hole_cards in tested_not_correct
+        }
+        missing_items = {
+            hole_cards: highest_value for
+            hole_cards, highest_value in exp_poss_straights
+            if hole_cards in correct_not_tested
+        }
 
         self.assertFalse(
             expr=tested_not_correct,
@@ -192,17 +223,21 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         )
 
         self.assertEqual(
-            first=possible_straights,
-            second=expected_possible_straights,
+            first=poss_straights,
+            second=exp_poss_straights,
             msg=(
-                f'Incorrect possible straights on board {board}\n'
-                f'Correct: \n'
-                f'{json.dumps(json_dumpable_tuple_dict(expected_possible_straights), indent=4)}\n'
-                f'Tested: \n'
-                f'{json.dumps(json_dumpable_tuple_dict(possible_straights), indent=4)}'
+                f'Incorrect possible straights on board {board}'
+                f'\n'
+                f'Correct: '
+                f'\n'
+                f'{json.dumps(untuple_dict(exp_poss_straights), indent=4)}'
+                f'\n'
+                f'Tested: '
+                f'\n'
+                f'{json.dumps(untuple_dict(poss_straights), indent=4)}'
             )
         )
-        best_straight = _get_best_straight(possible_straights, hand)
+        best_straight = _get_best_straight(poss_straights, hand)
         self.assertEqual(best_straight, expected_high_card)
         self._test_both_hand_orders(board, hand, hand_order[STRAIGHT])
 
@@ -228,10 +263,15 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             second=calc_kickers,
             msg=(
                 f'\n'
-                f'Board: {board}\n'
-                f'Hand: {hand}\n'
-                f'Brute force says {test_kickers[0]} full of {test_kickers[1]}\n'
-                f'Speed calc says {calc_kickers[0]} full of {calc_kickers[1]}'
+                f'Board: {board}'
+                f'\n'
+                f'Hand: {hand}'
+                f'\n'
+                f'Brute force says '
+                f'{test_kickers[0]} full of {test_kickers[1]}'
+                f'\n'
+                f'Speed calc says '
+                f'{calc_kickers[0]} full of {calc_kickers[1]}'
             )
         )
 
@@ -322,7 +362,9 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         self._test_straight(board, hand, expected_possible_straights, 8)
 
     def test_brute_force_full_house(self):
-        hand_order_, *cards = five_card_hand_rank(['2c', 'Ac', 'Ad'] + ['2d', 'As'])
+        hand_order_, *cards = five_card_hand_rank(
+            five_card_hand=['2c', 'Ac', 'Ad', '2d', 'As']
+        )
         self.assertEqual(hand_order_, hand_order[FULL_HOUSE])
 
     def test_straight_over_trips(self):
@@ -341,4 +383,9 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
     def test_three_of_a_kind_on_quads_board(self):
         board = ['Qh', 'Qs', 'Qc', 'Qd', '8d']
         hand = ['2h', 'Ts', 'Jd', '4d']
+        self._test_equal_hands(board, hand)
+
+    def test_boat_with_trips_in_hand(self):
+        board = ['3d', 'Qh', '3s', 'Ts', '3c']
+        hand = ['Th', 'Qs', 'Qc', 'Qd']
         self._test_equal_hands(board, hand)
