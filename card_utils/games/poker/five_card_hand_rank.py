@@ -35,7 +35,8 @@ def five_card_hand_rank(five_card_hand):
         aces_low=True,
         aces_high=True
     )
-    straight_value = _best_straight_from_sorted_values(sorted_values)
+    sorted_distinct_values = sorted(set(sorted_values))
+    straight_value = _best_straight_from_sorted_distinct_values(sorted_distinct_values)
     if is_flush and straight_value:
         return hand_order[STRAIGHT_FLUSH], straight_value
 
@@ -99,12 +100,17 @@ def five_card_hand_rank(five_card_hand):
     return (hand_order[HIGH_CARD], *inverse_ah_value_counts[1])
 
 
-def _best_straight_from_sorted_values(card_values):
+def _best_straight_from_sorted_distinct_values(sorted_distinct_values):
     """
-    :param card_values: ([int])
+    :param sorted_distinct_values: ([int])
     :return: (int) best straight or 0 if none
     """
-    sorted_distinct_values = sorted(set(card_values))
+    if len(set(sorted_distinct_values)) != len(sorted_distinct_values):
+        raise Exception(
+            f'Input to _best_straight_from_sorted_distinct_values '
+            f'must be a sorted list of distinct values'
+        )
+
     if len(sorted_distinct_values) == 5:
         max_value = max(sorted_distinct_values)
         is_straight = (
@@ -117,9 +123,9 @@ def _best_straight_from_sorted_values(card_values):
     elif len(sorted_distinct_values) == 6:
         return max(
             # recursively call for ace-low straights
-            _best_straight_from_sorted_values(sorted_distinct_values[:-1]),
+            _best_straight_from_sorted_distinct_values(sorted_distinct_values[:-1]),
             # recursively call for ace-high straights
-            _best_straight_from_sorted_values(sorted_distinct_values[1:])
+            _best_straight_from_sorted_distinct_values(sorted_distinct_values[1:])
         )
 
     # otherwise, there's no straight
