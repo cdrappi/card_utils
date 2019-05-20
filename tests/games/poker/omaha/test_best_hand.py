@@ -1,3 +1,4 @@
+import json
 import unittest
 
 from card_utils.games.poker import (
@@ -19,6 +20,7 @@ from card_utils.games.poker.omaha.utils import (
     get_possible_straights,
 )
 from card_utils.games.poker.util import pretty_hand_rank
+from card_utils.util import json_dumpable_tuple_dict
 from tests.games.poker.util import deal_random_board_hands
 
 
@@ -103,24 +105,40 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             )
         )
 
-    def test_broadway(self):
-        board = ['As', '2d', 'Jc', 'Tc', 'Jh']
-        hand = ['9h', 'Kh', '2s', 'Qh']
-
+    def _test_straight(self, board, hand, expected_possible_straights, expected_high_card):
         board_ranks = [r for r, _ in board]
         possible_straights = get_possible_straights(board_ranks)
-        expected_possible_straights = {
-            (12, 13): 14,
-        }
 
         self.assertEqual(
             first=possible_straights,
-            second=expected_possible_straights
+            second=expected_possible_straights,
+            msg=(
+                f'Incorrect possible straights on board {board}\n'
+                f'Correct: '
+                f'{json.dumps(json_dumpable_tuple_dict(expected_possible_straights), indent=4)}\n'
+                f'Tested: '
+                f'{json.dumps(json_dumpable_tuple_dict(possible_straights), indent=4)}'
+            )
         )
         best_straight = get_best_straight(possible_straights, hand)
-        self.assertEqual(best_straight, 14)
-
+        self.assertEqual(best_straight, expected_high_card)
         self._test_both_hand_orders(board, hand, hand_order[STRAIGHT])
+
+    def test_multiple_possible_straights(self):
+        board = ['Ah', '7s', '3h', '4c', '5s']
+        hand = ['Tc', 'Qh', '4d', '6s']
+        expected_possible_straights = {
+            (1, 2): 5,
+            (2, 3): 5,
+            (2, 4): 5,
+            (2, 5): 5,
+            (3, 6): 7,
+            (4, 6): 7,
+            (5, 6): 7,
+            (6, 7): 7,
+            (6, 8): 8
+        }
+        self._test_straight(board, hand, expected_possible_straights, 7)
 
     def test_nut_flush_over_second_nut_flush(self):
         board = ['2h', 'Qs', '9d', '5s', '3s']
@@ -153,23 +171,23 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         best_straight = get_best_straight(possible_straights, hand)
         self.assertEqual(best_straight, 0)
 
-    def test_straight(self):
+    def test_broadway(self):
+        board = ['As', '2d', 'Jc', 'Tc', 'Jh']
+        hand = ['9h', 'Kh', '2s', 'Qh']
+        expected_possible_straights = {
+            (12, 13): 14,
+        }
+        self._test_straight(board, hand, expected_possible_straights, 14)
+
+    def test_many_straight_cards_straight(self):
         board = ['Ts', '7d', '4h', '2c', '5h']
         hand = ['8h', '9c', '8c', '6h']
-        board_ranks = [r for r, _ in board]
-        possible_straights = get_possible_straights(board_ranks)
         expected_possible_straights = {
             (6, 8): 8,
             (3, 6): 7,
             (1, 3): 5,
         }
-
-        self.assertEqual(
-            first=possible_straights,
-            second=expected_possible_straights
-        )
-        best_straight = get_best_straight(possible_straights, hand)
-        self.assertEqual(best_straight, 8)
+        self._test_straight(board, hand, expected_possible_straights, 8)
 
     def test_brute_force_full_house(self):
         hand_order_, *cards = five_card_hand_rank(['2c', 'Ac', 'Ad'] + ['2d', 'As'])
