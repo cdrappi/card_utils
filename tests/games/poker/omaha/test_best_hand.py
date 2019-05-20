@@ -7,6 +7,7 @@ from card_utils.games.poker import (
     STRAIGHT_FLUSH,
     FULL_HOUSE,
     STRAIGHT,
+    ONE_PAIR,
 )
 from card_utils.games.poker.five_card_hand_rank import five_card_hand_rank
 from card_utils.games.poker.omaha.brute_force import (
@@ -29,7 +30,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
 
     n_random_cases = 0
 
-    n_random_cases = 10000
+    # n_random_cases = 10000
     print_every_n_cases = 100
 
     def setUp(self):
@@ -150,6 +151,11 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         best_straight = get_best_straight(possible_straights, hand)
         self.assertEqual(best_straight, expected_high_card)
         self._test_both_hand_orders(board, hand, hand_order[STRAIGHT])
+
+    def test_pocket_pair(self):
+        board = ['3c', 'Qh', 'Kd', '2s', '7h']
+        hand = ['Ah', 'Td', '9c', 'Ac']
+        self._test_both_hand_orders(board, hand, hand_order[ONE_PAIR])
 
     def test_two_boats(self):
         board = ['3d', '2c', '8s', '3h', '3c']
