@@ -38,7 +38,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
-    # @unittest.skip("uncomment if we don't want to test speeds!")
+    @unittest.skip("uncomment if we don't want to test speeds!")
     def test_speeds(self):
         speed_test_cases = [
             deal_random_board_hands(n_hands=8, n_cards=4)
@@ -66,7 +66,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             f'\n'
         )
 
-    # @unittest.skip("uncomment me if we don't want to test random cases")
+    @unittest.skip("uncomment me if we don't want to test random cases")
     def test_random_cases(self):
         for _ in range(self.n_random_cases):
             board, hands = deal_random_board_hands(n_hands=8, n_cards=4)
@@ -332,3 +332,8 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             ['6c', '4c', '4d', 'Qh']
         ]
         self._test_best_hand(board, hands)
+
+    def test_two_pair_on_paired_board(self):
+        board = ['Kh', 'Qc', 'Ks', 'Qh', '6h']
+        hand = ['4c', '5d', '8d', '4d']
+        self._test_equal_hands(board, hand)

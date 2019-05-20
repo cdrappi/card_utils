@@ -373,7 +373,11 @@ def get_best_two_pair(hand_values, board_values):
         # we have a two pair, and we can now figure out the best one
         pairs_in_union = pairs_on_board | pairs_in_hand
         top_pair = max(pairs_in_union)
-        second_pair = _get_highest_except(pairs_in_union, {top_pair})
+        second_pair = (
+            max(pairs_in_hand)
+            if top_pair in pairs_on_board
+            else max(pairs_on_board)
+        )
         kicker = _get_highest_except(board_values, {top_pair, second_pair})
         best_two_pair = (top_pair, second_pair, kicker)
 
@@ -420,7 +424,7 @@ def get_best_pair(hand_values, board_values):
         bk = _get_highest_except(board_values, {board_pair})
         hk_1 = _get_highest_except(hand_values, {board_pair, bk})
         hk_2 = _get_highest_except(hand_values, {board_pair, bk, hk_1})
-        sorted_kickers = sorted([bk, hk_1, hk_2])
+        sorted_kickers = sorted([bk, hk_1, hk_2], reverse=True)
         pair = (board_pair, *sorted_kickers)
         if pair > best_pair:
             best_pair = pair
@@ -440,12 +444,23 @@ def get_best_pair(hand_values, board_values):
         hand_kicker = _get_highest_except(hand_values, {pair_value})
         bk_1 = _get_highest_except(board_values, {pair_value})
         bk_2 = _get_highest_except(board_values, {pair_value, bk_1})
-        sorted_kickers = sorted([hand_kicker, bk_1, bk_2])
+        sorted_kickers = sorted([hand_kicker, bk_1, bk_2], reverse=True)
         pair = (pair_value, *sorted_kickers)
         if pair > best_pair:
             best_pair = pair
 
     return best_pair
+
+
+def get_best_high_card(hand_values, board_values):
+    """
+    :param hand_values: (collections.Counter({int: int}))
+    :param board_values: (collections.Counter({int: int}))
+    :return: (tuple) 5 card values
+    """
+    best_3_board_values = sorted(board_values, reverse=True)[0:3]
+    best_2_hand_values = sorted(hand_values, reverse=True)[0:2]
+    return tuple(sorted(best_3_board_values + best_2_hand_values, reverse=True))
 
 
 def get_hand_strength(board, hand) -> Tuple:
@@ -569,7 +584,8 @@ def get_hand_strength(board, hand) -> Tuple:
     if best_pair:
         return (hand_order[ONE_PAIR], *best_pair)
 
-    return (hand_order[HIGH_CARD], *hand_values)
+    best_high_card = get_best_high_card(hand_values, board_values)
+    return (hand_order[HIGH_CARD], *best_high_card)
 
 
 def get_best_hand(board, hands):
