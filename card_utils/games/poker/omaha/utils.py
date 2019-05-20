@@ -90,13 +90,18 @@ def _get_connecting_values(v1, v2, v3):
     # worst straight is the wheel A-2-3-4-5
     worst_straight_start = max(1, v1 + n_gaps - 2)
     # best straight is broadway T-J-Q-K-A
-    best_straight_start = min(10, v1 - n_gaps + 2)
+    best_straight_start = min(10, v1)
+
+    # print(v1, v2, v3, worst_straight_start, best_straight_start)
 
     connecting_values = set()
     for bottom_value in range(worst_straight_start, best_straight_start + 1):
         straight_values = set(range(bottom_value, bottom_value + 5))
-        values_to_make_straight = straight_values.difference(cards_on_board)
-        connecting_values.add(tuple(sorted(values_to_make_straight)))
+        values_to_make_straight = straight_values - cards_on_board
+        connectors = tuple(sorted(values_to_make_straight))
+        if len(connectors) != 2:
+            raise ValueError(f'Omaha connectors must be length 2 only!')
+        connecting_values.add(connectors)
 
     return connecting_values
 
@@ -124,7 +129,6 @@ def get_possible_straights(ranks):
     connecting_values = {}
     for v1, v2, v3 in zip(values[0:-2], values[1:-1], values[2:]):
         connectors_set = _get_connecting_values(v1, v2, v3)
-        print(connectors_set)
         for connectors in connectors_set:
             highest_straight_value = max({v3, *connectors})
             if connectors not in connecting_values:

@@ -2,6 +2,7 @@ import unittest
 
 from card_utils.games.poker import (
     hand_order,
+    inverse_hand_order,
     STRAIGHT_FLUSH,
     FULL_HOUSE,
 )
@@ -72,11 +73,16 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
                 f'Error in {test_name} hand order: \n'
                 f'For hand {hand}\n'
                 f'on board {board}\n'
-                f'Expected {hand_order[correct_order]}, '
-                f'received {hand_order[test_order]}')
+                f'Expected {inverse_hand_order[correct_order]}, '
+                f'received {inverse_hand_order[test_order]}')
         )
 
     def _test_both_hand_orders(self, board, hand, correct_order):
+        """
+        :param board: ([str])
+        :param hand: ([str])
+        :param correct_order: (int)
+        """
         bf_order, *true_kickers = brute_force_omaha_hi_rank(board, hand)
         calc_order, *calc_kickers = get_hand_strength(board, hand)
 
