@@ -14,7 +14,7 @@ from tests.games.poker.util import deal_random_board_hands
 class BestOmahaHighHandTestCase(unittest.TestCase):
     """ Test for the best Omaha high hand """
 
-    n_random_cases = 0
+    n_random_cases = 10
 
     def setUp(self):
         pass
@@ -22,6 +22,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
+    @unittest.skip('passes')
     def test_straight(self):
         board = ['Ts', '7d', '4h', '2c', '5h']
         hand = ['8h', '9c', '8c', '6h']
@@ -40,7 +41,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         best_straight = get_best_straight(possible_straights, hand)
         self.assertEqual(best_straight, 8)
 
-    @unittest.skip('ignore until straight is fixed')
+    @unittest.skip('passes')
     def test_straight_over_trips(self):
         board = ['Ts', '7d', '4h', '2c', '5h']
         hands = [
