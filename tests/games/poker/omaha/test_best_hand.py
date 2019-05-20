@@ -106,6 +106,20 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
     def test_broadway(self):
         board = ['As', '2d', 'Jc', 'Tc', 'Jh']
         hand = ['9h', 'Kh', '2s', 'Qh']
+
+        board_ranks = [r for r, _ in board]
+        possible_straights = get_possible_straights(board_ranks)
+        expected_possible_straights = {
+            (12, 13): 14,
+        }
+
+        self.assertEqual(
+            first=possible_straights,
+            second=expected_possible_straights
+        )
+        best_straight = get_best_straight(possible_straights, hand)
+        self.assertEqual(best_straight, 14)
+
         self._test_both_hand_orders(board, hand, hand_order[STRAIGHT])
 
     def test_nut_flush_over_second_nut_flush(self):
