@@ -124,6 +124,7 @@ def get_possible_straights(ranks):
     connecting_values = {}
     for v1, v2, v3 in zip(values[0:-2], values[1:-1], values[2:]):
         connectors_set = _get_connecting_values(v1, v2, v3)
+        print(connectors_set)
         for connectors in connectors_set:
             highest_straight_value = max({v3, *connectors})
             if connectors not in connecting_values:
