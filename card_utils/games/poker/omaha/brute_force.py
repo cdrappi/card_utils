@@ -18,4 +18,19 @@ def brute_force_omaha_hi_rank(board, hand):
         for hole_cards in itertools.combinations(hand, 2)
     )
     best_hand = max(possible_combinations, key=five_card_hand_rank)
-    return best_hand, five_card_hand_rank(best_hand)
+    return five_card_hand_rank(best_hand)
+
+
+def get_best_hand_brute_force(board, hands):
+    """ get the index of the best omaha hand given a board
+
+    :param board: ([str]) list of 5 cards
+    :param hands: ([set(str)]) list of sets of 4 cards
+    :return: ([int]) indices of `hands` that makes the strongest omaha hand,
+        --> this is a list because it is possible to "chop" with
+            every hand rank except straight flushes, quads and flushes
+    """
+    return max(
+        range(len(hands)),
+        key=lambda ii: brute_force_omaha_hi_rank(board, hands[ii])
+    )
