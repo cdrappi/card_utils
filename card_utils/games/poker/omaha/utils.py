@@ -79,21 +79,28 @@ def _get_connecting_values(v1, v2, v3):
         # can't make a straight without 3 distinct values
         return set()
 
-    n_gaps = v3 - v1 - 1
+    n_gaps = v3 - v1 - 2
     if n_gaps > 2:
         # can't make a straight if there are 3+ gaps
         # e.g. 4-GAP-6-GAP-GAP-9
         return set()
 
     cards_on_board = {v1, v2, v3}
+
+    # worst straight is the wheel A-2-3-4-5
     worst_straight_start = max(1, v1 + n_gaps - 2)
-    best_straight_start = min(14, v1 - n_gaps + 2)
+    # best straight is broadway T-J-Q-K-A
+    best_straight_start = min(10, v1 - n_gaps + 2)
+
+    print(cards_on_board)
+    print(n_gaps)
+    print(worst_straight_start, best_straight_start)
 
     connecting_values = set()
     for bottom_value in range(worst_straight_start, best_straight_start):
         straight_values = set(range(bottom_value, bottom_value + 5))
         values_to_make_straight = straight_values.difference(cards_on_board)
-        connecting_values.add(tuple(values_to_make_straight))
+        connecting_values.add(tuple(sorted(values_to_make_straight)))
 
     return connecting_values
 
