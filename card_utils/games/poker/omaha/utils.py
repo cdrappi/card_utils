@@ -547,13 +547,13 @@ def five_card_hand_rank(five_card_hand):
         aces_high=True
     )
     value_counts = collections.Counter(aces_high_values)
-    
+
 
 def brute_force_omaha_hi_rank(board, hand):
     """
     :param board: ([str]) 5 board cards
     :param hand: ([str]) 4 hole cards
-    :return: ([str]) list of five card hand,
+    :return: ([str], tuple) list of five card hand, and its tuple-rank
         a combo of 3 board cards and 2 hole cards
     """
     possible_combinations = (
