@@ -327,6 +327,22 @@ def get_best_two_pair(hand_values, board_values):
     """
     best_two_pair = tuple()
 
+    pairs_on_board = set(bv for bv, bc in board_values.items() if bc >= 2)
+    pairs_in_hand = set(hv for hv, hc in hand_values.items() if hc >= 2)
+    if pairs_on_board and pairs_in_hand:
+        # if the board has a pair and our hand has a different pair,
+        # we have a two pair, and we can now figure out the best one
+        pairs_in_union = pairs_on_board | pairs_in_hand
+        top_pair = max(pairs_in_union)
+        second_pair = _get_highest_except(pairs_in_union, {top_pair})
+        kicker = _get_highest_except(board_values, {top_pair, second_pair})
+        best_two_pair = (top_pair, second_pair, kicker)
+
+    if pairs_on_board:
+        # next case: our board can have a pair, and
+        # our hand can make a pair connecting with the board
+        pass
+
     for board_value, board_ct in board_values.items():
         if board_ct == 2:
             # this is a pair on the board,
@@ -334,7 +350,7 @@ def get_best_two_pair(hand_values, board_values):
             # or a match between pair and board
             pass
         elif board_ct == 1:
-            # we need to search for a 
+            # we need to search for a
             pass
 
     # TODO
