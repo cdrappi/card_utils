@@ -157,7 +157,7 @@ def get_possible_straights(ranks):
     return connecting_values
 
 
-def _get_best_straight(possible_straights, hand):
+def get_best_straight(possible_straights, hand):
     """ get list of indices of hands that make the strongest straight
         if no one makes a straight, return empty list
 
@@ -520,7 +520,7 @@ def get_hand_strength_fast(board, hand) -> Tuple:
             ranks=board_by_suits[flush_suit]
         )
         if possible_straight_flushes:
-            best_straight_flush = _get_best_straight(
+            best_straight_flush = get_best_straight(
                 possible_straights=possible_straight_flushes,
                 # filter hands by suit, and then we can use the
                 # same function for straight flushes
@@ -571,7 +571,7 @@ def get_hand_strength_fast(board, hand) -> Tuple:
 
     possible_straights = get_possible_straights([r for r, _ in board])
     if possible_straights:
-        best_straight = _get_best_straight(
+        best_straight = get_best_straight(
             possible_straights=possible_straights,
             hand=hand
         )

@@ -22,7 +22,7 @@ def brute_force_omaha_hi_rank(board, hand):
     return five_card_hand_rank(best_hand)
 
 
-def get_best_hand_brute_force(board, hands):
+def get_best_hands_brute_force(board, hands):
     """ get the index of the best omaha hand given a board
 
     :param board: ([str]) list of 5 cards
