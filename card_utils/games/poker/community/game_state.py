@@ -8,7 +8,7 @@ class CommunityGameState(PokerGameState):
     """ basic community card game state """
 
     name = 'community_card_poker'
-    num_hole_cards = 0
+    num_hole_cards = 0  # override this in subclasses!
 
     def __init__(self,
                  num_players: int,
@@ -38,7 +38,10 @@ class CommunityGameState(PokerGameState):
         for hand in hands:
             if len(hand) != self.num_hole_cards:
                 raise ValueError(
-                    f'Community card hands must have exactly {self.num_hole_cards}'
+                    f'Community card hands must have exactly '
+                    f'{self.num_hole_cards}\n'
+                    f'Perhaps you need to override the num_hole_cards '
+                    f'class variable in {self.__class__.__name__}'
                 )
 
         super().__init__(

@@ -7,6 +7,7 @@ from card_utils.games.poker.community.game_state import CommunityGameState
 class OmahaGameState(CommunityGameState):
     """ basic omaha game state """
 
+    name = 'omaha'
     num_hole_cards = 4
 
     def __init__(self,
