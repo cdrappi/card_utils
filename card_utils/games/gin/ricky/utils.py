@@ -2,6 +2,11 @@ import itertools
 from typing import List, Tuple
 
 from card_utils import deck
+from card_utils.deck.utils import (
+    rank_partition,
+    suit_partition,
+    ranks_to_sorted_values
+)
 from card_utils.games.gin.deal import new_game
 
 
@@ -59,60 +64,6 @@ def sorted_hand_points(hand):
             hand_points_ = min(hand_points_, meld_points)
 
     return sorted_hand, hand_points_
-
-
-def suit_partition(hand):
-    """
-    :param hand: ([str])
-    :return: ({str: [str]} suit --> [ranks]
-    """
-    suit_to_ranks = {}
-    for rank, suit in hand:
-        if suit not in suit_to_ranks:
-            suit_to_ranks[suit] = []
-        suit_to_ranks[suit].append(rank)
-
-    return suit_to_ranks
-
-
-def rank_partition(hand):
-    """
-    :param hand: ([str])
-    :return: ({str: [str]} rank --> [suit]
-    """
-    rank_to_suits = {}
-    for rank, suit in hand:
-        if rank not in rank_to_suits:
-            rank_to_suits[rank] = []
-        rank_to_suits[rank].append(suit)
-
-    return rank_to_suits
-
-
-def ranks_to_sorted_values(ranks, aces_high, aces_low):
-    """
-    :param ranks: ([str])
-    :param aces_high: (bool)
-    :param aces_low: (bool)
-    :return: ([int])
-    """
-    if not (aces_high or aces_low):
-        raise ValueError(
-            'Call to ranks_to_sorted_values: '
-            'Aces cannot be neither high nor low! Makes no sense'
-        )
-
-    values = sorted(deck.rank_to_value[rank] for rank in ranks)
-    # aces marked as low (1) now
-    if values[0] == 1:
-        # if we have an ace...
-        if aces_high:
-            values.append(14)
-        if not aces_low:
-            # get rid of first card
-            values.pop(0)
-
-    return values
 
 
 def rank_straights(ranks, straight_length, aces_high=True, aces_low=True, suit=''):
