@@ -84,6 +84,10 @@ class PokerGameState:
         self.street = street
         self.street_actions = street_actions or []
 
+    def move_action(self):
+        """ move action by 1 player """
+        self.action = (self.action + 1) % self.num_players
+
     def is_action_closed(self, street):
         """
         :param street: (int)
