@@ -80,4 +80,9 @@ class CommunityGameState(PokerGameState):
 
     @property
     def board(self):
+        """ in community card games, there is only one board,
+            so use this property to set/get it
+
+        :return: ([str])
+        """
         return self.boards[0]
