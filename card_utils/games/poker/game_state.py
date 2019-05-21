@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Set
 
 from card_utils.games.poker.street_action import StreetAction
 from card_utils.util import count_in
@@ -20,7 +20,8 @@ class PokerGameState:
                  big_blind: int = 2,
                  action: int = 0,
                  street: int = 1,
-                 street_actions: List[List[StreetAction]] = None):
+                 street_actions: List[List[StreetAction]] = None,
+                 players_starting_street: List[Set[int]] = None):
         """
         :param num_players: (int)
         :param deck: ([str])
@@ -35,6 +36,8 @@ class PokerGameState:
         :param street_actions: ([[int]])
             Each street gets a list of list of actions,
             represented by an object StreetAction
+        :param players_starting_street: ([set(int)])
+            set of players in the hand for each street
         """
         if num_players < 2:
             raise ValueError(
@@ -84,6 +87,11 @@ class PokerGameState:
         self.street = street
         self.street_actions = street_actions or []
 
+        if players_starting_street is None:
+            players_starting_street = [set(range(num_players))]
+
+        self.players_starting_street = players_starting_street
+
     def move_action(self):
         """ move action by 1 player """
         self.action = (self.action + 1) % self.num_players
@@ -97,6 +105,8 @@ class PokerGameState:
             # we haven't even gotten to the street yet
             return False
 
+        n_street_players = len(self.players_starting_street[street - 1])
+
         last_actions = {}
         for action in self.street_actions[street - 1]:
             last_actions[action.player] = action.action_type
@@ -104,14 +114,14 @@ class PokerGameState:
         # action is closed when either:
         values = last_actions.values()
         passes = count_in(values, StreetAction.valid_passes)
-        if passes == self.num_players:
+        if passes == n_street_players:
             # (1) everyone's last action is in {'PASS', 'CHECK'}
             return True
 
         closers = count_in(values, StreetAction.valid_closes)
         aggressors = count_in(values, StreetAction.valid_aggressions)
 
-        if aggressors == 1 and closers == self.num_players - 1:
+        if aggressors == 1 and closers == n_street_players - 1:
             # (2) everyone's last action is in {'PASS', 'FOLD', 'CALL'}
             #     except one in {'BET', 'RAISE'}
             return True
