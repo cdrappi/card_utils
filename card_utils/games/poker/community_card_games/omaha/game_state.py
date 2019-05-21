@@ -1,10 +1,15 @@
 """ class for generic omaha game state """
 from typing import List
 
-from card_utils.games.poker.game_state import PokerGameState
+from card_utils.games.poker.community_card_games.game_state import (
+    CommunityCardGameState
+)
 
 
-class OmahaGameState(PokerGameState):
+class OmahaGameState(CommunityCardGameState):
+    """ basic omaha game state """
+
+    num_hole_cards = 4
 
     def __init__(self,
                  num_players: int,
@@ -25,11 +30,6 @@ class OmahaGameState(PokerGameState):
         :param small_blind: (int)
         :param big_blind: (int)
         """
-        if len(boards) != 1:
-            raise ValueError(
-                f'Omaha is a community-card game, '
-                f'so it must only have one board'
-            )
         super().__init__(
             num_players=num_players,
             deck=deck,

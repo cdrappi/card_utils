@@ -1,8 +1,10 @@
-""" class for generic poker game state """
 from typing import List
 
 
 class PokerGameState:
+    """ class for generic poker game state """
+
+    name = 'poker'  # NOTE: override this in subclasses
 
     def __init__(self,
                  num_players: int,
