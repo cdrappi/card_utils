@@ -7,8 +7,9 @@ from card_utils.games.poker.game_state import PokerGameState
 class CommunityGameState(PokerGameState):
     """ basic community card game state """
 
+    # NOTE: override these in subclasses!
     name = 'community_card_poker'
-    num_hole_cards = 0  # override this in subclasses!
+    num_hole_cards = 0
 
     def __init__(self,
                  num_players: int,
