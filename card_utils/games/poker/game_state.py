@@ -67,6 +67,7 @@ class PokerGameState:
                 f'must have exactly one board, '
                 f'or a board for every player'
             )
+        self.boards = boards
 
         self.pot = pot
 

@@ -77,3 +77,7 @@ class CommunityGameState(PokerGameState):
             street=street,
             street_actions=street_actions,
         )
+
+    @property
+    def board(self):
+        return self.boards[0]
