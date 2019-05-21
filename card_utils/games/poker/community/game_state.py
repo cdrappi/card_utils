@@ -2,6 +2,7 @@
 from typing import List
 
 from card_utils.games.poker.game_state import PokerGameState
+from card_utils.games.poker.street_action import StreetAction
 
 
 class CommunityGameState(PokerGameState):
@@ -21,7 +22,8 @@ class CommunityGameState(PokerGameState):
                  small_blind: int = 1,
                  big_blind: int = 2,
                  action: int = None,
-                 street: int = 1):
+                 street: int = 1,
+                 street_actions: List[List[StreetAction]] = None):
         """
         :param num_players: (int)
         :param deck: ([str])
@@ -34,6 +36,9 @@ class CommunityGameState(PokerGameState):
         :param action: (int) the player index who acts (0-indexed)
             --> if None, default is set based on number of players
         :param street: (int) the current street (1-indexed)
+        :param street_actions: ([[int]])
+            Each street gets a list of list of actions,
+            represented by an object StreetAction
         """
         if len(boards) != 1:
             raise ValueError(
@@ -70,4 +75,5 @@ class CommunityGameState(PokerGameState):
             big_blind=big_blind,
             action=action,
             street=street,
+            street_actions=street_actions,
         )

@@ -1,6 +1,8 @@
 """ class for generic omaha game state """
 from typing import List
 
+from card_utils.games.poker.street_action import StreetAction
+
 from card_utils.games.poker.community.game_state import CommunityGameState
 
 
@@ -20,7 +22,8 @@ class OmahaGameState(CommunityGameState):
                  small_blind: int = 1,
                  big_blind: int = 2,
                  action: int = None,
-                 street: int = 1):
+                 street: int = 1,
+                 street_actions: List[List[StreetAction]] = None):
         """
         :param num_players: (int)
         :param deck: ([str])
@@ -33,6 +36,9 @@ class OmahaGameState(CommunityGameState):
         :param action: (int) the player index who acts (0-indexed)
             --> if None, default is set based on number of players
         :param street: (int) the current street (1-indexed)
+        :param street_actions: ([[int]])
+            Each street gets a list of list of actions,
+            represented by an object StreetAction
         """
         super().__init__(
             num_players=num_players,
@@ -44,5 +50,6 @@ class OmahaGameState(CommunityGameState):
             small_blind=small_blind,
             big_blind=big_blind,
             action=action,
-            street=street
+            street=street,
+            street_actions=street_actions,
         )
