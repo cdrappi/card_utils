@@ -101,13 +101,12 @@ class PokerGameState:
             # we haven't even gotten to the street yet
             return False
 
-        actions = self.street_actions[street - 1]
         # action is closed when either:
         # (1) everyone's last action is in {'PASS', 'CHECK'}
         # (2) everyone's last action is in {'PASS', 'FOLD', 'CALL'}
         #     except one in {'BET', 'RAISE'}
-        last_actions = {ii: None for ii in range(self.num_players)}
-        for action in actions:
+        last_actions = {}
+        for action in self.street_actions[street - 1]:
             last_actions[action.player] = action.action_type
 
         values = last_actions.values()
