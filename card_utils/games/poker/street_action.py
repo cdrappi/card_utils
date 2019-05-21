@@ -23,7 +23,7 @@ class StreetAction:
         action_draw
     }
 
-    valid_raises = {
+    valid_aggressions = {
         action_bet,
         action_raise,
     }
@@ -41,7 +41,7 @@ class StreetAction:
 
     valid_vpip = {
         action_call,
-        *valid_raises
+        *valid_aggressions
     }
 
     valid_action_types = {

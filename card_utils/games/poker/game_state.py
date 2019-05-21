@@ -101,23 +101,23 @@ class PokerGameState:
             # we haven't even gotten to the street yet
             return False
 
-        # action is closed when either:
-        # (1) everyone's last action is in {'PASS', 'CHECK'}
-        # (2) everyone's last action is in {'PASS', 'FOLD', 'CALL'}
-        #     except one in {'BET', 'RAISE'}
         last_actions = {}
         for action in self.street_actions[street - 1]:
             last_actions[action.player] = action.action_type
 
+        # action is closed when either:
         values = last_actions.values()
         passes = self.count_in(values, StreetAction.valid_passes)
         if passes == self.num_players:
+            # (1) everyone's last action is in {'PASS', 'CHECK'}
             return True
 
-        closures = self.count_in(values, StreetAction.valid_closes)
-        raises = self.count_in(values, StreetAction.valid_raises)
+        closers = self.count_in(values, StreetAction.valid_closes)
+        aggressors = self.count_in(values, StreetAction.valid_aggressions)
 
-        if raises == 1 and closures == self.num_players - 1:
+        if aggressors == 1 and closers == self.num_players - 1:
+            # (2) everyone's last action is in {'PASS', 'FOLD', 'CALL'}
+            #     except one in {'BET', 'RAISE'}
             return True
 
         return False
