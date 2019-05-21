@@ -23,10 +23,25 @@ class StreetAction:
         action_draw
     }
 
-    valid_vpip = {
+    valid_raises = {
         action_bet,
+        action_raise,
+    }
+
+    valid_closes = {
+        action_pass,
+        action_fold,
+        action_call
+    }
+
+    valid_passes = {
+        action_pass,
+        action_check
+    }
+
+    valid_vpip = {
         action_call,
-        action_raise
+        *valid_raises
     }
 
     valid_action_types = {
@@ -34,11 +49,11 @@ class StreetAction:
         *valid_vpip,
     }
 
-    def __init__(self, street, action_type, amount=0):
+    def __init__(self, player, street, action_type, amount=0):
         """
+        :param player: (int) player in game, 0-indexed
         :param street: (int) 1-indexed
-        :param action_type: (str)
-            one of {
+        :param action_type: (str) one of self.valid_action_types
         """
         if action_type not in self.valid_action_types:
             raise TypeError(
@@ -64,6 +79,7 @@ class StreetAction:
                     f'for actions of type {action_type}'
                 )
 
+        self.player = player
         self.street = street
         self.action_type = action_type
         self.amount = amount

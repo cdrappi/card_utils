@@ -81,3 +81,44 @@ class PokerGameState:
         self.action = action
         self.street = street
         self.street_actions = street_actions or []
+
+    @staticmethod
+    def count_in(values, in_set):
+        """ get count of values in in_set
+
+        :param values: (str)
+        :param in_set: (set(str))
+        :return: (int)
+        """
+        return sum(int(v in in_set) for v in values)
+
+    def is_action_closed(self, street):
+        """
+        :param street: (int)
+        :return: (bool)
+        """
+        if len(self.street_actions) < street:
+            # we haven't even gotten to the street yet
+            return False
+
+        actions = self.street_actions[street - 1]
+        # action is closed when either:
+        # (1) everyone's last action is in {'PASS', 'CHECK'}
+        # (2) everyone's last action is in {'PASS', 'FOLD', 'CALL'}
+        #     except one in {'BET', 'RAISE'}
+        last_actions = {ii: None for ii in range(self.num_players)}
+        for action in actions:
+            last_actions[action.player] = action.action_type
+
+        values = last_actions.values()
+        passes = self.count_in(values, StreetAction.valid_passes)
+        if passes == self.num_players:
+            return True
+
+        closures = self.count_in(values, StreetAction.valid_closes)
+        raises = self.count_in(values, StreetAction.valid_raises)
+
+        if raises == 1 and closures == self.num_players - 1:
+            return True
+
+        return False
