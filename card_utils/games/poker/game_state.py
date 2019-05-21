@@ -1,6 +1,7 @@
 from typing import List
 
 from card_utils.games.poker.street_action import StreetAction
+from card_utils.util import count_in
 
 
 class PokerGameState:
@@ -83,16 +84,6 @@ class PokerGameState:
         self.street = street
         self.street_actions = street_actions or []
 
-    @staticmethod
-    def count_in(values, in_set):
-        """ get count of values in in_set
-
-        :param values: (str)
-        :param in_set: (set(str))
-        :return: (int)
-        """
-        return sum(int(v in in_set) for v in values)
-
     def is_action_closed(self, street):
         """
         :param street: (int)
@@ -108,13 +99,13 @@ class PokerGameState:
 
         # action is closed when either:
         values = last_actions.values()
-        passes = self.count_in(values, StreetAction.valid_passes)
+        passes = count_in(values, StreetAction.valid_passes)
         if passes == self.num_players:
             # (1) everyone's last action is in {'PASS', 'CHECK'}
             return True
 
-        closers = self.count_in(values, StreetAction.valid_closes)
-        aggressors = self.count_in(values, StreetAction.valid_aggressions)
+        closers = count_in(values, StreetAction.valid_closes)
+        aggressors = count_in(values, StreetAction.valid_aggressions)
 
         if aggressors == 1 and closers == self.num_players - 1:
             # (2) everyone's last action is in {'PASS', 'FOLD', 'CALL'}

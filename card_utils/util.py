@@ -17,3 +17,13 @@ def untuple_dict(the_dict):
         )
 
     return {to_key(k): v for k, v in the_dict.items()}
+
+
+def count_in(values, in_set):
+    """ get count of values in in_set
+
+    :param values: (str)
+    :param in_set: (set(str))
+    :return: (int)
+    """
+    return sum(int(v in in_set) for v in values)
