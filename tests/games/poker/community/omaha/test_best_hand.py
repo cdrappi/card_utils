@@ -10,17 +10,17 @@ from card_utils.games.poker import (
     STRAIGHT,
     ONE_PAIR,
 )
-from card_utils.games.poker.five_card_hand_rank import five_card_hand_rank
-from card_utils.games.poker.omaha.brute_force import (
+from card_utils.games.poker.community.omaha.brute_force import (
     get_best_hands_brute_force,
     brute_force_omaha_hi_rank,
 )
-from card_utils.games.poker.omaha.utils import (
+from card_utils.games.poker.community.omaha.utils import (
     get_hand_strength_fast,
     get_best_hands_fast,
     get_best_straight,
     get_possible_straights,
 )
+from card_utils.games.poker.five_card_hand_rank import five_card_hand_rank
 from card_utils.games.poker.util import pretty_hand_rank
 from card_utils.util import untuple_dict
 from tests.games.poker.util import deal_random_board_hands

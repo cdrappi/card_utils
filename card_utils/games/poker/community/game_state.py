@@ -4,7 +4,7 @@ from typing import List
 from card_utils.games.poker.game_state import PokerGameState
 
 
-class CommunityCardGameState(PokerGameState):
+class CommunityGameState(PokerGameState):
     """ basic community card game state """
 
     name = 'community_card_poker'

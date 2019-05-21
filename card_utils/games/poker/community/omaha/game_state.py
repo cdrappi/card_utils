@@ -1,12 +1,10 @@
 """ class for generic omaha game state """
 from typing import List
 
-from card_utils.games.poker.community_card_games.game_state import (
-    CommunityCardGameState
-)
+from card_utils.games.poker.community.game_state import CommunityGameState
 
 
-class OmahaGameState(CommunityCardGameState):
+class OmahaGameState(CommunityGameState):
     """ basic omaha game state """
 
     num_hole_cards = 4
