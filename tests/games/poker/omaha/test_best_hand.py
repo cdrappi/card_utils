@@ -29,7 +29,7 @@ from tests.games.poker.util import deal_random_board_hands
 class BestOmahaHighHandTestCase(unittest.TestCase):
     """ Test for the best Omaha high hand """
 
-    n_random_cases = 10000
+    n_random_cases = 100
     n_cases_speed_test = 100
 
     def setUp(self):
@@ -38,7 +38,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @unittest.skip("uncomment if we don't want to test speeds!")
+    # @unittest.skip("uncomment if we don't want to test speeds!")
     def test_speeds(self):
         speed_test_cases = [
             deal_random_board_hands(n_hands=8, n_cards=4)
