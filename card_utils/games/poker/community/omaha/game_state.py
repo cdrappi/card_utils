@@ -18,7 +18,9 @@ class OmahaGameState(CommunityGameState):
                  boards: List[List[str]] = None,
                  pot: int = 0,
                  small_blind: int = 1,
-                 big_blind: int = 2):
+                 big_blind: int = 2,
+                 action: int = None,
+                 street: int = 1):
         """
         :param num_players: (int)
         :param deck: ([str])
@@ -28,6 +30,9 @@ class OmahaGameState(CommunityGameState):
         :param pot: (int)
         :param small_blind: (int)
         :param big_blind: (int)
+        :param action: (int) the player index who acts (0-indexed)
+            --> if None, default is set based on number of players
+        :param street: (int) the current street (1-indexed)
         """
         super().__init__(
             num_players=num_players,
@@ -37,5 +42,7 @@ class OmahaGameState(CommunityGameState):
             boards=boards,
             pot=pot,
             small_blind=small_blind,
-            big_blind=big_blind
+            big_blind=big_blind,
+            action=action,
+            street=street
         )

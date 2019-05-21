@@ -14,7 +14,9 @@ class PokerGameState:
                  boards: List[List[str]] = None,
                  pot: int = 0,
                  small_blind: int = 1,
-                 big_blind: int = 2):
+                 big_blind: int = 2,
+                 action: int = 0,
+                 street: int = 1):
         """
         :param num_players: (int)
         :param deck: ([str])
@@ -24,8 +26,18 @@ class PokerGameState:
         :param pot: (int)
         :param small_blind: (int)
         :param big_blind: (int)
+        :param action: (int) the player index who acts (0-indexed)
+        :param street: (int) the current street (1-indexed)
         """
+        if num_players < 2:
+            raise ValueError(
+                f'Fundamentally, poker is a game of more than 1 player'
+                f'\n'
+                f'{self.__class__.__name__} '
+                f'was instantiated with {num_players} players'
+            )
         self.num_players = num_players
+
         self.deck = deck
 
         if len(hands) != num_players:
@@ -59,3 +71,6 @@ class PokerGameState:
             )
         self.small_blind = small_blind
         self.big_blind = big_blind
+
+        self.action = action
+        self.street = street
