@@ -85,8 +85,9 @@ class PokerGameState:
 
         self.action = action
         self.street = street
-        self.street_actions = street_actions or []
 
+        # TODO: get rid of this for a better way to track state
+        self.street_actions = street_actions or []
         if players_starting_street is None:
             players_starting_street = [set(range(num_players))]
 
