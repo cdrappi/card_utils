@@ -1,5 +1,7 @@
 from typing import List
 
+from card_utils.games.poker.street_action import StreetAction
+
 
 class PokerGameState:
     """ class for generic poker game state """
@@ -16,7 +18,8 @@ class PokerGameState:
                  small_blind: int = 1,
                  big_blind: int = 2,
                  action: int = 0,
-                 street: int = 1):
+                 street: int = 1,
+                 street_actions: List[List[StreetAction]] = None):
         """
         :param num_players: (int)
         :param deck: ([str])
@@ -28,6 +31,9 @@ class PokerGameState:
         :param big_blind: (int)
         :param action: (int) the player index who acts (0-indexed)
         :param street: (int) the current street (1-indexed)
+        :param street_actions: ([[int]])
+            Each street gets a list of list of actions,
+            represented by an object StreetAction
         """
         if num_players < 2:
             raise ValueError(
@@ -74,3 +80,4 @@ class PokerGameState:
 
         self.action = action
         self.street = street
+        self.street_actions = street_actions or []
