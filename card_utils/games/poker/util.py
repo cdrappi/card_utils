@@ -1,3 +1,4 @@
+from card_utils.deck.utils import random_deck
 from card_utils.games.poker import (
     inverse_hand_order
 )
@@ -34,3 +35,19 @@ def get_best_hands_generic(board, hands, hand_strength_function):
             best_hand_indices.append(ii)
 
     return best_hand_indices
+
+
+def deal_random_hands(n_hands, n_cards):
+    """ deal random n_hands of n_cards each,
+        and also return the rest of the deck
+
+    :param n_hands: (int)
+    :param n_cards: (int)
+    :return: ([str], [[str]]) remaining deck, hands
+    """
+    deck = random_deck()
+    hands = [
+        deck[n_cards * ii:n_cards * (ii + 1)]
+        for ii in range(n_hands)
+    ]
+    return deck[n_cards * n_hands:], hands

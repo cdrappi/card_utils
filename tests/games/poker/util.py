@@ -1,4 +1,4 @@
-from card_utils.deck.utils import random_deck
+from card_utils.games.poker.util import deal_random_hands
 
 
 def deal_random_board_hands(n_hands, n_cards):
@@ -9,10 +9,6 @@ def deal_random_board_hands(n_hands, n_cards):
     :param n_cards: (int)
     :return: ([str], [[str]])
     """
-    deck = random_deck()
-    hands = [
-        deck[n_cards * ii:n_cards * (ii + 1)]
-        for ii in range(n_hands)
-    ]
-    board = deck[n_cards * n_hands:n_cards * n_hands + 5]
+    remaining_deck, hands = deal_random_hands(n_hands, n_cards)
+    board = remaining_deck[0:5]
     return board, hands
