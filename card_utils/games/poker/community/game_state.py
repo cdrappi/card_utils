@@ -31,14 +31,14 @@ class CommunityGameState(PokerGameState):
         """
         if len(boards) != 1:
             raise ValueError(
-                f'This is a community-card game, '
+                f'{self.name} is a community-card game, '
                 f'so it must only have one board'
             )
 
         for hand in hands:
             if len(hand) != self.num_hole_cards:
                 raise ValueError(
-                    f'Community card hands must have exactly '
+                    f'Hands in {self.name} must have exactly '
                     f'{self.num_hole_cards}\n'
                     f'Perhaps you need to override the num_hole_cards '
                     f'class variable in {self.__class__.__name__}'
