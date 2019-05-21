@@ -70,11 +70,11 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
     def test_random_cases(self):
         for _ in range(self.n_random_cases):
             board, hands = deal_random_board_hands(n_hands=8, n_cards=4)
-            self._test_best_hands(board, hands)
+            self._assert_best_hands(board, hands)
             for hand in hands:
-                self._test_equal_hands(board, hand)
+                self._assert_equal_hands(board, hand)
 
-    def _test_best_hands(self, board, hands):
+    def _assert_best_hands(self, board, hands):
         """
         :param board: ([str])
         :param hands: ([{str}]) list of set of cards
@@ -84,21 +84,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
 
         self.assertEqual(true_best_hand_indices, test_best_hand_indices)
 
-    def _assert_equal_orders(self, board, hand,
-                             correct_order, test_order,
-                             test_name):
-        self.assertEqual(
-            first=correct_order,
-            second=test_order,
-            msg=(
-                f'Error in {test_name} hand order: \n'
-                f'For hand {hand}\n'
-                f'on board {board}\n'
-                f'Expected {inverse_hand_order[correct_order]}, '
-                f'received {inverse_hand_order[test_order]}')
-        )
-
-    def _test_both_hand_orders(self, board, hand, correct_order):
+    def _assert_both_hand_orders(self, board, hand, correct_order):
         """
         :param board: ([str])
         :param hand: ([str])
@@ -135,7 +121,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             )
         )
 
-    def _test_equal_hands(self, board, hand):
+    def _assert_equal_hands(self, board, hand):
         """
         :param board: ([str])
         :param hand: ([str])
@@ -163,7 +149,21 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             )
         )
 
-    def _test_straight(self, board, hand, exp_poss_straights, expected_high_card):
+    def _assert_equal_orders(self, board, hand,
+                             correct_order, test_order,
+                             test_name):
+        self.assertEqual(
+            first=correct_order,
+            second=test_order,
+            msg=(
+                f'Error in {test_name} hand order: \n'
+                f'For hand {hand}\n'
+                f'on board {board}\n'
+                f'Expected {inverse_hand_order[correct_order]}, '
+                f'received {inverse_hand_order[test_order]}')
+        )
+
+    def _assert_correct_straight(self, board, hand, exp_poss_straights, expected_high_card):
         board_ranks = [r for r, _ in board]
         poss_straights = get_possible_straights(board_ranks)
 
@@ -215,17 +215,17 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         )
         best_straight = get_best_straight(poss_straights, hand)
         self.assertEqual(best_straight, expected_high_card)
-        self._test_both_hand_orders(board, hand, hand_order[STRAIGHT])
+        self._assert_both_hand_orders(board, hand, hand_order[STRAIGHT])
 
     def test_boat_with_quads_on_board(self):
         board = ['Qc', 'Qs', 'Qd', 'Qh', 'Kc']
         hand = ['As', 'Jd', 'Jc', '5h']
-        self._test_both_hand_orders(board, hand, hand_order[FULL_HOUSE])
+        self._assert_both_hand_orders(board, hand, hand_order[FULL_HOUSE])
 
     def test_pocket_pair(self):
         board = ['3c', 'Qh', 'Kd', '2s', '7h']
         hand = ['Ah', 'Td', '9c', 'Ac']
-        self._test_both_hand_orders(board, hand, hand_order[ONE_PAIR])
+        self._assert_both_hand_orders(board, hand, hand_order[ONE_PAIR])
 
     def test_two_boats(self):
         board = ['3d', '2c', '8s', '3h', '3c']
@@ -233,7 +233,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         test_order, *test_kickers = brute_force_omaha_hi_rank(board, hand)
         calc_order, *calc_kickers = get_hand_strength_fast(board, hand)
 
-        self._test_both_hand_orders(board, hand, hand_order[FULL_HOUSE])
+        self._assert_both_hand_orders(board, hand, hand_order[FULL_HOUSE])
         self.assertEqual(
             first=test_kickers,
             second=calc_kickers,
@@ -256,7 +256,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         hand = ['7h', 'Ts', '7c', '7d']
         calc_order, *calc_kickers = get_hand_strength_fast(board, hand)
 
-        self._test_both_hand_orders(board, hand, hand_order[FULL_HOUSE])
+        self._assert_both_hand_orders(board, hand, hand_order[FULL_HOUSE])
         self.assertEqual(
             first=calc_kickers,
             second=[4, 7],
@@ -282,7 +282,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             (6, 7): 7,
             (6, 8): 8
         }
-        self._test_straight(board, hand, expected_possible_straights, 7)
+        self._assert_correct_straight(board, hand, expected_possible_straights, 7)
 
     def test_nut_flush_over_second_nut_flush(self):
         board = ['2h', 'Qs', '9d', '5s', '3s']
@@ -292,15 +292,15 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         ]
 
         for hand in hands:
-            self._test_equal_hands(board, hand)
+            self._assert_equal_hands(board, hand)
 
-        self._test_best_hands(board, hands)
+        self._assert_best_hands(board, hands)
 
     def test_steel_wheel(self):
         board = ['5h', 'Ah', 'Tc', '3h', 'Ts']
         hand = ['7d', '8s', '2h', '4h']
 
-        self._test_both_hand_orders(board, hand, hand_order[STRAIGHT_FLUSH])
+        self._assert_both_hand_orders(board, hand, hand_order[STRAIGHT_FLUSH])
 
     def test_non_straight(self):
         board = ['3h', '9d', 'Js', '2c', '4h']
@@ -325,7 +325,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         expected_possible_straights = {
             (12, 13): 14,
         }
-        self._test_straight(board, hand, expected_possible_straights, 14)
+        self._assert_correct_straight(board, hand, expected_possible_straights, 14)
 
     def test_many_straight_cards_straight(self):
         board = ['Ts', '7d', '4h', '2c', '5h']
@@ -335,7 +335,7 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             (3, 6): 7,
             (1, 3): 5,
         }
-        self._test_straight(board, hand, expected_possible_straights, 8)
+        self._assert_correct_straight(board, hand, expected_possible_straights, 8)
 
     def test_brute_force_full_house(self):
         hand_order_, *cards = five_card_hand_rank(
@@ -349,19 +349,19 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             ['8h', '9c', '8c', '6h'],
             ['6c', '4c', '4d', 'Qh']
         ]
-        self._test_best_hands(board, hands)
+        self._assert_best_hands(board, hands)
 
     def test_two_pair_on_paired_board(self):
         board = ['Kh', 'Qc', 'Ks', 'Qh', '6h']
         hand = ['4c', '5d', '8d', '4d']
-        self._test_equal_hands(board, hand)
+        self._assert_equal_hands(board, hand)
 
     def test_three_of_a_kind_on_quads_board(self):
         board = ['Qh', 'Qs', 'Qc', 'Qd', '8d']
         hand = ['2h', 'Ts', 'Jd', '4d']
-        self._test_equal_hands(board, hand)
+        self._assert_equal_hands(board, hand)
 
     def test_boat_with_trips_in_hand(self):
         board = ['3d', 'Qh', '3s', 'Ts', '3c']
         hand = ['Th', 'Qs', 'Qc', 'Qd']
-        self._test_equal_hands(board, hand)
+        self._assert_equal_hands(board, hand)
