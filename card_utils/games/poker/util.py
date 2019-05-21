@@ -25,7 +25,7 @@ def get_best_hands_generic(board, hands, hand_strength_function):
     """
     best_hand_strength = tuple()
     best_hand_indices = []
-    for ii, hand in hands:
+    for ii, hand in enumerate(hands):
         hand_strength = hand_strength_function(board, hand)
         if hand_strength > best_hand_strength:
             best_hand_strength = hand_strength
