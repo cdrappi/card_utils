@@ -43,16 +43,16 @@ class OmahaGameState(CommunityGameState):
             street_actions=street_actions,
         )
 
-    def order_hands(self, players):
+    def order_hands(self, players_at_showdown):
         """
-        :param players: ([int])
+        :param players_at_showdown: ([int])
         :return: ([[int]])
         """
-        # list of list of best hands,
-        # outer list is a rank,
-        # inner list is set of people who chop
         best_hands = get_best_hands_fast(
             board=self.board,
-            hands=[self.hands[p] for p in players]
+            hands=[self.hands[p] for p in players_at_showdown]
         )
-        return [p for p, r in zip(players, best_hands)]
+        return [
+            [players_at_showdown[i] for i in hand_level]
+            for hand_level in best_hands
+        ]
