@@ -240,7 +240,7 @@ class PokerGameState:
         """
         return bool(
             self.is_all_in(player)
-            or self.last_actions[player] in {StreetAction.action_fold}
+            or self.last_actions[player] == StreetAction.action_fold
         )
 
     def increment_action(self):
