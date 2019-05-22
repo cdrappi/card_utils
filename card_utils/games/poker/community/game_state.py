@@ -18,8 +18,8 @@ class CommunityGameState(PokerGameState):
                  hands: List[List[str]],
                  starting_stacks: List[int],
                  boards: List[List[str]] = None,
-                 small_blind: int = 1,
-                 big_blind: int = 2,
+                 ante: int = 0,
+                 blinds: List[int] = None,
                  street_actions: List[StreetAction] = None,
                  ):
         """
@@ -28,8 +28,7 @@ class CommunityGameState(PokerGameState):
         :param hands: ([[str]])
         :param starting_stacks: ([[int]])
         :param boards: ([[str]])
-        :param small_blind: (int)
-        :param big_blind: (int)
+        :param blinds: ([int])
         :param street_actions: ([StreetAction])
             Each street gets a list of list of actions,
             represented by an object StreetAction
@@ -54,8 +53,8 @@ class CommunityGameState(PokerGameState):
             hands=hands,
             starting_stacks=starting_stacks,
             boards=boards,
-            small_blind=small_blind,
-            big_blind=big_blind,
+            ante=ante,
+            blinds=blinds,
             street_actions=street_actions,
         )
 

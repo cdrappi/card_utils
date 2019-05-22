@@ -17,7 +17,7 @@ class PokerGameState:
                  starting_stacks: List[int],
                  boards: List[List[str]] = None,
                  ante: int = 0,
-                 small_blind: int = 1,
+                 blinds: List[int] = None,
                  big_blind: int = 2,
                  street_actions: List[StreetAction] = None,
                  ):
@@ -28,8 +28,7 @@ class PokerGameState:
         :param starting_stacks: ([[int]])
         :param boards: ([[str]])
         :param ante: (int)
-        :param small_blind: (int)
-        :param big_blind: (int)
+        :param blinds: ([int])
         :param street_actions: ([[int]])
             Each street gets a list of list of actions,
             represented by an object StreetAction
@@ -69,18 +68,11 @@ class PokerGameState:
         self.boards = boards
 
         self.ante = ante
-
-        if small_blind > big_blind:
-            raise ValueError(
-                f'PokerGameState.__init__: '
-                f'small blind cannot be less than big blind'
-            )
-        self.small_blind = small_blind
-        self.big_blind = big_blind
+        self.blinds = blinds or []
 
         self.street_actions = street_actions or []
 
-        self.pot = 0
+        self.pots = {}
         self.action = 0
         self.street = 1
         self.players_folded = set()
@@ -108,11 +100,13 @@ class PokerGameState:
     def extract_antes(self):
         """ subtract antes from stacks and
             return total amount extracted
+
+        :return: (int) total antes
         """
         antes = 0
-        for stack in self.stacks:
-            if stack >= self.ante:
-                stack -= self.ante
+        for player_index in range(self.num_players):
+            if self.stacks[player_index] >= self.ante:
+                self.stacks[player_index] -= self.ante
                 antes += self.ante
             else:
                 # TODO: side pots nooooooo
@@ -120,21 +114,28 @@ class PokerGameState:
 
         return antes
 
+    def extract_blinds(self):
+        """
+        :return: (int) total blinds
+        """
+        blinds = 0
+        for player_index, blind in enumerate(self.blinds):
+            if self.stacks[player_index] >= blind:
+                self.stacks[player_index] -= blind
+                blinds += blind
+            else:
+                # TODO: side pots nooooooo
+                raise Exception('TODO: implement side pots!')
+        return blinds
+
     def extract_antes_and_blinds(self):
         """ subtract antes/blinds from stacks and
             return total amount extracted
 
         :return: (int) amount extracted
         """
-
-        if self.small_blind or self.big_blind:
-            raise NotImplementedError(
-                f'There is a small blind ({self.small_blind}) '
-                f'or big blind ({self.big_blind}) so the '
-                f'extract_antes_and_blinds method must be overriden!'
-            )
-
-        return self.extract_antes()
+        # TODO: needs to be a dict....
+        return self.extract_antes() + self.extract_blinds()
 
     def reset_state_from_street_actions(self):
         """ given self.street_actions, derive the current:
@@ -152,7 +153,7 @@ class PokerGameState:
         self.action = self.get_starting_action()
         self.players_folded = set()
         self.street_to_actions = {}
-        self.pot = self.extract_antes_and_blinds()
+        self.pots = self.extract_antes_and_blinds()
 
         for street_action in self.street_actions:
             street = street_action.street
