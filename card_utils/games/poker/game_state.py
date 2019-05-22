@@ -172,14 +172,23 @@ class PokerGameState:
                 self.players_folded.add(street_action.player)
 
             self.street_to_actions[street].append(street_action)
+            self.move_action()
 
         # TODO
         pass
 
+    def increment_action(self):
+        """ move the action to the left by one,
+            irrespective of whether that player has already folded
+        """
+        self.action = (self.action + 1) % self.num_players
+
     def move_action(self):
         """ move action by 1 player """
         # TODO
-        self.action = (self.action + 1) % self.num_players
+        self.increment_action()
+        while self.action not in self.players_folded:
+            self.increment_action()
 
     def is_action_closed(self, street):
         """
