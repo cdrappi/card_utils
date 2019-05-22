@@ -1,5 +1,5 @@
-import collections
 from typing import List
+
 from card_utils.games.poker.pot import Pot
 from card_utils.games.poker.street_action import StreetAction
 from card_utils.util import count_in
@@ -80,8 +80,7 @@ class PokerGameState:
         self.street_to_actions = {}
         self.reset_state_from_street_actions()
 
-    @staticmethod
-    def get_starting_action():
+    def get_starting_action(self):
         """ the player who starts the action
             on the very first street
 
@@ -96,7 +95,31 @@ class PokerGameState:
 
         :return: (int)
         """
-        return 0
+        raise NotImplementedError(
+            f'NotImplementedError in {self.__class__.__name__}: '
+            f'You must override get_starting_action '
+            f'in subclasses of PokerGameState'
+        )
+
+    def is_all_in(self, player):
+        """
+        :param player: (int)
+        :return: (bool)
+        """
+        return self.stacks[player] == 0
+
+    def put_money_in_pot(self, player, amount):
+        """
+        :param player: (int)
+        :param amount: (int)
+        """
+        if amount > self.stacks[player]:
+            raise Exception(
+                f'player {player} only has {self.stacks[player]} chips, '
+                f'but trying to put {amount} in pot'
+            )
+        self.stacks[player] -= amount
+        self.pot.put_money_in(player, amount)
 
     def extract_antes(self):
         """ subtract antes from stacks and
@@ -104,30 +127,15 @@ class PokerGameState:
 
         :return: (int) total antes
         """
-        antes = 0
-        for player_index in range(self.num_players):
-            if self.stacks[player_index] >= self.ante:
-                self.stacks[player_index] -= self.ante
-                antes += self.ante
-            else:
-                # TODO: side pots nooooooo
-                raise Exception('TODO: implement side pots!')
-
-        return collections.Counter({tuple(): antes})
+        for player in range(self.num_players):
+            amount = min(self.stacks[player], self.ante)
+            self.put_money_in_pot(player, amount)
 
     def extract_blinds(self):
-        """
-        :return: (int) total blinds
-        """
-        blinds = 0
-        for player_index, blind in enumerate(self.blinds):
-            if self.stacks[player_index] >= blind:
-                self.stacks[player_index] -= blind
-                blinds += blind
-            else:
-                # TODO: side pots nooooooo
-                raise Exception('TODO: implement side pots!')
-        return collections.Counter({tuple(): blinds})
+        """ move blinds from self.stacks to self.pot """
+        for player, blind in enumerate(self.blinds):
+            amount = min(self.stacks[player], blind)
+            self.put_money_in_pot(player, amount)
 
     def extract_antes_and_blinds(self):
         """ subtract antes/blinds from stacks and
@@ -135,7 +143,8 @@ class PokerGameState:
 
         :return: (int) amount extracted
         """
-        return self.extract_antes() + self.extract_blinds()
+        self.extract_antes()
+        self.extract_blinds()
 
     def reset_state_from_street_actions(self):
         """ given self.street_actions, derive the current:
@@ -149,13 +158,12 @@ class PokerGameState:
         to set these four helper state variables given
         the list of StreetAction objects
         """
-        self.street = 1
-        self.action = self.get_starting_action()
         self.players_folded = set()
         self.street_to_actions = {}
         self.pot = Pot(self.num_players)
-
         self.extract_antes_and_blinds()
+        self.street = 1
+        self.action = self.get_starting_action()
 
         for street_action in self.street_actions:
             street = street_action.street
@@ -185,11 +193,17 @@ class PokerGameState:
         """
         self.action = (self.action + 1) % self.num_players
 
+    def cannot_act(self, player):
+        """
+        :param player: (int)
+        :return:
+        """
+        return self.is_all_in(player) or player in self.players_folded
+
     def move_action(self):
         """ move action by 1 player """
-        # TODO
         self.increment_action()
-        while self.action not in self.players_folded:
+        while self.cannot_act(self.action):
             self.increment_action()
 
     def is_action_closed(self, street):
