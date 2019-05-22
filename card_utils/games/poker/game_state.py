@@ -274,8 +274,6 @@ class PokerGameState:
         """
         folders = 0
         checkers = 0
-        callers = 0
-        aggr_all_in = 0
         aggr_not_all_in = 0
         all_in_last_street = 0
         no_last_action = 0
@@ -290,13 +288,8 @@ class PokerGameState:
                 folders += 1
             elif last_action == StreetAction.action_check:
                 checkers += 1
-            elif last_action == StreetAction.action_call:
-                callers += 1
-            elif last_action in StreetAction.valid_aggressions:
-                if is_all_in:
-                    aggr_all_in += 1
-                else:
-                    aggr_not_all_in += 1
+            elif not is_all_in and last_action in StreetAction.aggressions:
+                aggr_not_all_in += 1
             else:
                 no_last_action += 1
 
@@ -313,23 +306,14 @@ class PokerGameState:
             return True
 
         next_player_last_action = self.last_actions[self.get_next_action()]
-        non_checkers = (
-            folders
-            + all_in_last_street
-            + callers
-            + aggr_all_in
-            + aggr_not_all_in
-        )
-
         everyone_closed_last_aggression = (
             # Case 2:
             # The last action person who would theoretically act next
             # was a bet or raise
-            next_player_last_action in StreetAction.valid_aggressions
+            next_player_last_action in StreetAction.aggressions
             # and they are the only such aggressor who can be not all-in
             and aggr_not_all_in <= 1
             # Everyone else in the hand must have not checked
-            and non_checkers == self.num_players
+            and checkers == 0
         )
-
         return everyone_closed_last_aggression

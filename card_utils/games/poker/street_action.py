@@ -13,36 +13,12 @@ class StreetAction:
     # for drawing games
     action_draw = 'DRAW'
 
-    valid_zero_amount = {
-        action_fold,
-        action_check,
-        action_draw
-    }
-
-    valid_aggressions = {
-        action_bet,
-        action_raise,
-    }
-
-    valid_closes = {
-        action_fold,
-        action_call
-    }
-
-    valid_passes = {
-        action_check,
-        action_fold,
-    }
-
-    valid_wagers = {
-        action_call,
-        *valid_aggressions
-    }
-
-    valid_actions = {
-        *valid_zero_amount,
-        *valid_wagers,
-    }
+    zeros = {action_fold, action_check, action_draw}
+    aggressions = {action_bet, action_raise}
+    closes = {action_fold, action_call}
+    passes = {action_check, action_fold}
+    wagers = {action_call, *aggressions}
+    actions = {*zeros, *wagers}
 
     def __init__(self, player, street, action, amount=0):
         """
@@ -50,7 +26,7 @@ class StreetAction:
         :param street: (int) 1-indexed
         :param action: (str) one of self.valid_action_types
         """
-        if action not in self.valid_actions:
+        if action not in self.actions:
             raise TypeError(
                 f'StreetAction: Invalid action_type {action} '
                 f'on street {street}'
@@ -61,13 +37,13 @@ class StreetAction:
                 f'StreetAction: amount must be >= 0, received {amount}'
             )
 
-        if action in self.valid_zero_amount:
+        if action in self.zeros:
             if amount != 0:
                 raise ValueError(
                     f'StreetAction: amount must be 0 '
                     f'for actions of type {action}'
                 )
-        elif action in self.valid_wagers:
+        elif action in self.wagers:
             if amount <= 0:
                 raise ValueError(
                     f'StreetAction: amount must be > 0 '
