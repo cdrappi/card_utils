@@ -2,7 +2,6 @@ from typing import List
 
 from card_utils.games.poker.pot import Pot
 from card_utils.games.poker.street_action import StreetAction
-from card_utils.util import count_in
 
 
 class PokerGameState:
@@ -227,7 +226,7 @@ class PokerGameState:
         players_at_showdown = [
             player
             for player in range(self.num_players)
-            if self.last_actions[player] not in {StreetAction.action_fold}
+            if self.last_actions[player] != StreetAction.action_fold
         ]
         winners = self.order_hands(players_at_showdown)
         payouts = self.pot.settle_showdown(winners)
@@ -240,7 +239,7 @@ class PokerGameState:
         """
         return bool(
             self.is_all_in(player)
-            or self.last_actions[player] == StreetAction.action_fold
+            or self.last_actions.get(player) == StreetAction.action_fold
         )
 
     def increment_action(self):
@@ -259,29 +258,59 @@ class PokerGameState:
         """ increment the street, and reset the last_action of
             everyone who hasn't folded
         """
-
         self.street += 1
-        for player in range(self.num_players):
-            if self.last_actions[player] != StreetAction.action_fold:
-                self.last_actions[player] = None
+        self.last_actions = {
+            player: StreetAction.action_fold
+            for player, action in self.last_actions.items()
+            if action == StreetAction.action_fold
+        }
 
     def is_action_closed(self):
         """
         :return: (bool)
         """
-        # action is closed when either:
-        values = self.last_actions.values()
-        passes = count_in(values, StreetAction.valid_passes)
-        if passes == self.num_players:
-            # (1) everyone's last action is in {'FOLD', CHECK'}
+        folders = 0
+        checkers = 0
+        callers = 0
+        aggr_all_in = 0
+        aggr_not_all_in = 0
+        all_in_last_street = 0
+
+        for player in range(self.num_players):
+            last_action = self.last_actions.get(player)
+            is_all_in = self.is_all_in(player)
+
+            if last_action is None and is_all_in:
+                all_in_last_street += 1
+            elif last_action == StreetAction.action_fold:
+                folders += 1
+            elif last_action == StreetAction.action_check:
+                checkers += 1
+            elif last_action == StreetAction.action_call:
+                callers += 1
+            elif last_action in StreetAction.valid_aggressions:
+                if is_all_in:
+                    aggr_all_in += 1
+                else:
+                    aggr_not_all_in += 1
+
+        if folders + checkers + all_in_last_street == self.num_players:
+            # Case 1: no one this street has made any bets,
+            # and everyone had either folded or went all on a previous street,
+            # or checked on this street
             return True
 
-        closers = count_in(values, StreetAction.valid_closes)
-        aggressors = count_in(values, StreetAction.valid_aggressions)
-
-        if aggressors == 1 and closers == self.num_players - 1:
-            # (2) everyone's last action is in {'FOLD', 'CALL'}
-            #     except one in {'BET', 'RAISE'}
+        # Case 2:
+        # At most one person's last action was a not-all-in bet or raise
+        # And no one's last action can be check
+        non_checkers = (
+            folders
+            + all_in_last_street
+            + callers
+            + aggr_all_in
+            + aggr_not_all_in
+        )
+        if aggr_not_all_in <= 1 and non_checkers == self.num_players:
             return True
 
         return False
