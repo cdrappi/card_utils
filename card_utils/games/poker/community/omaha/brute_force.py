@@ -32,7 +32,7 @@ def get_best_hands_brute_force(board, hands):
             every hand rank except straight flushes, quads and flushes
     """
     return get_best_hands_generic(
+        hand_strength_function=brute_force_omaha_hi_rank,
         board=board,
         hands=hands,
-        hand_strength_function=brute_force_omaha_hi_rank
     )

@@ -57,9 +57,9 @@ def get_best_hands_fast(board, hands):
             every hand rank except straight flushes, quads and flushes
     """
     return get_best_hands_generic(
+        hand_strength_function=get_hand_strength_fast,
         board=board,
         hands=hands,
-        hand_strength_function=get_hand_strength_fast
     )
 
 
