@@ -10,6 +10,7 @@ class PokerGameState:
 
     # NOTE: override this in subclasses
     name = 'abstract_poker'
+    max_streets = 0
 
     def __init__(self,
                  num_players: int,
@@ -19,7 +20,6 @@ class PokerGameState:
                  boards: List[List[str]] = None,
                  ante: int = 0,
                  blinds: List[int] = None,
-                 big_blind: int = 2,
                  street_actions: List[StreetAction] = None,
                  ):
         """
@@ -74,10 +74,11 @@ class PokerGameState:
         self.street_actions = street_actions or []
 
         self.pot = Pot(self.num_players)
+        self.is_all_action_closed = False
+        self.last_actions = {}
+        self.payouts = {}
         self.action = 0
         self.street = 1
-        self.players_folded = set()
-        self.street_to_actions = {}
         self.reset_state_from_street_actions()
 
     def get_starting_action(self):
@@ -99,6 +100,20 @@ class PokerGameState:
             f'NotImplementedError in {self.__class__.__name__}: '
             f'You must override get_starting_action '
             f'in subclasses of PokerGameState'
+        )
+
+    def order_hands(self, players):
+        """ given a list of players who've seen the hand to showdown,
+            sort them by their hand strength,
+            first on the resulting list having the strongest hand,
+            to last on the list with the weakest hand
+
+        :param players: ([int])
+        :return: ([int])
+        """
+        raise NotImplementedError(
+            f'All PokerGameState objects must implement order_hands '
+            f'to decide who wins at showdown'
         )
 
     def is_all_in(self, player):
@@ -158,34 +173,75 @@ class PokerGameState:
         to set these four helper state variables given
         the list of StreetAction objects
         """
-        self.players_folded = set()
-        self.street_to_actions = {}
         self.pot = Pot(self.num_players)
+        self.is_all_action_closed = False
+        self.last_actions = {}
+        self.payouts = {}
         self.extract_antes_and_blinds()
         self.street = 1
         self.action = self.get_starting_action()
 
         for street_action in self.street_actions:
-            street = street_action.street
-            action = street_action.action
 
-            if street not in self.street_to_actions:
-                self.street_to_actions[street] = []
-
-            if action != self.action:
+            if street_action.action != self.action:
                 raise Exception(
-                    f'The action is on {self.action}, but the next '
-                    f'StreetAction object comes from {action}'
+                    f'The calculated action is on {self.action}, but '
+                    f'the next StreetAction object comes from '
+                    f'{street_action.action}'
+                )
+            if street_action.street != self.street:
+                raise Exception(
+                    f'The calculated street is {self.street}, but '
+                    f'the next StreetAction object comes from '
+                    f'{street_action.street}'
                 )
 
-            if street_action.action == StreetAction.action_fold:
-                self.players_folded.add(street_action.player)
+            self.register_street_action(street_action)
 
-            self.street_to_actions[street].append(street_action)
-            self.move_action()
+    def register_street_action(self, street_action):
+        """
+        :param street_action: (StreetAction)
+        """
+        if street_action.action in street_action.valid_wagers:
+            self.put_money_in_pot(
+                player=street_action.player,
+                amount=street_action.amount
+            )
 
-        # TODO
-        pass
+        self.last_actions[street_action.player] = street_action.action
+        self.move_action()
+        if self.is_action_closed():
+            if self.street < self.max_streets:
+                self.move_street()
+            else:
+                self.is_all_action_closed = True
+
+        if self.is_all_action_closed:
+            self.payouts = self.get_payouts()
+
+    def get_payouts(self):
+        """ sort hands and ship Pot
+
+        :return: ({int: int}) player index --> payout
+        """
+        players_at_showdown = [
+            player
+            for player in range(self.num_players)
+            if self.last_actions[player] not in {StreetAction.action_fold}
+        ]
+        winners = self.order_hands(players_at_showdown)
+        payouts = self.pot.settle_showdown(winners)
+        return payouts
+
+    def cannot_act(self, player):
+        """
+        :param player: (int)
+        :return: (bool)
+        """
+        return bool(
+            self.is_all_in(player)
+            or self.last_actions[player] in {StreetAction.action_fold}
+        )
 
     def increment_action(self):
         """ move the action to the left by one,
@@ -193,47 +249,38 @@ class PokerGameState:
         """
         self.action = (self.action + 1) % self.num_players
 
-    def cannot_act(self, player):
-        """
-        :param player: (int)
-        :return:
-        """
-        return self.is_all_in(player) or player in self.players_folded
-
     def move_action(self):
         """ move action by 1 player """
         self.increment_action()
         while self.cannot_act(self.action):
             self.increment_action()
 
-    def is_action_closed(self, street):
+    def move_street(self):
+        """ increment the street, and reset the last_action of
+            everyone who hasn't folded
         """
-        :param street: (int)
+
+        self.street += 1
+        for player in range(self.num_players):
+            if self.last_actions[player] != StreetAction.action_fold:
+                self.last_actions[player] = None
+
+    def is_action_closed(self):
+        """
         :return: (bool)
         """
-        # TODO
-        if len(self.street_actions) < street:
-            # we haven't even gotten to the street yet
-            return False
-
-        n_street_players = len(self.players_starting_street[street - 1])
-
-        last_actions = {}
-        for action in self.street_actions[street - 1]:
-            last_actions[action.player] = action.action_type
-
         # action is closed when either:
-        values = last_actions.values()
+        values = self.last_actions.values()
         passes = count_in(values, StreetAction.valid_passes)
-        if passes == n_street_players:
-            # (1) everyone's last action is in {'PASS', 'CHECK'}
+        if passes == self.num_players:
+            # (1) everyone's last action is in {'FOLD', CHECK'}
             return True
 
         closers = count_in(values, StreetAction.valid_closes)
         aggressors = count_in(values, StreetAction.valid_aggressions)
 
-        if aggressors == 1 and closers == n_street_players - 1:
-            # (2) everyone's last action is in {'PASS', 'FOLD', 'CALL'}
+        if aggressors == 1 and closers == self.num_players - 1:
+            # (2) everyone's last action is in {'FOLD', 'CALL'}
             #     except one in {'BET', 'RAISE'}
             return True
 

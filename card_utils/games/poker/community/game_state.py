@@ -12,6 +12,8 @@ class CommunityGameState(PokerGameState):
     name = 'abstract_community'
     num_hole_cards = 0
 
+    max_streets = 7
+
     def __init__(self,
                  num_players: int,
                  deck: List[str],

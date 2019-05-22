@@ -1,9 +1,6 @@
 class StreetAction:
     """ represent an action on a given street """
 
-    # to skip over a player who has folded
-    action_pass = 'PASS'
-
     # when the action is open or checked to you
     action_check = 'CHECK'
     action_bet = 'BET'
@@ -17,7 +14,6 @@ class StreetAction:
     action_draw = 'DRAW'
 
     valid_zero_amount = {
-        action_pass,
         action_fold,
         action_check,
         action_draw
@@ -29,35 +25,34 @@ class StreetAction:
     }
 
     valid_closes = {
-        action_pass,
         action_fold,
         action_call
     }
 
     valid_passes = {
-        action_pass,
-        action_check
+        action_check,
+        action_fold,
     }
 
-    valid_vpip = {
+    valid_wagers = {
         action_call,
         *valid_aggressions
     }
 
-    valid_action_types = {
+    valid_actions = {
         *valid_zero_amount,
-        *valid_vpip,
+        *valid_wagers,
     }
 
-    def __init__(self, player, street, action_type, amount=0):
+    def __init__(self, player, street, action, amount=0):
         """
         :param player: (int) player in game, 0-indexed
         :param street: (int) 1-indexed
-        :param action_type: (str) one of self.valid_action_types
+        :param action: (str) one of self.valid_action_types
         """
-        if action_type not in self.valid_action_types:
+        if action not in self.valid_actions:
             raise TypeError(
-                f'StreetAction: Invalid action_type {action_type} '
+                f'StreetAction: Invalid action_type {action} '
                 f'on street {street}'
             )
 
@@ -66,20 +61,20 @@ class StreetAction:
                 f'StreetAction: amount must be >= 0, received {amount}'
             )
 
-        if action_type in self.valid_zero_amount:
+        if action in self.valid_zero_amount:
             if amount != 0:
                 raise ValueError(
                     f'StreetAction: amount must be 0 '
-                    f'for actions of type {action_type}'
+                    f'for actions of type {action}'
                 )
-        elif action_type in self.valid_vpip:
+        elif action in self.valid_wagers:
             if amount <= 0:
                 raise ValueError(
                     f'StreetAction: amount must be > 0 '
-                    f'for actions of type {action_type}'
+                    f'for actions of type {action}'
                 )
 
         self.player = player
         self.street = street
-        self.action_type = action_type
+        self.action_type = action
         self.amount = amount
