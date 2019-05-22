@@ -242,8 +242,18 @@ class PokerGameState:
             or self.last_actions.get(player) == StreetAction.action_fold
         )
 
+    def mod_n(self, player):
+        """
+        :param player: (int)
+        :return: (int)
+        """
+        return player % self.num_players
+
     def get_next_action(self):
-        return (self.action + 1) % self.num_players
+        """
+        :return: (int)
+        """
+        return self.mod_n(self.action + 1)
 
     def increment_action(self):
         """ move the action to the left by one,
@@ -277,7 +287,12 @@ class PokerGameState:
         aggr_not_all_in = 0
         all_in_last_street = 0
 
-        for player in range(self.num_players):
+        players_in_action_order = (
+            self.mod_n(self.action + p)
+            for p in range(self.num_players)
+        )
+
+        for player in players_in_action_order:
             last_action = self.last_actions.get(player)
             not_all_in = not self.is_all_in(player)
 
