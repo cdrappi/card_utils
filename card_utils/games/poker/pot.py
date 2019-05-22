@@ -10,7 +10,6 @@ class Pot:
         """
         self.num_players = num_players
         self.money_from = collections.Counter()
-        self.pot = 0
 
     def put_money_in(self, player, amount):
         """
@@ -18,7 +17,6 @@ class Pot:
         :param amount: (int) chips
         """
         self.money_from[player] += amount
-        self.pot += amount
 
     def settle_showdown(self, winning_players):
         """
@@ -40,8 +38,19 @@ class Pot:
                     payouts[winner] += from_p
                     self.money_from[p] -= from_p
 
-            if sum(self.money_from.values()) == 0:
-                # we can terminate early when there's no money left
+            if self.total_money == 0:
+                # we can terminate when there's no money left
                 return payouts
 
-        return payouts
+        raise Exception(
+            f'Reached end of loop in Pot.settle_showdown, '
+            f'but there is still {self.total_money} in the pot!'
+        )
+
+    @property
+    def total_money(self):
+        """ sum of all the money in the pot from each player
+
+        :return: (int)
+        """
+        return sum(self.money_from.values())
