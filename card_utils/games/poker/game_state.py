@@ -242,11 +242,14 @@ class PokerGameState:
             or self.last_actions.get(player) == StreetAction.action_fold
         )
 
+    def get_next_action(self):
+        return (self.action + 1) % self.num_players
+
     def increment_action(self):
         """ move the action to the left by one,
             irrespective of whether that player has already folded
         """
-        self.action = (self.action + 1) % self.num_players
+        self.action = self.get_next_action()
 
     def move_action(self):
         """ move action by 1 player """
@@ -309,9 +312,7 @@ class PokerGameState:
             # or checked on this street
             return True
 
-        # Case 2:
-        # At most one person's last action was a not-all-in bet or raise
-        # And no one's last action can be check
+        next_player_last_action = self.last_actions[self.get_next_action()]
         non_checkers = (
             folders
             + all_in_last_street
@@ -319,7 +320,16 @@ class PokerGameState:
             + aggr_all_in
             + aggr_not_all_in
         )
-        if aggr_not_all_in <= 1 and non_checkers == self.num_players:
-            return True
 
-        return False
+        everyone_closed_last_aggression = (
+            # Case 2:
+            # The last action person who would theoretically act next
+            # was a bet or raise
+            next_player_last_action in StreetAction.valid_aggressions
+            # and they are the only such aggressor who can be not all-in
+            and aggr_not_all_in <= 1
+            # Everyone else in the hand must have not checked
+            and non_checkers == self.num_players
+        )
+
+        return everyone_closed_last_aggression
