@@ -1,5 +1,6 @@
+import collections
 from typing import List
-
+from card_utils.games.poker.pot import Pot
 from card_utils.games.poker.street_action import StreetAction
 from card_utils.util import count_in
 
@@ -72,7 +73,7 @@ class PokerGameState:
 
         self.street_actions = street_actions or []
 
-        self.pots = {}
+        self.pot = Pot(self.num_players)
         self.action = 0
         self.street = 1
         self.players_folded = set()
@@ -112,7 +113,7 @@ class PokerGameState:
                 # TODO: side pots nooooooo
                 raise Exception('TODO: implement side pots!')
 
-        return antes
+        return collections.Counter({tuple(): antes})
 
     def extract_blinds(self):
         """
@@ -126,7 +127,7 @@ class PokerGameState:
             else:
                 # TODO: side pots nooooooo
                 raise Exception('TODO: implement side pots!')
-        return blinds
+        return collections.Counter({tuple(): blinds})
 
     def extract_antes_and_blinds(self):
         """ subtract antes/blinds from stacks and
@@ -134,7 +135,6 @@ class PokerGameState:
 
         :return: (int) amount extracted
         """
-        # TODO: needs to be a dict....
         return self.extract_antes() + self.extract_blinds()
 
     def reset_state_from_street_actions(self):
@@ -153,7 +153,9 @@ class PokerGameState:
         self.action = self.get_starting_action()
         self.players_folded = set()
         self.street_to_actions = {}
-        self.pots = self.extract_antes_and_blinds()
+        self.pot = Pot(self.num_players)
+
+        self.extract_antes_and_blinds()
 
         for street_action in self.street_actions:
             street = street_action.street
