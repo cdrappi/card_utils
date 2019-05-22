@@ -52,5 +52,5 @@ class StreetAction:
 
         self.player = player
         self.street = street
-        self.action_type = action
+        self.action = action
         self.amount = amount

@@ -1,5 +1,5 @@
 """ class for generic omaha game state """
-from typing import List
+from typing import List, Dict
 
 from card_utils.games.poker.game_state import PokerGameState
 from card_utils.games.poker.street_action import StreetAction
@@ -22,7 +22,7 @@ class CommunityGameState(PokerGameState):
                  boards: List[List[str]] = None,
                  ante: int = 0,
                  blinds: List[int] = None,
-                 street_actions: List[StreetAction] = None,
+                 street_actions: List[Dict] = None,
                  ):
         """
         :param num_players: (int)
@@ -31,9 +31,7 @@ class CommunityGameState(PokerGameState):
         :param starting_stacks: ([[int]])
         :param boards: ([[str]])
         :param blinds: ([int])
-        :param street_actions: ([StreetAction])
-            Each street gets a list of list of actions,
-            represented by an object StreetAction
+        :param street_actions: ([dict])
         """
         if len(boards) != 1:
             raise ValueError(
@@ -60,6 +58,20 @@ class CommunityGameState(PokerGameState):
             street_actions=street_actions,
         )
 
+    def order_hands(self, players):
+        """ given a list of players who've seen the hand to showdown,
+            sort them by their hand strength,
+            first on the resulting list having the strongest hands,
+            to last on the list with the weakest hand
+
+        :param players: ([int])
+        :return: ([[int]])
+        """
+        raise NotImplementedError(
+            f'All CommunityGameState objects must implement order_hands '
+            f'to decide who wins at showdown'
+        )
+
     def get_starting_action(self):
         """ given self.street_actions, derive the current:
             - street
@@ -81,9 +93,8 @@ class CommunityGameState(PokerGameState):
             # left of the dealer who hasn't folded
             # e.g. small blind (0), then big blind (1)... etc
             return next(
-                player_index
-                for player_index in range(self.num_players)
-                if player_index not in self.players_folded
+                p for p in range(self.num_players)
+                if self.last_actions.get(p) == StreetAction.action_fold
             )
 
     @property

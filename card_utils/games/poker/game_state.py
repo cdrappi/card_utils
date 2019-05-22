@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from card_utils.games.poker.pot import Pot
 from card_utils.games.poker.street_action import StreetAction
@@ -19,7 +19,7 @@ class PokerGameState:
                  boards: List[List[str]] = None,
                  ante: int = 0,
                  blinds: List[int] = None,
-                 street_actions: List[StreetAction] = None,
+                 street_actions: List[Dict] = None,
                  ):
         """
         :param num_players: (int)
@@ -29,9 +29,13 @@ class PokerGameState:
         :param boards: ([[str]])
         :param ante: (int)
         :param blinds: ([int])
-        :param street_actions: ([[int]])
-            Each street gets a list of list of actions,
-            represented by an object StreetAction
+        :param street_actions: ([dict]) list of dicts like:
+            {
+                "player": int,
+                "street": int,
+                "action": str,
+                "amount": int
+            }
         """
         if num_players < 2:
             raise ValueError(
@@ -104,11 +108,11 @@ class PokerGameState:
     def order_hands(self, players):
         """ given a list of players who've seen the hand to showdown,
             sort them by their hand strength,
-            first on the resulting list having the strongest hand,
+            first on the resulting list having the strongest hands,
             to last on the list with the weakest hand
 
         :param players: ([int])
-        :return: ([int])
+        :return: ([[int]])
         """
         raise NotImplementedError(
             f'All PokerGameState objects must implement order_hands '
@@ -180,7 +184,9 @@ class PokerGameState:
         self.street = 1
         self.action = self.get_starting_action()
 
-        for street_action in self.street_actions:
+        for street_action_dict in self.street_actions:
+
+            street_action = StreetAction(**street_action_dict)
 
             if street_action.action != self.action:
                 raise Exception(
@@ -201,7 +207,7 @@ class PokerGameState:
         """
         :param street_action: (StreetAction)
         """
-        if street_action.action in street_action.valid_wagers:
+        if street_action.action in StreetAction.wagers:
             self.put_money_in_pot(
                 player=street_action.player,
                 amount=street_action.amount
@@ -282,6 +288,7 @@ class PokerGameState:
         """
         :return: (bool)
         """
+        # TODO: test!
         folders = 0
         checkers = 0
         aggr_not_all_in = 0
