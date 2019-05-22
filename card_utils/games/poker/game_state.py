@@ -276,28 +276,24 @@ class PokerGameState:
         checkers = 0
         aggr_not_all_in = 0
         all_in_last_street = 0
-        no_last_action = 0
 
         for player in range(self.num_players):
             last_action = self.last_actions.get(player)
-            is_all_in = self.is_all_in(player)
+            not_all_in = not self.is_all_in(player)
 
-            if last_action is None and is_all_in:
+            if not_all_in and last_action is None:
+                # Everyone must have acted this street, or
+                # have been all in or folded on a previous street
+                # for the action to be closed
+                return False
+            if last_action is None:
                 all_in_last_street += 1
             elif last_action == StreetAction.action_fold:
                 folders += 1
             elif last_action == StreetAction.action_check:
                 checkers += 1
-            elif not is_all_in and last_action in StreetAction.aggressions:
+            elif not_all_in and last_action in StreetAction.aggressions:
                 aggr_not_all_in += 1
-            else:
-                no_last_action += 1
-
-        if no_last_action:
-            # Everyone must have acted this street, or
-            # have been all in or folded on a previous street
-            # for the action to be closed
-            return False
 
         if folders + checkers + all_in_last_street == self.num_players:
             # Case 1: no one this street has made any bets,
