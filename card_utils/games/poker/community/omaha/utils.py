@@ -52,8 +52,8 @@ def get_best_hands_fast(board, hands):
 
     :param board: ([str]) list of 5 cards
     :param hands: ([set(str)]) list of sets of 4 cards
-    :return: ([int]) indices of `hands` that makes the strongest omaha hand
-        --> this is a list because it is possible to "chop" with
+    :return: ([[int]]) indices of `hands` that makes the strongest omaha hand
+        --> this is a list of lists because it is possible to "chop" with
             every hand rank except straight flushes, quads and flushes
     """
     return get_best_hands_generic(

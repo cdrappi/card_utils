@@ -20,8 +20,8 @@ def get_best_hands_generic(board, hands, hand_strength_function):
     :param hands: ([set(str)]) list of sets of 4 cards
     :param hand_strength_function: (function)
         inputs (board, hand), outputs (tuple)
-    :return: ([int]) indices of `hands` that makes the strongest omaha hand
-        --> this is a list because it is possible to "chop" with
+    :return: ([[int]]) indices of `hands` that makes the strongest omaha hand
+        --> this is a list of lists because it is possible to "chop" with
             every hand rank except straight flushes, quads and flushes
     """
     hand_strengths = {}
