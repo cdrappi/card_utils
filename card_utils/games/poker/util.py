@@ -24,17 +24,17 @@ def get_best_hands_generic(board, hands, hand_strength_function):
         --> this is a list because it is possible to "chop" with
             every hand rank except straight flushes, quads and flushes
     """
-    best_hand_strength = tuple()
-    best_hand_indices = []
+    hand_strengths = {}
     for ii, hand in enumerate(hands):
         hand_strength = hand_strength_function(board, hand)
-        if hand_strength > best_hand_strength:
-            best_hand_strength = hand_strength
-            best_hand_indices = [ii]
-        elif hand_strength == best_hand_strength:
-            best_hand_indices.append(ii)
+        if hand_strength not in hand_strengths:
+            hand_strengths[hand_strength] = []
+        hand_strengths[hand_strength].append(ii)
 
-    return best_hand_indices
+    return [
+        hand_strengths[hs]
+        for hs in sorted(hand_strengths, reverse=True)
+    ]
 
 
 def deal_random_hands(n_hands, n_cards):

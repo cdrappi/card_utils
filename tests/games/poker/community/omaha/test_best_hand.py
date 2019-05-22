@@ -79,10 +79,10 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         :param board: ([str])
         :param hands: ([{str}]) list of set of cards
         """
-        true_best_hand_indices = get_best_hands_brute_force(board, hands)
-        test_best_hand_indices = get_best_hands_fast(board, hands)
+        brute_force_hand_order = get_best_hands_brute_force(board, hands)
+        fast_hand_order = get_best_hands_fast(board, hands)
 
-        self.assertEqual(true_best_hand_indices, test_best_hand_indices)
+        self.assertEqual(brute_force_hand_order, fast_hand_order)
 
     def _assert_both_hand_orders(self, board, hand, correct_order):
         """
