@@ -11,14 +11,14 @@ class Pot:
         :param num_players: (int)
         """
         self.num_players = num_players
-        self.money_from = collections.Counter()
+        self.balances = collections.Counter()
 
     def put_money_in(self, player, amount):
         """
         :param player: (int) index
         :param amount: (int) chips
         """
-        self.money_from[player] += amount
+        self.balances[player] += amount
 
     def settle_showdown(self, winning_players):
         """
@@ -26,29 +26,36 @@ class Pot:
             who made it to showdown,
             sorted by strength of their hand,
             with the strongest hand first
-        :return: ({int: int}) player index --> amount won
+        :return: ({int: int}) player index --> inc_amt won
         """
         payouts = {p: 0 for p in range(self.num_players)}
 
         for winner_tier in winning_players:
+            # go over each tier of winners
+            # they will chop their equity in each side pot equally
             incremental_amounts = self.get_incremental_amounts(winner_tier)
-            for amount in incremental_amounts:
-                amount_winners = [w for w in winner_tier if self.money_from[w] >= amount]
-                money_from_p = {
-                    p: min(self.money_from[p], amount) / len(amount_winners)
-                    for p in range(self.num_players)
-                }
-                for w in amount_winners:
-                    player_with_money_left = (
-                        player
-                        for player, money_left in self.money_from.items()
-                        if money_left
-                    )
-                    for p in player_with_money_left:
-                        from_p = money_from_p[p]
-                        self.money_from[p] -= from_p
-                        payouts[w] += from_p
-                        print(f'{amount}: {w} wins {from_p} from {p} chopping {len(amount_winners)} ways')
+            for inc_amt in incremental_amounts:
+                # get the players who are chopping this amount,
+                # which should decrease each loop
+                players_chopping = [
+                    winner
+                    for winner in winner_tier
+                    if self.balances[winner] >= inc_amt
+                ]
+                # each player chops up as much as they can win from
+                # the balance of all players (including themselves)
+                money_per_winner = sum(
+                    min(money_left, inc_amt) / len(players_chopping)
+                    for money_left in self.balances.values()
+                )
+                for winner in players_chopping:
+                    # apply payouts to everyone in this hand/amount tier
+                    payouts[winner] += money_per_winner
+                for p in range(self.num_players):
+                    # and deduct balances from all players,
+                    # who each paid out at most inc_amount
+                    # to the winners in this tier
+                    self.balances[p] = max(0, self.balances[p] - inc_amt)
 
             if self.total_money == 0:
                 # we can terminate when there's no money left
@@ -66,12 +73,12 @@ class Pot:
 
         :return: (int)
         """
-        return sum(self.money_from.values())
+        return sum(self.balances.values())
 
     def get_incremental_amounts(self, players):
         """
         :param players: ([int])
         :return: ([int])
         """
-        cumulative_amounts = sorted(self.money_from[p] for p in players)
+        cumulative_amounts = sorted(self.balances[p] for p in players)
         return inverse_cumulative_sum(cumulative_amounts)
