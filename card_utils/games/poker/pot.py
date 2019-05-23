@@ -1,5 +1,7 @@
 import collections
 
+from card_utils.util import inverse_cumulative_sum
+
 
 class Pot:
     """ class to handle side-pot logic """
@@ -27,16 +29,21 @@ class Pot:
         :return: ({int: int}) player index --> amount won
         """
         payouts = {p: 0 for p in range(self.num_players)}
-        for winners in winning_players:
-            n_chop = len(winners)
-            for winner in winners:
-                # TODO: fix!
-                amount_in = self.money_from[winner]
-                for p in range(self.num_players):
-                    # can't win more than you risked
-                    from_p = min(self.money_from[p], amount_in) / n_chop
-                    payouts[winner] += from_p
-                    self.money_from[p] -= from_p
+
+        for winner_tier in winning_players:
+            incremental_amounts = self.get_incremental_amounts(winner_tier)
+            for amount in incremental_amounts:
+                players = [w for w in winner_tier if self.money_from[w] >= amount]
+                money_from_p = {
+                    p: min(self.money_from[p], amount) / len(players)
+                    for p in range(self.num_players)
+                }
+                for w in players:
+                    for p in range(self.num_players):
+                        from_p = money_from_p[p]
+                        self.money_from[p] -= from_p
+                        payouts[w] += from_p
+                        print(f'{amount}: {w} wins {from_p} from {p} chopping {len(players)} ways')
 
             if self.total_money == 0:
                 # we can terminate when there's no money left
@@ -44,7 +51,8 @@ class Pot:
 
         raise Exception(
             f'Reached end of loop in Pot.settle_showdown, '
-            f'but there is still {self.total_money} in the pot!'
+            f'but there is still {self.total_money} '
+            f'in the pot!'
         )
 
     @property
@@ -54,3 +62,11 @@ class Pot:
         :return: (int)
         """
         return sum(self.money_from.values())
+
+    def get_incremental_amounts(self, players):
+        """
+        :param players: ([int])
+        :return: ([int])
+        """
+        cumulative_amounts = sorted(self.money_from[p] for p in players)
+        return inverse_cumulative_sum(cumulative_amounts)
