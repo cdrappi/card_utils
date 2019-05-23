@@ -39,8 +39,12 @@ class Pot:
                     for p in range(self.num_players)
                 }
                 for w in amount_winners:
-                    players_with_money = (p for p in range(self.num_players) if self.money_from[p])
-                    for p in players_with_money:
+                    player_with_money_left = (
+                        player
+                        for player, money_left in self.money_from.items()
+                        if money_left
+                    )
+                    for p in player_with_money_left:
                         from_p = money_from_p[p]
                         self.money_from[p] -= from_p
                         payouts[w] += from_p
