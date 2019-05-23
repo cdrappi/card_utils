@@ -33,17 +33,18 @@ class Pot:
         for winner_tier in winning_players:
             incremental_amounts = self.get_incremental_amounts(winner_tier)
             for amount in incremental_amounts:
-                players = [w for w in winner_tier if self.money_from[w] >= amount]
+                amount_winners = [w for w in winner_tier if self.money_from[w] >= amount]
                 money_from_p = {
-                    p: min(self.money_from[p], amount) / len(players)
+                    p: min(self.money_from[p], amount) / len(amount_winners)
                     for p in range(self.num_players)
                 }
-                for w in players:
-                    for p in range(self.num_players):
+                for w in amount_winners:
+                    players_with_money = (p for p in range(self.num_players) if self.money_from[p])
+                    for p in players_with_money:
                         from_p = money_from_p[p]
                         self.money_from[p] -= from_p
                         payouts[w] += from_p
-                        print(f'{amount}: {w} wins {from_p} from {p} chopping {len(players)} ways')
+                        print(f'{amount}: {w} wins {from_p} from {p} chopping {len(amount_winners)} ways')
 
             if self.total_money == 0:
                 # we can terminate when there's no money left
