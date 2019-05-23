@@ -26,11 +26,11 @@ class Pot:
             with the strongest hand first
         :return: ({int: int}) player index --> amount won
         """
-        # TODO: test!
         payouts = {p: 0 for p in range(self.num_players)}
         for winners in winning_players:
             n_chop = len(winners)
             for winner in winners:
+                # TODO: fix!
                 amount_in = self.money_from[winner]
                 for p in range(self.num_players):
                     # can't win more than you risked
