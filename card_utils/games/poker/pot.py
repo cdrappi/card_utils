@@ -22,11 +22,9 @@ class Pot:
 
     def settle_showdown(self, winning_players):
         """
-        :param winning_players: ([[int]]) list of player indexes
-            who made it to showdown,
-            sorted by strength of their hand,
-            with the strongest hand first
-        :return: ({int: int}) player index --> inc_amt won
+        :param winning_players: ([[int]]) list of players who made it
+            to showdown, sorted by hand strength (strongest first)
+        :return: ({int: int}) player index --> amount won
         """
         payouts = {p: 0 for p in range(self.num_players)}
 
