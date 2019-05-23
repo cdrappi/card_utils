@@ -1,5 +1,3 @@
-import collections
-
 from card_utils.util import inverse_cumulative_sum
 
 
@@ -11,7 +9,7 @@ class Pot:
         :param num_players: (int)
         """
         self.num_players = num_players
-        self.balances = collections.Counter()
+        self.balances = {p: 0 for p in range(num_players)}
 
     def put_money_in(self, player, amount):
         """

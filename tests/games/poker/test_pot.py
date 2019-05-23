@@ -68,3 +68,10 @@ class PotTestCase(unittest.TestCase):
                 3: 20,
             }
         )
+
+    def test_eight_way_multi_balance_chop(self):
+        self._dry_test(
+            amounts_in={
+                0:
+            }
+        )
