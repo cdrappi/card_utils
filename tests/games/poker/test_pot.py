@@ -26,3 +26,18 @@ class PotTestCase(unittest.TestCase):
             0: 0
         }
         self.assertEqual(payouts, expected_payouts)
+
+    def test_heads_up_uneven_entered(self):
+        """ heads up, 1 player puts in more money than the other """
+        pot = Pot(2)
+        pot.put_money_in(0, 20)
+        pot.put_money_in(1, 10)
+
+        winning_players = [[1], [0]]
+        payouts = pot.settle_showdown(winning_players)
+
+        expected_payouts = {
+            1: 20,
+            0: 10
+        }
+        self.assertEqual(payouts, expected_payouts)
