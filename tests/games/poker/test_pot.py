@@ -12,16 +12,14 @@ class PotTestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def _dry_test(self, n, amounts_in, winning_players, expected_payouts):
+    def _dry_test(self, amounts_in, winning_players, expected_payouts):
         """
-        :param n: (int)
         :param amounts_in: ({int: int})
         :param winning_players: ([[int]])
         :param expected_payouts: ({int: int})
         :return:
         """
-        self.assertEqual(n, len(amounts_in))
-        self.assertEqual(n, sum(1 for wt in winning_players for _ in wt))
+        n = len(amounts_in)
 
         # for brevity, allow input of this function to exclude
         # players who are expected to receive 0 in payout
@@ -39,26 +37,34 @@ class PotTestCase(unittest.TestCase):
     def test_heads_up_winner(self):
         """ heads up, 1 player wins it all """
         self._dry_test(
-            n=2,
             amounts_in={0: 10, 1: 10},
             winning_players=[[1], [0]],
             expected_payouts={1: 20}
         )
 
-    def test_heads_up_uneven_entered(self):
+    def test_heads_up_chopped_pot(self):
+        """ test a chopped pot with uneven amounts in and out """
+        self._dry_test(
+            amounts_in={0: 20, 1: 10},
+            winning_players=[[0, 1]],
+            expected_payouts={0: 20, 1: 10}
+        )
+
+    def test_three_way_uneven_entered(self):
         """ heads up, 1 player puts in more money than the other """
         self._dry_test(
-            n=2,
-            amounts_in={0: 20, 1: 10},
+            amounts_in={0: 20, 1: 10, 2: 0},
             winning_players=[[1], [0]],
             expected_payouts={0: 10, 1: 20}
         )
 
-    def test_heads_up_chopped_pot(self):
-        """ test a chopped pot with uneven amounts in and out """
+    def test_4_way_multi_balance_chop(self):
         self._dry_test(
-            n=2,
-            amounts_in={0: 20, 1: 10},
-            winning_players=[[0, 1]],
-            expected_payouts={0: 20, 1: 10}
+            amounts_in={0: 10, 1: 20, 2: 30, 3: 40},
+            winning_players=[[1], [2, 3]],
+            expected_payouts={
+                1: 70,
+                2: 10,
+                3: 20,
+            }
         )
