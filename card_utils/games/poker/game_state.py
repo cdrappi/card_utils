@@ -229,6 +229,22 @@ class PokerGameState:
                 f'{action.player}'
             )
 
+        if action.action in Action.aggressions:
+            if self.min_bet is not None and action.amount < self.min_bet:
+                raise ValueError(
+                    f'Invalid {action.action} size: '
+                    f'amount {action.amount} '
+                    f'is less than the minimum of {self.min_bet}'
+                )
+
+        if action.action in Action.aggressions:
+            if self.max_bet is not None and action.amount > self.max_bet:
+                raise ValueError(
+                    f'Invalid {action.action} size: '
+                    f'amount {action.amount} '
+                    f'is greater than the limit of {self.max_bet}'
+                )
+
     def append_action(self, player, action, amount=None):
         """
         :param player: (int)
@@ -415,3 +431,18 @@ class PokerGameState:
         :return: (int)
         """
         return max(self.pot.balances.values()) - self.pot.balances[self.action]
+
+    @property
+    def min_bet(self):
+        """ in general, the min bet will be the biggest blind
+
+        :return: (int|None)
+        """
+        return max(self.blinds)
+
+    @property
+    def max_bet(self):
+        """
+        :return: (int|None)
+        """
+        return None

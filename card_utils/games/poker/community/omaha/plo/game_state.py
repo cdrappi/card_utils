@@ -7,19 +7,6 @@ class PLOGameState(OmahaGameState):
 
     name = 'PLO'
 
-    def validate_action(self, action):
-        """
-        :param action: (Action)
-        """
-        super().validate_action(action)
-        if action.action in Action.aggressions:
-            if action.amount > self.max_bet:
-                raise ValueError(
-                    f'Invalid {action.action} size: '
-                    f'amount {action.amount} '
-                    f'is greater than the pot-limit of {self.max_bet}'
-                )
-
     @property
     def max_bet(self):
         """ in PLO, the most you can bet is the pot,
