@@ -218,6 +218,17 @@ class PokerGameState:
             amount=amount
         )
 
+    def validate_action(self, action):
+        """
+        :param action: (Action)
+        """
+        if action.player != self.action:
+            raise Exception(
+                f'The calculated action is on {self.action}, but '
+                f'the next Action object comes from '
+                f'{action.player}'
+            )
+
     def append_action(self, player, action, amount=None):
         """
         :param player: (int)
@@ -225,13 +236,7 @@ class PokerGameState:
         :param amount: (int)
         """
         action_obj = self.build_action(player, action, amount=amount)
-        if action_obj.player != self.action:
-            raise Exception(
-                f'The calculated action is on {self.action}, but '
-                f'the next Action object comes from '
-                f'{action_obj.player}'
-            )
-
+        self.validate_action(action_obj)
         self.actions.append(action_obj)
         self.update_state_with_action(action_obj)
 

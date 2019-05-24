@@ -7,22 +7,18 @@ class PLOGameState(OmahaGameState):
 
     name = 'PLO'
 
-    def build_action(self, player, action, amount):
+    def validate_action(self, action):
         """
-        :param player:
-        :param action:
-        :param amount:
-        :return:
+        :param action: (Action)
         """
-        action_obj = super().build_action(player, action, amount)
-        if action_obj.action in Action.aggressions:
-            if action_obj.amount > self.max_bet:
+        super().validate_action(action)
+        if action.action in Action.aggressions:
+            if action.amount > self.max_bet:
                 raise ValueError(
-                    f'Invalid {action_obj.action} size: '
-                    f'amount {action_obj.amount} '
+                    f'Invalid {action.action} size: '
+                    f'amount {action.amount} '
                     f'is greater than the pot-limit of {self.max_bet}'
                 )
-        return action_obj
 
     @property
     def max_bet(self):
