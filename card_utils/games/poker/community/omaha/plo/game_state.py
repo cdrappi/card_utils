@@ -8,6 +8,12 @@ class PLOGameState(OmahaGameState):
     name = 'PLO'
 
     def build_action(self, player, action, amount):
+        """
+        :param player:
+        :param action:
+        :param amount:
+        :return:
+        """
         action_obj = super().build_action(player, action, amount)
         if action_obj.action in Action.aggressions:
             if action_obj.amount > self.max_bet:
@@ -16,6 +22,7 @@ class PLOGameState(OmahaGameState):
                     f'amount {action_obj.amount} '
                     f'is greater than the pot-limit of {self.max_bet}'
                 )
+        return action_obj
 
     @property
     def max_bet(self):
