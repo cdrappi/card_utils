@@ -33,6 +33,9 @@ class CommunityGameState(PokerGameState):
         :param blinds: ([int])
         :param street_actions: ([dict])
         """
+        if boards is None:
+            boards = [[]]
+
         if len(boards) != 1:
             raise ValueError(
                 f'{self.name} is a community-card game, '
