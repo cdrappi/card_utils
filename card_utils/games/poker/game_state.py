@@ -421,14 +421,14 @@ class PokerGameState:
             # have different balances, then we action is not complete
             return False
 
-        print(
-            f'folders={folders}\n'
-            f'checkers={checkers}\n'
-            f'aggr_not_all_in={aggr_not_all_in}\n'
-            f'all_in_last_street={all_in_last_street}\n'
-            f'not_yet_acted={not_yet_acted}\n'
-            f'{"-" * 10}'
-        )
+        # print(
+        #     f'folders={folders}\n'
+        #     f'checkers={checkers}\n'
+        #     f'aggr_not_all_in={aggr_not_all_in}\n'
+        #     f'all_in_last_street={all_in_last_street}\n'
+        #     f'not_yet_acted={not_yet_acted}\n'
+        #     f'{"-" * 10}'
+        # )
 
         if folders == self.num_players - 1:
             # Case 1: everyone folds except 1 person
