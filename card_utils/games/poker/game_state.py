@@ -229,6 +229,19 @@ class PokerGameState:
                 f'{action.player}'
             )
 
+        if self.amount_to_call == 0:
+            if action.action in Action.nonzero_to_call:
+                raise ValueError(
+                    f'it is 0 to call, so {action.action} '
+                    f'is an invalid action'
+                )
+        else:
+            if action.action in Action.zero_to_call:
+                raise ValueError(
+                    f'it is {self.amount_to_call} to call, '
+                    f'so {action.action} is an invalid action'
+                )
+
         if self.stacks[action.player] < action.amount:
             raise Exception(
                 f'Player {action.player} only has '
