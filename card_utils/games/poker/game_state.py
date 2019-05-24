@@ -75,7 +75,6 @@ class PokerGameState:
 
         self.actions = []
         self.pot = Pot(self.num_players)
-        self.is_all_action_complete = False
         self.last_actions = {}
         self.payouts = {}
         self.action = 0
@@ -175,7 +174,6 @@ class PokerGameState:
         the list of StreetAction objects
         """
         self.pot = Pot(self.num_players)
-        self.is_all_action_complete = False
         self.last_actions = {}
         self.payouts = {}
         self.extract_antes_and_blinds()
@@ -185,15 +183,26 @@ class PokerGameState:
         for action_dict in actions:
             self.act(**action_dict)
 
-    def act(self, player, action, amount=0):
+    def act(self, player, action, amount=None):
         """ create an action, update state and advance the game forward
 
         :param player: (int)
         :param action: (str)
-        :param amount: (int)
+        :param amount: (int) if None, construct default
         """
         self.append_action(player, action, amount=amount)
         self.advance_action()
+
+    def append_action(self, player, action, amount=None):
+        """
+        :param player: (int)
+        :param action: (str)
+        :param amount: (int)
+        """
+        action_obj = self.build_action(player, action, amount=amount)
+        self.validate_action(action_obj)
+        self.actions.append(action_obj)
+        self.update_state_with_action(action_obj)
 
     def build_action(self, player, action, amount):
         """
@@ -265,17 +274,6 @@ class PokerGameState:
                     f'is greater than the limit of {self.max_bet}'
                 )
 
-    def append_action(self, player, action, amount=None):
-        """
-        :param player: (int)
-        :param action: (str)
-        :param amount: (int)
-        """
-        action_obj = self.build_action(player, action, amount=amount)
-        self.validate_action(action_obj)
-        self.actions.append(action_obj)
-        self.update_state_with_action(action_obj)
-
     def update_state_with_action(self, action):
         """
         :param action: (Action)
@@ -291,12 +289,15 @@ class PokerGameState:
 
     def advance_action(self):
         """ move action forward and check if hand is over """
-        if self.is_action_closed():
-            self.move_street()
-        else:
-            self.move_action()
+        is_action_closed = self.is_action_closed()
 
-        if self.street >= self.max_streets:
+        if not is_action_closed:
+            self.move_action()
+        else:
+            while self.is_action_closed() and self.street <= self.max_streets:
+                self.move_street()
+
+        if self.street > self.max_streets:
             self.payouts = self.get_payouts()
 
     def get_payouts(self):
@@ -374,6 +375,7 @@ class PokerGameState:
 
         :return: (bool)
         """
+        # TODO: delete?
         n_cant_act = sum(self.cannot_act(p) for p in range(self.num_players))
         return n_cant_act == self.num_players - 1
 
@@ -408,14 +410,14 @@ class PokerGameState:
             elif last_action in Action.aggressions and not is_all_in:
                 aggr_not_all_in += 1
 
-        print(
-            f'folders={folders}\n'
-            f'checkers={checkers}\n'
-            f'aggr_not_all_in={aggr_not_all_in}\n'
-            f'all_in_last_street={all_in_last_street}\n'
-            f'not_yet_acted={not_yet_acted}\n'
-            f'{"-" * 10}'
-        )
+        # print(
+        #     f'folders={folders}\n'
+        #     f'checkers={checkers}\n'
+        #     f'aggr_not_all_in={aggr_not_all_in}\n'
+        #     f'all_in_last_street={all_in_last_street}\n'
+        #     f'not_yet_acted={not_yet_acted}\n'
+        #     f'{"-" * 10}'
+        # )
 
         if folders == self.num_players - 1:
             # Case 1: everyone folds except 1 person
@@ -431,11 +433,11 @@ class PokerGameState:
         next_player_last_action = self.last_actions.get(self.get_next_action())
         everyone_closed_last_aggression = (
             # Case 3:
+            # the person who acts now did NOT bet or raise
+            current_player_last_action not in Action.aggressions
             # The last action person who would theoretically act next
             # was a bet or raise
-            next_player_last_action in Action.aggressions
-            # but the person who acts now did NOT bet or raise
-            and current_player_last_action not in Action.aggressions
+            and next_player_last_action in Action.aggressions
             # and they are the only such aggressor who can be not all-in
             and aggr_not_all_in <= 1
             # Everyone else in the hand must have acted and not checked
