@@ -1,5 +1,6 @@
 import unittest
 
+from card_utils.games.poker.action import Action
 from card_utils.games.poker.community.omaha.plo.game_state import PLOGameState
 from card_utils.games.poker.util import deal_random_hands
 
@@ -28,6 +29,7 @@ class PLOGameStateTestCase(unittest.TestCase):
         blinds = blinds or [1, 2]
         if starting_stacks is None:
             starting_stacks = [200 for _ in range(num_players)]
+
         self.assertEqual(num_players, len(starting_stacks))
 
         deck, hands = deal_random_hands(n_hands=num_players, n_cards=4)
@@ -56,9 +58,18 @@ class PLOGameStateTestCase(unittest.TestCase):
         # street 1 is preflop
         self.assertEqual(plo.street, 1)
 
-    def test_heads_up_action_closed(self):
-        """ test whether the is_action_closed method works
-            as we build up the action
+    def test_heads_up_preflop_fold(self):
+        """ test whether the action works correctly
+            when the button folds immediately heads up preflop
         """
         plo = self._create_random_setup(num_players=2)
         self.assertFalse(plo.is_action_closed())
+
+        self.assertEqual(plo.action, 1)
+        plo.append_action(1, Action.action_fold)
+        print(f'last actions: {plo.last_actions}')
+
+        # self.assertTrue(plo.is_action_closed())
+        # self.assertTrue(plo.is_all_action_closed)
+        #
+        # self.assertEqual(plo.payouts, {0: 3})

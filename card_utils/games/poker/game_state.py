@@ -73,15 +73,14 @@ class PokerGameState:
         self.ante = ante
         self.blinds = blinds or []
 
-        self.actions = actions or []
-
+        self.actions = []
         self.pot = Pot(self.num_players)
         self.is_all_action_closed = False
         self.last_actions = {}
         self.payouts = {}
         self.action = 0
         self.street = 1
-        self.reset_state_from_actions()
+        self.reset_state_from_actions(actions)
 
     def get_starting_action(self):
         """ the player who starts the action
@@ -163,7 +162,7 @@ class PokerGameState:
         self.extract_antes()
         self.extract_blinds()
 
-    def reset_state_from_actions(self):
+    def reset_state_from_actions(self, actions):
         """ given self.street_actions, derive the current:
             - pot size
             - street
@@ -183,46 +182,43 @@ class PokerGameState:
         self.street = 1
         self.action = self.get_starting_action()
 
-        for action_dict in self.actions:
+        for action_dict in actions:
+            self.act(**action_dict)
 
-            action = Action(**action_dict)
+    def act(self, player, action, amount=0):
+        """ create an action, update state and advance the game forward
 
-            if action.action != self.action:
-                raise Exception(
-                    f'The calculated action is on {self.action}, but '
-                    f'the next StreetAction object comes from '
-                    f'{action.action}'
-                )
+        :param player: (int)
+        :param action: (str)
+        :param amount: (int)
+        """
+        self.append_action(player, action, amount=amount)
+        self.advance_action()
 
-            self.register_action(action)
-
-    def new_action(self, player, action, amount=0):
+    def append_action(self, player, action, amount=0):
         """
         :param player: (int)
         :param action: (str)
         :param amount: (int)
         """
-        street_action = Action(
+        action = Action(
             player=player,
             street=self.street,
             action=action,
             amount=amount
         )
-        self.register_action(street_action)
 
-    def advance_action(self):
-        """ move action forward and check if hand is over """
-        self.move_action()
-        if self.is_action_closed():
-            if self.street < self.max_streets:
-                self.move_street()
-            else:
-                self.is_all_action_closed = True
+        if action.player != self.action:
+            raise Exception(
+                f'The calculated action is on {self.action}, but '
+                f'the next Action object comes from '
+                f'{action.player}'
+            )
 
-        if self.is_all_action_closed:
-            self.payouts = self.get_payouts()
+        self.actions.append(action)
+        self.update_state_with_action(action)
 
-    def apply_action(self, action):
+    def update_state_with_action(self, action):
         """
         :param action: (Action)
         :return:
@@ -235,19 +231,17 @@ class PokerGameState:
 
         self.last_actions[action.player] = action.action
 
-    def register_action(self, action):
-        """
-        :param action: (Action)
-        """
-        self.apply_action(action)
-        self.advance_action()
+    def advance_action(self):
+        """ move action forward and check if hand is over """
+        self.move_action()
+        if self.is_action_closed():
+            if self.street < self.max_streets:
+                self.move_street()
+            else:
+                self.is_all_action_closed = True
 
-    def add_action(self, action):
-        """
-        :param action: (Action)
-        """
-        self.actions.append(action)
-        self.apply_action(action)
+        if self.is_all_action_closed:
+            self.payouts = self.get_payouts()
 
     def get_payouts(self):
         """ sort hands and ship Pot
@@ -313,7 +307,6 @@ class PokerGameState:
         """
         :return: (bool)
         """
-        # TODO: test!
         folders = 0
         checkers = 0
         aggr_not_all_in = 0
@@ -326,31 +319,37 @@ class PokerGameState:
 
         for player in players_in_action_order:
             last_action = self.last_actions.get(player)
-            not_all_in = not self.is_all_in(player)
+            is_all_in = self.is_all_in(player)
 
-            if not_all_in and last_action is None:
-                # Everyone must have acted this street, or
-                # have been all in or folded on a previous street
-                # for the action to be closed
-                return False
-            if last_action is None:
+            if last_action is None and is_all_in:
                 all_in_last_street += 1
             elif last_action == Action.action_fold:
                 folders += 1
             elif last_action == Action.action_check:
                 checkers += 1
-            elif not_all_in and last_action in Action.aggressions:
+            elif last_action in Action.aggressions and not is_all_in:
                 aggr_not_all_in += 1
 
+        print(
+            f'folders={folders}\n'
+            f'checkers={checkers}\n'
+            f'aggr_not_all_in={aggr_not_all_in}\n'
+            f'all_in_last_street={all_in_last_street}'
+        )
+
+        if folders == self.num_players - 1:
+            # Case 1: everyone folds except 1 person
+            return True
+
         if folders + checkers + all_in_last_street == self.num_players:
-            # Case 1: no one this street has made any bets,
+            # Case 2: no one this street has made any bets,
             # and everyone had either folded or went all on a previous street,
             # or checked on this street
             return True
 
-        next_player_last_action = self.last_actions[self.get_next_action()]
+        next_player_last_action = self.last_actions.get(self.get_next_action())
         everyone_closed_last_aggression = (
-            # Case 2:
+            # Case 3:
             # The last action person who would theoretically act next
             # was a bet or raise
             next_player_last_action in Action.aggressions
