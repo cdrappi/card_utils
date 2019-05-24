@@ -69,9 +69,26 @@ class PotTestCase(unittest.TestCase):
             }
         )
 
-    def test_eight_way_multi_balance_chop(self):
+    def test_eight_way_everyone_gets_stacked(self):
+        """ player p has 10*p chips,
+            and everyone loses to player 7, the big stack
+        """
+        starting_stacks = {i: 10 * i for i in range(8)}
         self._dry_test(
-            amounts_in={
-                0:
+            amounts_in=starting_stacks,
+            winning_players=[[7]],
+            expected_payouts={7: sum(starting_stacks.values())}
+        )
+
+    def test_eight_way_multi_balance_chop(self):
+        starting_stacks = {i: 10 * i for i in range(8)}
+        self._dry_test(
+            amounts_in=starting_stacks,
+            winning_players=[[4, 3], [6], [7]],
+            expected_payouts={
+                3: 90,
+                4: 130,
+                6: 50,
+                7: 10
             }
         )
