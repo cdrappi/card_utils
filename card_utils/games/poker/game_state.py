@@ -364,6 +364,7 @@ class PokerGameState:
             for player, action in self.last_actions.items()
             if action == Action.action_fold
         }
+        self.action = self.get_starting_action()
 
     def everyone_folded_or_all_in(self):
         """ whether all action is closed for all streets
@@ -446,7 +447,7 @@ class PokerGameState:
             # and those who are not all in have all put
             # an equal amount in the pot as the person
             # who has put the most in the pot
-            and len({*not_all_in_balances, max(self.pot.balances)}) == 1
+            and len({*not_all_in_balances, max(self.pot.balances.values())}) == 1
         )
         return everyone_closed_last_aggression
 
