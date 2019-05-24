@@ -14,16 +14,16 @@ class PLOGameStateTestCase(unittest.TestCase):
         pass
 
     def _create_random_setup(self, num_players,
-                             street_actions=None,
+                             actions=None,
                              blinds=None,
                              starting_stacks=None):
         """
         :param num_players: (int)
-        :param street_actions: ([dict])
+        :param actions: ([dict])
         :param starting_stacks: ([int])
         :return: (PLOGameState)
         """
-        street_actions = street_actions or []
+        actions = actions or []
 
         blinds = blinds or [1, 2]
         if starting_stacks is None:
@@ -37,7 +37,7 @@ class PLOGameStateTestCase(unittest.TestCase):
             hands=hands,
             starting_stacks=starting_stacks,
             blinds=blinds,
-            street_actions=street_actions
+            actions=actions
         )
 
     def test_heads_up_game_initialisation(self):
