@@ -55,3 +55,10 @@ class PLOGameStateTestCase(unittest.TestCase):
         self.assertEqual(plo.action, 2)
         # street 1 is preflop
         self.assertEqual(plo.street, 1)
+
+    def test_heads_up_action_closed(self):
+        """ test whether the is_action_closed method works
+            as we build up the action
+        """
+        plo = self._create_random_setup(num_players=2)
+        self.assertFalse(plo.is_action_closed())

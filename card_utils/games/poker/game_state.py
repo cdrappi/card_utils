@@ -203,17 +203,22 @@ class PokerGameState:
 
             self.register_street_action(street_action)
 
-    def register_street_action(self, street_action):
+    def new_action(self, player, action, amount=0):
         """
-        :param street_action: (StreetAction)
+        :param player: (int)
+        :param action: (str)
+        :param amount: (int)
         """
-        if street_action.action in StreetAction.wagers:
-            self.put_money_in_pot(
-                player=street_action.player,
-                amount=street_action.amount
-            )
+        street_action = StreetAction(
+            player=player,
+            street=self.street,
+            action=action,
+            amount=amount
+        )
+        self.register_street_action(street_action)
 
-        self.last_actions[street_action.player] = street_action.action
+    def advance_action(self):
+        """ move action forward and check if hand is over """
         self.move_action()
         if self.is_action_closed():
             if self.street < self.max_streets:
@@ -223,6 +228,33 @@ class PokerGameState:
 
         if self.is_all_action_closed:
             self.payouts = self.get_payouts()
+
+    def apply_street_action(self, street_action):
+        """
+        :param street_action: (StreetAction)
+        :return:
+        """
+        if street_action.action in StreetAction.wagers:
+            self.put_money_in_pot(
+                player=street_action.player,
+                amount=street_action.amount
+            )
+
+        self.last_actions[street_action.player] = street_action.action
+
+    def register_street_action(self, street_action):
+        """
+        :param street_action: (StreetAction)
+        """
+        self.apply_street_action(street_action)
+        self.advance_action()
+
+    def add_street_action(self, street_action):
+        """
+        :param street_action: (StreetAction)
+        """
+        self.street_actions.append(street_action)
+        self.apply_street_action(street_action)
 
     def get_payouts(self):
         """ sort hands and ship Pot

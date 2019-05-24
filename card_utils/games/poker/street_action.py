@@ -25,6 +25,7 @@ class StreetAction:
         :param player: (int) player in game, 0-indexed
         :param street: (int) 1-indexed
         :param action: (str) one of self.valid_action_types
+        :param amount: (int) amount if any
         """
         if action not in self.actions:
             raise TypeError(
