@@ -229,6 +229,13 @@ class PokerGameState:
                 f'{action.player}'
             )
 
+        if self.stacks[action.player] < action.amount:
+            raise Exception(
+                f'Player {action.player} only has '
+                f'{self.stacks[action.player]} in stack, '
+                f'less than the desired wager of {action.amount}'
+            )
+
         if action.action in Action.aggressions:
             if self.min_bet is not None and action.amount < self.min_bet:
                 raise ValueError(
