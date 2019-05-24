@@ -1,7 +1,7 @@
 from typing import List, Dict
 
+from card_utils.games.poker.action import Action
 from card_utils.games.poker.pot import Pot
-from card_utils.games.poker.street_action import StreetAction
 
 
 class PokerGameState:
@@ -19,7 +19,7 @@ class PokerGameState:
                  boards: List[List[str]] = None,
                  ante: int = 0,
                  blinds: List[int] = None,
-                 street_actions: List[Dict] = None,
+                 actions: List[Dict] = None,
                  ):
         """
         :param num_players: (int)
@@ -29,12 +29,11 @@ class PokerGameState:
         :param boards: ([[str]])
         :param ante: (int)
         :param blinds: ([int])
-        :param street_actions: ([dict]) list of dicts like:
+        :param actions: ([dict]) list of dicts like:
             {
                 "player": int,
-                "street": int,
                 "action": str,
-                "amount": int
+                "amount": int  [only necessary for bet/call/raises]
             }
         """
         if num_players < 2:
@@ -74,7 +73,7 @@ class PokerGameState:
         self.ante = ante
         self.blinds = blinds or []
 
-        self.street_actions = street_actions or []
+        self.actions = actions or []
 
         self.pot = Pot(self.num_players)
         self.is_all_action_closed = False
@@ -82,7 +81,7 @@ class PokerGameState:
         self.payouts = {}
         self.action = 0
         self.street = 1
-        self.reset_state_from_street_actions()
+        self.reset_state_from_actions()
 
     def get_starting_action(self):
         """ the player who starts the action
@@ -164,7 +163,7 @@ class PokerGameState:
         self.extract_antes()
         self.extract_blinds()
 
-    def reset_state_from_street_actions(self):
+    def reset_state_from_actions(self):
         """ given self.street_actions, derive the current:
             - pot size
             - street
@@ -184,24 +183,18 @@ class PokerGameState:
         self.street = 1
         self.action = self.get_starting_action()
 
-        for street_action_dict in self.street_actions:
+        for action_dict in self.actions:
 
-            street_action = StreetAction(**street_action_dict)
+            action = Action(**action_dict)
 
-            if street_action.action != self.action:
+            if action.action != self.action:
                 raise Exception(
                     f'The calculated action is on {self.action}, but '
                     f'the next StreetAction object comes from '
-                    f'{street_action.action}'
-                )
-            if street_action.street != self.street:
-                raise Exception(
-                    f'The calculated street is {self.street}, but '
-                    f'the next StreetAction object comes from '
-                    f'{street_action.street}'
+                    f'{action.action}'
                 )
 
-            self.register_street_action(street_action)
+            self.register_action(action)
 
     def new_action(self, player, action, amount=0):
         """
@@ -209,13 +202,13 @@ class PokerGameState:
         :param action: (str)
         :param amount: (int)
         """
-        street_action = StreetAction(
+        street_action = Action(
             player=player,
             street=self.street,
             action=action,
             amount=amount
         )
-        self.register_street_action(street_action)
+        self.register_action(street_action)
 
     def advance_action(self):
         """ move action forward and check if hand is over """
@@ -229,32 +222,32 @@ class PokerGameState:
         if self.is_all_action_closed:
             self.payouts = self.get_payouts()
 
-    def apply_street_action(self, street_action):
+    def apply_action(self, action):
         """
-        :param street_action: (StreetAction)
+        :param action: (Action)
         :return:
         """
-        if street_action.action in StreetAction.wagers:
+        if action.action in Action.wagers:
             self.put_money_in_pot(
-                player=street_action.player,
-                amount=street_action.amount
+                player=action.player,
+                amount=action.amount
             )
 
-        self.last_actions[street_action.player] = street_action.action
+        self.last_actions[action.player] = action.action
 
-    def register_street_action(self, street_action):
+    def register_action(self, action):
         """
-        :param street_action: (StreetAction)
+        :param action: (Action)
         """
-        self.apply_street_action(street_action)
+        self.apply_action(action)
         self.advance_action()
 
-    def add_street_action(self, street_action):
+    def add_action(self, action):
         """
-        :param street_action: (StreetAction)
+        :param action: (Action)
         """
-        self.street_actions.append(street_action)
-        self.apply_street_action(street_action)
+        self.actions.append(action)
+        self.apply_action(action)
 
     def get_payouts(self):
         """ sort hands and ship Pot
@@ -264,7 +257,7 @@ class PokerGameState:
         players_at_showdown = [
             player
             for player in range(self.num_players)
-            if self.last_actions[player] != StreetAction.action_fold
+            if self.last_actions[player] != Action.action_fold
         ]
         winners = self.order_hands(players_at_showdown)
         payouts = self.pot.settle_showdown(winners)
@@ -277,7 +270,7 @@ class PokerGameState:
         """
         return bool(
             self.is_all_in(player)
-            or self.last_actions.get(player) == StreetAction.action_fold
+            or self.last_actions.get(player) == Action.action_fold
         )
 
     def mod_n(self, player):
@@ -311,9 +304,9 @@ class PokerGameState:
         """
         self.street += 1
         self.last_actions = {
-            player: StreetAction.action_fold
+            player: Action.action_fold
             for player, action in self.last_actions.items()
-            if action == StreetAction.action_fold
+            if action == Action.action_fold
         }
 
     def is_action_closed(self):
@@ -342,11 +335,11 @@ class PokerGameState:
                 return False
             if last_action is None:
                 all_in_last_street += 1
-            elif last_action == StreetAction.action_fold:
+            elif last_action == Action.action_fold:
                 folders += 1
-            elif last_action == StreetAction.action_check:
+            elif last_action == Action.action_check:
                 checkers += 1
-            elif not_all_in and last_action in StreetAction.aggressions:
+            elif not_all_in and last_action in Action.aggressions:
                 aggr_not_all_in += 1
 
         if folders + checkers + all_in_last_street == self.num_players:
@@ -360,7 +353,7 @@ class PokerGameState:
             # Case 2:
             # The last action person who would theoretically act next
             # was a bet or raise
-            next_player_last_action in StreetAction.aggressions
+            next_player_last_action in Action.aggressions
             # and they are the only such aggressor who can be not all-in
             and aggr_not_all_in <= 1
             # Everyone else in the hand must have not checked

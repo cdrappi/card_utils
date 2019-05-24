@@ -2,7 +2,7 @@
 from typing import List, Dict
 
 from card_utils.games.poker.game_state import PokerGameState
-from card_utils.games.poker.street_action import StreetAction
+from card_utils.games.poker.street_action import Action
 
 
 class CommunityGameState(PokerGameState):
@@ -22,7 +22,7 @@ class CommunityGameState(PokerGameState):
                  boards: List[List[str]] = None,
                  ante: int = 0,
                  blinds: List[int] = None,
-                 street_actions: List[Dict] = None,
+                 actions: List[Dict] = None,
                  ):
         """
         :param num_players: (int)
@@ -31,7 +31,7 @@ class CommunityGameState(PokerGameState):
         :param starting_stacks: ([[int]])
         :param boards: ([[str]])
         :param blinds: ([int])
-        :param street_actions: ([dict])
+        :param actions: ([dict])
         """
         if boards is None:
             boards = [[]]
@@ -58,7 +58,7 @@ class CommunityGameState(PokerGameState):
             boards=boards,
             ante=ante,
             blinds=blinds,
-            street_actions=street_actions,
+            actions=actions,
         )
 
     def order_hands(self, players):
@@ -97,7 +97,7 @@ class CommunityGameState(PokerGameState):
             # e.g. small blind (0), then big blind (1)... etc
             return next(
                 p for p in range(self.num_players)
-                if self.last_actions.get(p) == StreetAction.action_fold
+                if self.last_actions.get(p) == Action.action_fold
             )
 
     @property

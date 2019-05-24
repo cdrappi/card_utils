@@ -1,4 +1,4 @@
-class StreetAction:
+class Action:
     """ represent an action on a given street """
 
     # when the action is open or checked to you

@@ -19,7 +19,7 @@ class OmahaGameState(CommunityGameState):
                  boards: List[List[str]] = None,
                  ante: int = 0,
                  blinds: List[int] = None,
-                 street_actions: List[Dict] = None,
+                 actions: List[Dict] = None,
                  ):
         """
         :param num_players: (int)
@@ -28,7 +28,7 @@ class OmahaGameState(CommunityGameState):
         :param starting_stacks: ([[int]])
         :param boards: ([[str]])
         :param blinds: ([int])
-        :param street_actions: ([[int]])
+        :param actions: ([[int]])
             Each street gets a list of list of actions,
             represented by an object StreetAction
         """
@@ -40,7 +40,7 @@ class OmahaGameState(CommunityGameState):
             boards=boards,
             ante=ante,
             blinds=blinds,
-            street_actions=street_actions,
+            actions=actions,
         )
 
     def order_hands(self, players_at_showdown):
