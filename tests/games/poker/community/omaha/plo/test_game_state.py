@@ -93,13 +93,21 @@ class PLOGameStateTestCase(unittest.TestCase):
         """
         plo = self._create_random_setup(num_players=2)
 
-        plo.append_action(1, Action.action_raise, amount=4)
+        plo.append_action(1, Action.action_raise, amount=3)
+        # self.assertFalse(plo.is_action_closed())
+        plo.advance_action()
+
         self.assertEqual(plo.amount_to_call, 2)
-        plo.append_action(0, Action.action_call, amount=plo.amount_to_call)
+        self.assertEqual(plo.action, 0)
+        plo.append_action(0, Action.action_call)
 
         self.assertTrue(plo.is_action_closed())
-
+        self.assertEqual(plo.street, 1)
         plo.advance_action()
-        self.assertTrue(plo.is_all_action_complete)
 
-        self._assert_equal_payouts(plo.payouts, {0: 3})
+        self.assertEqual(plo.street, 2)
+        plo.act(0, Action.action_check)
+        plo.act(1, Action.action_bet, 4)
+
+        plo.act(0, Action.action_fold)
+        self._assert_equal_payouts(plo.payouts, {1: 12})
