@@ -140,11 +140,10 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo.act(0, Action.action_fold)
         self._assert_equal_payouts(plo.payouts, {1: 12})
 
-    def test_heads_up_aipf(self):
+    def test_heads_up_all_in_preflop(self):
         """
-        preflop:  button raises to 4, BB calls
-        postflop: BB checks, button bets 4, BB folds
-
+        preflop:  pot-pot-pot-pot-all in-call
+                  BB wins with flopped royal flush
         """
         hand_0 = ['As', 'Ah', 'Ks', 'Kh']
         hand_1 = ['2c', '2d', '2h', '2s']
