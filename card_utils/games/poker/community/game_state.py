@@ -119,6 +119,27 @@ class CommunityGameState(PokerGameState):
                 if self.last_actions.get(p) == Action.action_fold
             )
 
+    def move_street(self):
+        """ increment the street and then deal out flop/turn/river if necessary """
+        super().move_street()
+        if self.street == 2 and len(self.board) == 0:
+            # Flop
+            self.deal_cards_to_board(3)
+        elif self.street == 3 and len(self.board) == 3:
+            # Turn
+            self.deal_cards_to_board(1)
+        elif self.street == 4 and len(self.board) == 4:
+            # River
+            self.deal_cards_to_board(1)
+
+    def deal_cards_to_board(self, n):
+        """
+        :param n: (int)
+        """
+        cards = self.deck[0:n]
+        self.deck = self.deck[n:]
+        self.boards[0].extend(cards)
+
     @property
     def board(self):
         """ in community card games, there is only one board,

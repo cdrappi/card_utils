@@ -291,17 +291,13 @@ class PokerGameState:
 
     def advance_action(self):
         """ move action forward and check if hand is over """
-        if not self.is_action_closed():
-            self.move_action()
+        if self.is_action_closed():
+            self.move_street()
         else:
-            self.is_all_action_complete = bool(
-                self.everyone_folded_or_all_in()
-                or self.street >= self.max_streets
-            )
-            if self.is_all_action_complete:
-                self.payouts = self.get_payouts()
-            else:
-                self.move_street()
+            self.move_action()
+
+        if self.street >= self.max_streets:
+            self.payouts = self.get_payouts()
 
     def get_payouts(self):
         """ sort hands and ship Pot
@@ -412,14 +408,14 @@ class PokerGameState:
             elif last_action in Action.aggressions and not is_all_in:
                 aggr_not_all_in += 1
 
-        # print(
-        #     f'folders={folders}\n'
-        #     f'checkers={checkers}\n'
-        #     f'aggr_not_all_in={aggr_not_all_in}\n'
-        #     f'all_in_last_street={all_in_last_street}\n'
-        #     f'not_yet_acted={not_yet_acted}\n'
-        #     f'{"-" * 10}'
-        # )
+        print(
+            f'folders={folders}\n'
+            f'checkers={checkers}\n'
+            f'aggr_not_all_in={aggr_not_all_in}\n'
+            f'all_in_last_street={all_in_last_street}\n'
+            f'not_yet_acted={not_yet_acted}\n'
+            f'{"-" * 10}'
+        )
 
         if folders == self.num_players - 1:
             # Case 1: everyone folds except 1 person

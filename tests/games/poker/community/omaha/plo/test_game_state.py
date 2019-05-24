@@ -124,8 +124,19 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo.act(0, Action.action_raise, amount=plo.max_bet)
         plo.act(1, Action.action_raise, amount=plo.max_bet)
         plo.act(0, Action.action_raise, amount=plo.max_bet)
+        plo.append_action(1, Action.action_raise, amount=plo.stacks[1])
 
-        print(plo.pot)
+        print(plo.last_actions)
+        self.assertFalse(plo.is_action_closed())
+
+        print(plo.pot.balances)
+        print(plo.amount_to_call)
+        print(plo.action)
+
+        plo.act(0, Action.action_call)
+
+        print(plo.pot.total_money)
+        print(plo.stacks)
         #
         # # self.assertFalse(plo.is_action_closed())
         # plo.advance_action()
