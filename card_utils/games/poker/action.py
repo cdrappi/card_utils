@@ -1,3 +1,6 @@
+""" validate poker actions with class """
+
+
 class Action:
     """ represent an action on a given street """
 
@@ -20,38 +23,33 @@ class Action:
     wagers = {action_call, *aggressions}
     actions = {*zeros, *wagers}
 
-    def __init__(self, player, street, action, amount=0):
+    def __init__(self, player, action, amount=0):
         """
         :param player: (int) player in game, 0-indexed
-        :param street: (int) 1-indexed
         :param action: (str) one of self.valid_action_types
         :param amount: (int) amount if any
         """
         if action not in self.actions:
-            raise TypeError(
-                f'StreetAction: Invalid action_type {action} '
-                f'on street {street}'
-            )
+            raise TypeError(f'Action: Invalid action {action}')
 
         if amount < 0:
             raise ValueError(
-                f'StreetAction: amount must be >= 0, received {amount}'
+                f'Action: amount must be >= 0, received {amount}'
             )
 
         if action in self.zeros:
             if amount != 0:
                 raise ValueError(
-                    f'StreetAction: amount must be 0 '
+                    f'Action: amount must be 0 '
                     f'for actions of type {action}'
                 )
         elif action in self.wagers:
             if amount <= 0:
                 raise ValueError(
-                    f'StreetAction: amount must be > 0 '
+                    f'Action: amount must be > 0 '
                     f'for actions of type {action}'
                 )
 
         self.player = player
-        self.street = street
         self.action = action
         self.amount = amount

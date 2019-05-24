@@ -195,28 +195,45 @@ class PokerGameState:
         self.append_action(player, action, amount=amount)
         self.advance_action()
 
-    def append_action(self, player, action, amount=0):
+    def build_action(self, player, action, amount):
+        """
+        :param player: (int)
+        :param action: (str)
+        :param amount: (int)
+        :return:
+        """
+        if amount is None:
+            if action == Action.action_call:
+                amount = self.amount_to_call
+            elif action in Action.zeros:
+                amount = 0
+            else:
+                raise ValueError(
+                    f'Amount cannot be None for action type {action}'
+                )
+
+        return Action(
+            player=player,
+            action=action,
+            amount=amount
+        )
+
+    def append_action(self, player, action, amount=None):
         """
         :param player: (int)
         :param action: (str)
         :param amount: (int)
         """
-        action = Action(
-            player=player,
-            street=self.street,
-            action=action,
-            amount=amount
-        )
-
-        if action.player != self.action:
+        action_obj = self.build_action(player, action, amount=amount)
+        if action_obj.player != self.action:
             raise Exception(
                 f'The calculated action is on {self.action}, but '
                 f'the next Action object comes from '
-                f'{action.player}'
+                f'{action_obj.player}'
             )
 
-        self.actions.append(action)
-        self.update_state_with_action(action)
+        self.actions.append(action_obj)
+        self.update_state_with_action(action_obj)
 
     def update_state_with_action(self, action):
         """
@@ -380,3 +397,11 @@ class PokerGameState:
             and checkers == 0
         )
         return everyone_closed_last_aggression
+
+    @property
+    def amount_to_call(self):
+        """
+        :param player: (int)
+        :return: (int)
+        """
+        return max(self.pot.balances.values()) - self.pot.balances[self.action]
