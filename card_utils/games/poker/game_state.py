@@ -387,7 +387,6 @@ class PokerGameState:
         """
         folders = 0
         checkers = 0
-        aggr_not_all_in = 0
         all_in_last_street = 0
         not_yet_acted = 0
         not_all_in_set = set()
@@ -412,8 +411,6 @@ class PokerGameState:
                 folders += 1
             elif last_action == Action.action_check:
                 checkers += 1
-            elif last_action in Action.aggressions and not is_all_in:
-                aggr_not_all_in += 1
 
         not_all_in_balances = {self.pot.balances[p] for p in not_all_in_set}
         if len(not_all_in_balances) > 1:
