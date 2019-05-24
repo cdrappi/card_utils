@@ -261,8 +261,6 @@ class PokerGameState:
             # if everyone's folded, no need to order hands
             else [players_at_showdown]
         )
-        print(winners)
-        print(self.pot.balances)
         payouts = self.pot.settle_showdown(winners)
         return payouts
 
