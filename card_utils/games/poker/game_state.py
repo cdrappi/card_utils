@@ -371,14 +371,14 @@ class PokerGameState:
             elif last_action in Action.aggressions and not is_all_in:
                 aggr_not_all_in += 1
 
-        print(
-            f'folders={folders}\n'
-            f'checkers={checkers}\n'
-            f'aggr_not_all_in={aggr_not_all_in}\n'
-            f'all_in_last_street={all_in_last_street}\n'
-            f'not_yet_acted={not_yet_acted}\n'
-            f'{"-" * 10}'
-        )
+        # print(
+        #     f'folders={folders}\n'
+        #     f'checkers={checkers}\n'
+        #     f'aggr_not_all_in={aggr_not_all_in}\n'
+        #     f'all_in_last_street={all_in_last_street}\n'
+        #     f'not_yet_acted={not_yet_acted}\n'
+        #     f'{"-" * 10}'
+        # )
 
         if folders == self.num_players - 1:
             # Case 1: everyone folds except 1 person
