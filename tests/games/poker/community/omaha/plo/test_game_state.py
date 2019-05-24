@@ -110,7 +110,6 @@ class PLOGameStateTestCase(unittest.TestCase):
         self.assertTrue(plo.is_action_closed())
 
         plo.advance_action()
-        self.assertTrue(plo.is_all_action_complete)
 
         self._assert_equal_payouts(plo.payouts, {0: 3})
 
