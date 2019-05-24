@@ -47,9 +47,8 @@ class PLOGameStateTestCase(unittest.TestCase):
         :param payouts: ({int: float})
         :param expected_payouts: ({int: float})
         """
-        for p in payouts:
-            if p not in expected_payouts:
-                expected_payouts[p] = 0
+        for p in set(payouts) - set(expected_payouts):
+            expected_payouts[p] = 0
 
         self.assertEqual(payouts, expected_payouts)
 
