@@ -198,6 +198,7 @@ class PLOGameStateTestCase(unittest.TestCase):
 
     def test_three_way_river_fold(self):
         """ button pots every street and they fold on the river """
+
         plo = self._create_random_setup(num_players=3)
 
         self.assertEqual(plo.street, 1)
@@ -239,4 +240,72 @@ class PLOGameStateTestCase(unittest.TestCase):
         self._assert_equal_payouts(
             payouts=plo.payouts,
             expected_payouts={2: 424}
+        )
+
+    def test_eight_way_normal_hand(self):
+        """ a reasonable 8-way hand """
+
+        hands = [
+            ['7c', '3s', '6s', '3h'],  # [0] SB - folds
+            ['Td', '7s', 'Jh', '3c'],  # [1] BB - calls
+            ['Js', '6d', '2h', 'Kh'],  # [2] 5-off - folds
+            ['Ah', '6c', 'Qs', 'Kd'],  # [3] 4-off - raises
+            ['Qc', '2s', '7h', 'Ks'],  # [4] 3-off - folds
+            ['4c', 'Jc', '5c', 'Ac'],  # [5] Hijack - folds
+            ['4d', 'Ad', '8s', '6h'],  # [6] Cutoff - folds
+            ['8d', '5d', '7d', 'Ts']  # [7] Button - calls
+        ]
+        boards = [['Kc', 'Qh', 'Qd', '9d', '3d']]
+        plo = self._create_fixed_setup(
+            num_players=8,
+            hands=hands,
+            boards=boards,
+            deck=[
+                c for c in DECK_CARDS
+                if not bool(
+                    any(c in h for h in hands)
+                    or (c in boards[0])
+                )
+            ]
+        )
+
+        self.assertEqual(plo.street, 1)
+
+        # Preflop
+        plo.act(2, Action.action_fold)
+        plo.act(3, Action.action_raise, amount=6)
+        plo.act(4, Action.action_fold)
+        plo.act(5, Action.action_fold)
+        plo.act(6, Action.action_fold)
+        plo.act(7, Action.action_call)
+        plo.act(0, Action.action_fold)
+        plo.act(1, Action.action_call)
+
+        self.assertEqual(plo.street, 2)
+
+        # Flop
+        plo.act(1, Action.action_check)
+        plo.act(3, Action.action_bet, amount=plo.max_bet)
+        plo.act(7, Action.action_call)
+        plo.act(1, Action.action_call)
+
+        self.assertEqual(plo.street, 3)
+
+        # Turn makes flush for poor button
+        plo.act(1, Action.action_check)
+        plo.act(3, Action.action_bet, amount=plo.max_bet)
+        plo.act(7, Action.action_call)
+        plo.act(1, Action.action_fold)
+
+        self.assertEqual(plo.street, 4)
+
+        # River
+        plo.act(3, Action.action_bet, amount=plo.stacks[3])
+        plo.act(7, Action.action_call)
+
+        self.assertEqual(plo.street, 5)
+
+        self._assert_equal_payouts(
+            payouts=plo.payouts,
+            expected_payouts={3: 426}
         )
