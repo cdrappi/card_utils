@@ -168,3 +168,30 @@ class PLOGameStateTestCase(unittest.TestCase):
             payouts=plo.payouts,
             expected_payouts={0: 400}
         )
+
+    def test_three_way_all_in_preflop(self):
+        """ three way all in, small blind wins with flopped royal """
+        hand_0 = ['As', 'Ah', 'Ks', 'Kh']
+        hand_1 = ['2c', '2d', '2h', '2s']
+        hand_2 = ['3c', '3d', '3h', '3s']
+        boards = [['Qs', 'Js', 'Ts']]
+        plo = self._create_fixed_setup(
+            num_players=3,
+            hands=[hand_0, hand_1, hand_2],
+            deck=[
+                c for c in DECK_CARDS
+                if c not in hand_0 + hand_1 + hand_2 + boards[0]
+            ]
+        )
+
+        plo.act(2, Action.action_raise, amount=plo.max_bet)
+        plo.act(0, Action.action_raise, amount=plo.max_bet)
+        plo.act(1, Action.action_raise, amount=plo.max_bet)
+        plo.act(2, Action.action_raise, amount=plo.stacks[2])
+        plo.act(0, Action.action_call)
+        plo.act(1, Action.action_call)
+
+        self._assert_equal_payouts(
+            payouts=plo.payouts,
+            expected_payouts={0: 600}
+        )

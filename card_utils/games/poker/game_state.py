@@ -389,6 +389,7 @@ class PokerGameState:
         aggr_not_all_in = 0
         all_in_last_street = 0
         not_yet_acted = 0
+        not_all_in_set = set()
 
         players_in_action_order = (
             self.mod_n(self.action + p)
@@ -398,6 +399,9 @@ class PokerGameState:
         for player in players_in_action_order:
             last_action = self.last_actions.get(player)
             is_all_in = self.is_all_in(player)
+
+            if last_action != Action.action_fold and not is_all_in:
+                not_all_in_set.add(player)
 
             if last_action is None and is_all_in:
                 all_in_last_street += 1
@@ -410,14 +414,20 @@ class PokerGameState:
             elif last_action in Action.aggressions and not is_all_in:
                 aggr_not_all_in += 1
 
-        # print(
-        #     f'folders={folders}\n'
-        #     f'checkers={checkers}\n'
-        #     f'aggr_not_all_in={aggr_not_all_in}\n'
-        #     f'all_in_last_street={all_in_last_street}\n'
-        #     f'not_yet_acted={not_yet_acted}\n'
-        #     f'{"-" * 10}'
-        # )
+        not_all_in_balances = {self.pot.balances[p] for p in not_all_in_set}
+        if len(not_all_in_balances) > 1:
+            # if those who are not all in but have not folded
+            # have different balances, then we action is not complete
+            return False
+
+        print(
+            f'folders={folders}\n'
+            f'checkers={checkers}\n'
+            f'aggr_not_all_in={aggr_not_all_in}\n'
+            f'all_in_last_street={all_in_last_street}\n'
+            f'not_yet_acted={not_yet_acted}\n'
+            f'{"-" * 10}'
+        )
 
         if folders == self.num_players - 1:
             # Case 1: everyone folds except 1 person
@@ -429,26 +439,20 @@ class PokerGameState:
             # or checked on this street
             return True
 
-        current_player_last_action = self.last_actions.get(self.action)
-        next_player_last_action = self.last_actions.get(self.get_next_action())
         everyone_closed_last_aggression = (
             # Case 3:
-            # the person who acts now did NOT bet or raise
-            current_player_last_action not in Action.aggressions
-            # The last action person who would theoretically act next
-            # was a bet or raise
-            and next_player_last_action in Action.aggressions
-            # and they are the only such aggressor who can be not all-in
-            and aggr_not_all_in <= 1
-            # Everyone else in the hand must have acted and not checked
-            and checkers + not_yet_acted == 0
+            # Everyone must have acted and not checked
+            checkers + not_yet_acted == 0
+            # and those who are not all in have all put
+            # an equal amount in the pot as the person
+            # who has put the most in the pot
+            and len({*not_all_in_balances, max(self.pot.balances)}) == 1
         )
         return everyone_closed_last_aggression
 
     @property
     def amount_to_call(self):
         """
-        :param player: (int)
         :return: (int)
         """
         return max(self.pot.balances.values()) - self.pot.balances[self.action]
@@ -456,14 +460,19 @@ class PokerGameState:
     @property
     def min_bet(self):
         """ in general, the min bet will be the biggest blind
+            and the minimum raise will be the difference
+            between the last two raises
 
         :return: (int|None)
         """
-        return max(self.blinds)
+        *_, second_highest, highest = sorted(self.pot.balances.values())
+        last_raise = highest - second_highest
+        biggest_blind = max(self.blinds)
+        return max(biggest_blind, last_raise)
 
     @property
     def max_bet(self):
         """
-        :return: (int|None)
+        :return: (int)
         """
-        return None
+        return self.stacks[self.action]
