@@ -59,6 +59,7 @@ class PotTestCase(unittest.TestCase):
         )
 
     def test_4_way_multi_balance_chop(self):
+        """ test a complex 4-way chop """
         self._dry_test(
             amounts_in={0: 10, 1: 20, 2: 30, 3: 40},
             winning_players=[[1], [2, 3]],
@@ -81,6 +82,7 @@ class PotTestCase(unittest.TestCase):
         )
 
     def test_eight_way_multi_balance_chop(self):
+        """ test a complex 8-way chop """
         starting_stacks = {i: 10 * i for i in range(8)}
         self._dry_test(
             amounts_in=starting_stacks,
