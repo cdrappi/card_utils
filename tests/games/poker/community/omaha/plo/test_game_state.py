@@ -26,7 +26,7 @@ class PLOGameStateTestCase(unittest.TestCase):
         """
         actions = actions or []
 
-        blinds = blinds or [1, 2]
+        blinds = blinds or ([1, 2] if num_players > 2 else [2, 1])
         if starting_stacks is None:
             starting_stacks = [200 for _ in range(num_players)]
 
