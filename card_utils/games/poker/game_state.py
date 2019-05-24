@@ -427,12 +427,15 @@ class PokerGameState:
             # or checked on this street
             return True
 
+        current_player_last_action = self.last_actions.get(self.action)
         next_player_last_action = self.last_actions.get(self.get_next_action())
         everyone_closed_last_aggression = (
             # Case 3:
             # The last action person who would theoretically act next
             # was a bet or raise
             next_player_last_action in Action.aggressions
+            # but the person who acts now did NOT bet or raise
+            and current_player_last_action not in Action.aggressions
             # and they are the only such aggressor who can be not all-in
             and aggr_not_all_in <= 1
             # Everyone else in the hand must have acted and not checked
