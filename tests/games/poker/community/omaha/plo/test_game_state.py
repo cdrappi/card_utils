@@ -200,16 +200,14 @@ class PLOGameStateTestCase(unittest.TestCase):
         """ button pots every street and they fold on the river """
         plo = self._create_random_setup(num_players=3)
 
+        self.assertEqual(plo.street, 1)
+
         # Preflop
         plo.act(2, Action.action_raise, amount=plo.max_bet)
         plo.act(0, Action.action_call)
-        plo.append_action(1, Action.action_call)
-
-        self.assertTrue(plo.is_action_closed())
-        plo.advance_action()
+        plo.act(1, Action.action_call)
 
         self.assertEqual(plo.street, 2)
-        self.assertEqual(plo.action, 0)
 
         # Flop
         plo.act(0, Action.action_check)
@@ -218,6 +216,8 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo.act(0, Action.action_call)
         plo.act(1, Action.action_call)
 
+        self.assertEqual(plo.street, 3)
+
         # Turn
         plo.act(0, Action.action_check)
         plo.act(1, Action.action_check)
@@ -225,12 +225,16 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo.act(0, Action.action_call)
         plo.act(1, Action.action_call)
 
+        self.assertEqual(plo.street, 4)
+
         # River
         plo.act(0, Action.action_check)
         plo.act(1, Action.action_check)
         plo.act(2, Action.action_bet, amount=plo.stacks[2])
         plo.act(0, Action.action_fold)
         plo.act(1, Action.action_fold)
+
+        self.assertEqual(plo.street, 5)
 
         self._assert_equal_payouts(
             payouts=plo.payouts,
