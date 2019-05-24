@@ -2,7 +2,7 @@
 from typing import List, Dict
 
 from card_utils.games.poker.game_state import PokerGameState
-from card_utils.games.poker.street_action import Action
+from card_utils.games.poker.action import Action
 
 
 class CommunityGameState(PokerGameState):
