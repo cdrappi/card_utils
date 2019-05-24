@@ -40,7 +40,18 @@ class PLOGameStateTestCase(unittest.TestCase):
             street_actions=street_actions
         )
 
-    def test_seed_street_actions(self):
+    def test_heads_up_game_initialisation(self):
+        """ test seeding the action """
+        plo = self._create_random_setup(num_players=2)
+        # action starts on the button
+        self.assertEqual(plo.action, 1)
+        # street 1 is preflop
+        self.assertEqual(plo.street, 1)
+
+    def test_multi_way_initialisation(self):
         """ test seeding the action """
         plo = self._create_random_setup(num_players=8)
-        
+        # action starts UTG
+        self.assertEqual(plo.action, 2)
+        # street 1 is preflop
+        self.assertEqual(plo.street, 1)
