@@ -200,7 +200,7 @@ class PokerGameState:
         :param player: (int)
         :param action: (str)
         :param amount: (int)
-        :return:
+        :return: (Action)
         """
         if amount is None:
             if action == Action.action_call:
