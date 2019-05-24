@@ -42,6 +42,17 @@ class PLOGameStateTestCase(unittest.TestCase):
             actions=actions
         )
 
+    def _assert_equal_payouts(self, payouts, expected_payouts):
+        """
+        :param payouts: ({int: float})
+        :param expected_payouts: ({int: float})
+        """
+        for p in payouts:
+            if p not in expected_payouts:
+                expected_payouts[p] = 0
+
+        self.assertEqual(payouts, expected_payouts)
+
     def test_heads_up_game_initialisation(self):
         """ test seeding the action """
         plo = self._create_random_setup(num_players=2)
@@ -67,9 +78,10 @@ class PLOGameStateTestCase(unittest.TestCase):
 
         self.assertEqual(plo.action, 1)
         plo.append_action(1, Action.action_fold)
-        print(f'last actions: {plo.last_actions}')
 
-        # self.assertTrue(plo.is_action_closed())
-        # self.assertTrue(plo.is_all_action_closed)
-        #
-        # self.assertEqual(plo.payouts, {0: 3})
+        self.assertTrue(plo.is_action_closed())
+
+        plo.advance_action()
+        self.assertTrue(plo.is_all_action_complete)
+
+        self._assert_equal_payouts(plo.payouts, {0: 3})

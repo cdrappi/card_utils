@@ -1,8 +1,11 @@
 """ class for generic omaha game state """
+import logging
 from typing import List, Dict
 
-from card_utils.games.poker.game_state import PokerGameState
 from card_utils.games.poker.action import Action
+from card_utils.games.poker.game_state import PokerGameState
+
+logger = logging.getLogger(__name__)
 
 
 class CommunityGameState(PokerGameState):
@@ -50,6 +53,16 @@ class CommunityGameState(PokerGameState):
                     f'class variable in {self.__class__.__name__}'
                 )
 
+        if num_players == 2 and blinds[0] < blinds[1]:
+            logger.warning(
+                f'Flipping the blinds for 2-handed play. To suppress this warning, '
+                f'you should flip the order of blinds in heads up play. '
+                f'e.g. input the blinds as [2, 1] rather than [1, 2] '
+                f'because the dealer pays the small blind '
+                f'and acts second on all later streets'
+            )
+            blinds = [blinds[1], blinds[0]]
+
         super().__init__(
             num_players=num_players,
             deck=deck,
@@ -74,6 +87,12 @@ class CommunityGameState(PokerGameState):
             f'All CommunityGameState objects must implement order_hands '
             f'to decide who wins at showdown'
         )
+
+    def extract_blinds(self):
+        """ move blinds from self.stacks to self.pot """
+        for player, blind in enumerate(self.blinds):
+            amount = min(self.stacks[player], blind)
+            self.put_money_in_pot(player, amount)
 
     def get_starting_action(self):
         """ given self.street_actions, derive the current:

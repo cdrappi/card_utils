@@ -75,7 +75,7 @@ class PokerGameState:
 
         self.actions = []
         self.pot = Pot(self.num_players)
-        self.is_all_action_closed = False
+        self.is_all_action_complete = False
         self.last_actions = {}
         self.payouts = {}
         self.action = 0
@@ -175,7 +175,7 @@ class PokerGameState:
         the list of StreetAction objects
         """
         self.pot = Pot(self.num_players)
-        self.is_all_action_closed = False
+        self.is_all_action_complete = False
         self.last_actions = {}
         self.payouts = {}
         self.extract_antes_and_blinds()
@@ -235,12 +235,14 @@ class PokerGameState:
         """ move action forward and check if hand is over """
         self.move_action()
         if self.is_action_closed():
-            if self.street < self.max_streets:
+            self.is_all_action_complete = bool(
+                self.everyone_folded_or_all_in()
+                or self.street >= self.max_streets
+            )
+            if not self.is_all_action_complete:
                 self.move_street()
-            else:
-                self.is_all_action_closed = True
 
-        if self.is_all_action_closed:
+        if self.is_all_action_complete:
             self.payouts = self.get_payouts()
 
     def get_payouts(self):
@@ -251,9 +253,16 @@ class PokerGameState:
         players_at_showdown = [
             player
             for player in range(self.num_players)
-            if self.last_actions[player] != Action.action_fold
+            if self.last_actions.get(player) != Action.action_fold
         ]
-        winners = self.order_hands(players_at_showdown)
+        winners = (
+            self.order_hands(players_at_showdown)
+            if len(players_at_showdown) > 1
+            # if everyone's folded, no need to order hands
+            else [players_at_showdown]
+        )
+        print(winners)
+        print(self.pot.balances)
         payouts = self.pot.settle_showdown(winners)
         return payouts
 
@@ -303,8 +312,22 @@ class PokerGameState:
             if action == Action.action_fold
         }
 
-    def is_action_closed(self):
+    def everyone_folded_or_all_in(self):
+        """ whether all action is closed for all streets
+
+        This only happens in one case:
+            Everyone except one person has either:
+                - folded
+                - went all in
+
+        :return: (bool)
         """
+        n_cant_act = sum(self.cannot_act(p) for p in range(self.num_players))
+        return n_cant_act == self.num_players - 1
+
+    def is_action_closed(self):
+        """ whether the action is closed for a particular street
+
         :return: (bool)
         """
         folders = 0
@@ -330,12 +353,12 @@ class PokerGameState:
             elif last_action in Action.aggressions and not is_all_in:
                 aggr_not_all_in += 1
 
-        print(
-            f'folders={folders}\n'
-            f'checkers={checkers}\n'
-            f'aggr_not_all_in={aggr_not_all_in}\n'
-            f'all_in_last_street={all_in_last_street}'
-        )
+        # print(
+        #     f'folders={folders}\n'
+        #     f'checkers={checkers}\n'
+        #     f'aggr_not_all_in={aggr_not_all_in}\n'
+        #     f'all_in_last_street={all_in_last_street}'
+        # )
 
         if folders == self.num_players - 1:
             # Case 1: everyone folds except 1 person
