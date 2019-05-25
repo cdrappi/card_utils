@@ -26,11 +26,11 @@ class Action:
     wagers = {action_call, *aggressions}
     actions = {*zeros, *wagers}
 
-    def __init__(self, player, action, amount=0):
+    def __init__(self, player, action, amount):
         """
         :param player: (int) player in game, 0-indexed
         :param action: (str) one of self.valid_action_types
-        :param amount: (int) amount if any
+        :param amount: (int) amount, 0 for CHECK/FOLD/DRAW
         """
         if action not in self.actions:
             raise TypeError(f'Action: Invalid action {action}')
