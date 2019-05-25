@@ -459,3 +459,14 @@ class PokerGameState:
         :return: (int)
         """
         return self.stacks[self.action]
+
+    @property
+    def pnl(self):
+        """ map player to their PnL for the hand
+
+        :return: ({int: float})
+        """
+        return {
+            ii: self.payouts.get(ii, 0) - stack
+            for ii, stack in enumerate(self.stacks)
+        }
