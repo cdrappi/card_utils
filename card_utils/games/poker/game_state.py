@@ -304,8 +304,8 @@ class PokerGameState:
                 is_action_closed = self.is_action_closed()
 
         if self.street >= self.showdown_street:
-            self.is_complete = True
             self.payouts = self.get_payouts()
+            self.is_complete = True
 
     def get_payouts(self):
         """ sort hands and ship Pot
