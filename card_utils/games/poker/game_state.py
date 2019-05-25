@@ -9,7 +9,7 @@ class PokerGameState:
 
     # NOTE: override this in subclasses
     name = 'abstract_poker'
-    max_streets = 0
+    showdown_street = 0
 
     def __init__(self,
                  num_players: int,
@@ -294,10 +294,10 @@ class PokerGameState:
         if not is_action_closed:
             self.move_action()
         else:
-            while self.is_action_closed() and self.street <= self.max_streets:
+            while self.is_action_closed() and self.street < self.showdown_street:
                 self.move_street()
 
-        if self.street > self.max_streets:
+        if self.street >= self.showdown_street:
             self.payouts = self.get_payouts()
 
     def get_payouts(self):

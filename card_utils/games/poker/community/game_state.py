@@ -19,7 +19,7 @@ class CommunityGameState(PokerGameState):
     # postflop = 2
     # turn = 3
     # river = 4
-    max_streets = 4
+    showdown_street = 5
 
     def __init__(self,
                  num_players: int,
