@@ -27,12 +27,12 @@ def get_best_hands_brute_force(board, hands):
 
     :param board: ([str]) list of 5 cards
     :param hands: ([set(str)]) list of sets of 4 cards
-    :return: ([int]) indices of `hands` that makes the strongest omaha hand,
+    :return: ([[int]]) indices of `hands` that makes the strongest omaha hand,
         --> this is a list because it is possible to "chop" with
             every hand rank except straight flushes, quads and flushes
     """
     return get_best_hands_generic(
+        hand_strength_function=brute_force_omaha_hi_rank,
         board=board,
         hands=hands,
-        hand_strength_function=brute_force_omaha_hi_rank
     )

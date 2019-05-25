@@ -10,17 +10,17 @@ from card_utils.games.poker import (
     STRAIGHT,
     ONE_PAIR,
 )
-from card_utils.games.poker.five_card_hand_rank import five_card_hand_rank
-from card_utils.games.poker.omaha.brute_force import (
+from card_utils.games.poker.community.omaha.brute_force import (
     get_best_hands_brute_force,
     brute_force_omaha_hi_rank,
 )
-from card_utils.games.poker.omaha.utils import (
+from card_utils.games.poker.community.omaha.utils import (
     get_hand_strength_fast,
     get_best_hands_fast,
     get_best_straight,
     get_possible_straights,
 )
+from card_utils.games.poker.five_card_hand_rank import five_card_hand_rank
 from card_utils.games.poker.util import pretty_hand_rank
 from card_utils.util import untuple_dict
 from tests.games.poker.util import deal_random_board_hands
@@ -79,10 +79,10 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         :param board: ([str])
         :param hands: ([{str}]) list of set of cards
         """
-        true_best_hand_indices = get_best_hands_brute_force(board, hands)
-        test_best_hand_indices = get_best_hands_fast(board, hands)
+        brute_force_hand_order = get_best_hands_brute_force(board, hands)
+        fast_hand_order = get_best_hands_fast(board, hands)
 
-        self.assertEqual(true_best_hand_indices, test_best_hand_indices)
+        self.assertEqual(brute_force_hand_order, fast_hand_order)
 
     def _assert_both_hand_orders(self, board, hand, correct_order):
         """
