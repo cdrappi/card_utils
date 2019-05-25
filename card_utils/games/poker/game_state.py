@@ -412,10 +412,15 @@ class PokerGameState:
             elif last_action == Action.action_check:
                 checkers += 1
 
-        not_all_in_balances = {self.pot.balances[p] for p in not_all_in_set}
+        not_all_in_balances = {
+            *{self.pot.balances[p] for p in not_all_in_set},
+            max(self.pot.balances.values())
+        }
         if len(not_all_in_balances) > 1:
             # if those who are not all in but have not folded
-            # have different balances, then we action is not complete
+            # have different balances, and their balance is not equal
+            # to the max any player has put in the pot,
+            # then we action is not complete
             return False
 
         # print(
@@ -437,16 +442,9 @@ class PokerGameState:
             # or checked on this street
             return True
 
-        everyone_closed_last_aggression = (
-            # Case 3:
-            # Everyone must have acted and not checked
-            checkers + not_yet_acted == 0
-            # and those who are not all in have all put
-            # an equal amount in the pot as the person
-            # who has put the most in the pot
-            and len({*not_all_in_balances, max(self.pot.balances.values())}) == 1
-        )
-        return everyone_closed_last_aggression
+        # Case 3:
+        # Everyone must have acted and not checked
+        return not_yet_acted == 0
 
     @property
     def amount_to_call(self):
