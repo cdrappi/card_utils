@@ -294,8 +294,9 @@ class PokerGameState:
         if not is_action_closed:
             self.move_action()
         else:
-            while self.is_action_closed() and self.street < self.showdown_street:
+            while is_action_closed and self.street < self.showdown_street:
                 self.move_street()
+                is_action_closed = self.is_action_closed()
 
         if self.street >= self.showdown_street:
             self.payouts = self.get_payouts()
