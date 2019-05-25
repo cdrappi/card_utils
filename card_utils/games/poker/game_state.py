@@ -366,20 +366,6 @@ class PokerGameState:
         }
         self.action = self.get_starting_action()
 
-    def everyone_folded_or_all_in(self):
-        """ whether all action is closed for all streets
-
-        This only happens in one case:
-            Everyone except one person has either:
-                - folded
-                - went all in
-
-        :return: (bool)
-        """
-        # TODO: delete?
-        n_cant_act = sum(self.cannot_act(p) for p in range(self.num_players))
-        return n_cant_act == self.num_players - 1
-
     def is_action_closed(self):
         """ whether the action is closed for a particular street
 
