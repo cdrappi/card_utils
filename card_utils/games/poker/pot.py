@@ -10,6 +10,7 @@ class Pot:
         """
         self.num_players = num_players
         self.balances = {p: 0 for p in range(num_players)}
+        self.money_from = {p: 0 for p in range(num_players)}
 
     def put_money_in(self, player, amount):
         """
@@ -17,6 +18,7 @@ class Pot:
         :param amount: (int) chips
         """
         self.balances[player] += amount
+        self.money_from[player] += amount
 
     def settle_showdown(self, winning_players):
         """

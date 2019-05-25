@@ -77,6 +77,7 @@ class PokerGameState:
         self.pot = Pot(self.num_players)
         self.last_actions = {}
         self.payouts = {}
+        self.is_complete = False
         self.action = 0
         self.street = 1
         self.reset_state_from_actions(actions)
@@ -199,6 +200,10 @@ class PokerGameState:
         :param action: (str)
         :param amount: (int)
         """
+        if self.is_complete:
+            raise Exception(
+                f'cannot append_action after the hand is_complete'
+            )
         action_obj = self.build_action(player, action, amount=amount)
         self.validate_action(action_obj)
         self.actions.append(action_obj)
@@ -300,6 +305,7 @@ class PokerGameState:
 
         if self.street >= self.showdown_street:
             self.payouts = self.get_payouts()
+            self.is_complete = True
 
     def get_payouts(self):
         """ sort hands and ship Pot
@@ -448,11 +454,15 @@ class PokerGameState:
 
         :return: (int|None)
         """
+        biggest_blind = max(self.blinds)
+
         # TODO: very unsure about this...
         *_, second_highest, highest = sorted(self.pot.balances.values())
         last_raise_delta = highest - second_highest
-        biggest_blind = max(self.blinds)
-        return max(biggest_blind, last_raise_delta + self.amount_to_call)
+
+        min_bet = max(biggest_blind, last_raise_delta + self.amount_to_call)
+        stack_size = self.stacks[self.action]
+        return min(min_bet, stack_size)
 
     @property
     def max_bet(self):
@@ -461,6 +471,13 @@ class PokerGameState:
         """
         return self.stacks[self.action]
 
+    def player_pnl(self, player):
+        """
+        :param player: (int)
+        :return: (float)
+        """
+        return self.payouts.get(player, 0) - self.pot.money_from[player]
+
     @property
     def pnl(self):
         """ map player to their PnL for the hand
@@ -468,6 +485,6 @@ class PokerGameState:
         :return: ({int: float})
         """
         return {
-            ii: self.payouts.get(ii, 0) - stack
-            for ii, stack in enumerate(self.stacks)
+            player: self.player_pnl(player)
+            for player in range(self.num_players)
         }
