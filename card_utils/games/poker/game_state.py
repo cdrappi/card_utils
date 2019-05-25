@@ -80,7 +80,7 @@ class PokerGameState:
         self.is_complete = False
         self.action = 0
         self.street = 1
-        self.reset_state_from_actions(actions)
+        self.reset_state_from_actions(actions or [])
 
     def get_starting_action(self):
         """ the player who starts the action
