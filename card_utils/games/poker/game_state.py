@@ -448,10 +448,11 @@ class PokerGameState:
 
         :return: (int|None)
         """
+        # TODO: very unsure about this...
         *_, second_highest, highest = sorted(self.pot.balances.values())
-        last_raise = highest - second_highest
+        last_raise_delta = highest - second_highest
         biggest_blind = max(self.blinds)
-        return max(biggest_blind, last_raise)
+        return max(biggest_blind, last_raise_delta + self.amount_to_call)
 
     @property
     def max_bet(self):
