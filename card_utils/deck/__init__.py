@@ -1,7 +1,7 @@
 """ constants to build the deck of cards and score the game """
 
 ranks = list('23456789TJQKA')
-suits = set('cdhs')
+suits = list('cdhs')
 
 cards = [f'{r}{s}' for r in ranks for s in suits]
 
