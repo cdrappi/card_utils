@@ -22,7 +22,8 @@ class PokerGameState:
                  stacks: List[int] = None,
                  action: int = 0,
                  street: int = 0,
-                 actions: List[Dict] = None,
+                 actions: List[Action] = None,
+                 action_dicts: List[Dict] = None,
                  last_actions: Dict[int, str] = None,
                  pot_balances: Dict[int, int] = None,
                  ):
@@ -90,7 +91,15 @@ class PokerGameState:
 
         self.action = action
         self.street = street
-        self.actions = [Action(**a) for a in actions or []]
+
+        if actions and action_dicts:
+            raise ValueError(
+                'can only provide either action or action_dicts '
+                'to initialise poker game state, not both'
+            )
+        elif action_dicts:
+            actions = [Action(**ad) for ad in action_dicts]
+        self.actions = actions or []
 
         self.pot = Pot(self.num_players, pot_balances)
         self.last_actions = last_actions or {}
@@ -98,16 +107,16 @@ class PokerGameState:
         self.is_complete = False
 
     @classmethod
-    def from_actions(cls,
-                     num_players: int,
-                     deck: List[str],
-                     hands: List[List[str]],
-                     starting_stacks: List[int],
-                     boards: List[List[str]] = None,
-                     ante: int = 0,
-                     blinds: List[int] = None,
-                     actions: List[Dict] = None,
-                     ):
+    def from_action_dicts(cls,
+                          num_players: int,
+                          deck: List[str],
+                          hands: List[List[str]],
+                          starting_stacks: List[int],
+                          boards: List[List[str]] = None,
+                          ante: int = 0,
+                          blinds: List[int] = None,
+                          action_dicts: List[Dict] = None,
+                          ):
         """
         :param num_players: (int)
         :param deck: ([str])
@@ -116,7 +125,7 @@ class PokerGameState:
         :param boards: ([[str]])
         :param ante: (int)
         :param blinds: ([int])
-        :param actions: ([dict]) list of dicts like:
+        :param action_dicts: ([dict]) list of dicts like:
             {
                 "player": int,
                 "action": str,
@@ -133,7 +142,7 @@ class PokerGameState:
             ante=ante,
             blinds=blinds,
         )
-        game_state.reset_state_from_actions(actions or [])
+        game_state.reset_state_from_action_dicts(action_dicts or [])
         return game_state
 
     def get_starting_action(self):
@@ -216,7 +225,7 @@ class PokerGameState:
         self.extract_antes()
         self.extract_blinds()
 
-    def reset_state_from_actions(self, actions):
+    def reset_state_from_action_dicts(self, action_dicts):
         """ given self.street_actions, derive the current:
             - pot size
             - street
@@ -235,35 +244,26 @@ class PokerGameState:
         self.street = 1
         self.action = self.get_starting_action()
 
-        for action_dict in actions:
+        for action_dict in action_dicts:
             self.act(**action_dict)
 
-    def act(self, player, action, amount=None):
-        """ create an action, update state and advance the game forward
-
-        :param player: (int)
-        :param action: (str)
-        :param amount: (int) if None, construct default
-        """
-        self.append_action(player, action, amount=amount)
+    def act(self, *args, **kwargs):
+        """ create an action, update state and advance the game forward """
+        self.append_action(*args, **kwargs)
         self.advance_action()
 
-    def append_action(self, player, action, amount=None):
-        """
-        :param player: (int)
-        :param action: (str)
-        :param amount: (int)
-        """
+    def append_action(self, *args, **kwargs):
+        """ build and append action to state """
         if self.is_complete:
             raise Exception(
                 f'cannot append_action after the hand is_complete'
             )
-        action_obj = self.build_action(player, action, amount=amount)
+        action_obj = self.build_action(*args, **kwargs)
         self.validate_action(action_obj)
         self.actions.append(action_obj)
         self.update_state_with_action(action_obj)
 
-    def build_action(self, player, action, amount):
+    def build_action(self, player, action, amount=None):
         """
         :param player: (int)
         :param action: (str)
@@ -283,7 +283,9 @@ class PokerGameState:
         return Action(
             player=player,
             action=action,
-            amount=amount
+            amount=amount,
+            street=self.street,
+            pot_before_action=self.pot.total_money
         )
 
     def validate_action(self, action):

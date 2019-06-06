@@ -26,11 +26,12 @@ class Action:
     wagers = {action_call, *aggressions}
     actions = {*zeros, *wagers}
 
-    def __init__(self, player, action, amount):
+    def __init__(self, player, action, amount, **state):
         """
         :param player: (int) player in game, 0-indexed
         :param action: (str) one of self.valid_action_types
         :param amount: (int) amount, 0 for CHECK/FOLD/DRAW
+        :param state: (dict) extra state data to record for convenience
         """
         if action not in self.actions:
             raise TypeError(f'Action: Invalid action {action}')
@@ -56,6 +57,8 @@ class Action:
         self.player = player
         self.action = action
         self.amount = amount
+
+        self.state = {**state}
 
     def to_dict(self):
         """
