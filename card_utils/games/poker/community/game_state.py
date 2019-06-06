@@ -67,7 +67,8 @@ class CommunityGameState(PokerGameState):
             if len(hand) != self.num_hole_cards:
                 raise ValueError(
                     f'Hands in {self.name} must have exactly '
-                    f'{self.num_hole_cards}\n'
+                    f'{self.num_hole_cards} cards. '
+                    f'You provided {len(hand)}\n'
                     f'Perhaps you need to override the num_hole_cards '
                     f'class variable in {self.__class__.__name__}'
                 )
