@@ -1,5 +1,6 @@
-from typing import List, Dict
 import copy
+from typing import List, Dict
+
 from card_utils.games.poker.action import Action
 from card_utils.games.poker.pot import Pot
 
@@ -501,7 +502,9 @@ class PokerGameState:
         """
         :return: (int)
         """
-        return max(self.pot.balances.values()) - self.pot.balances[self.action]
+        max_owed_to_pot = max(self.pot.balances.values()) - self.pot.balances[self.action]
+        stack_size = self.stacks[self.action]
+        return min(stack_size, max_owed_to_pot)
 
     @property
     def min_bet(self):
