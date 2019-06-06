@@ -103,7 +103,10 @@ class PokerGameState:
         self.pot = Pot(self.num_players, pot_balances)
 
         self.street = street
-        self.action = action or self.get_starting_action()
+
+        if action is None:
+            action = self.get_starting_action()
+        self.action = action
 
         if action is None:
             self.extract_antes_and_blinds()
