@@ -239,6 +239,14 @@ class CommunityGameState(PokerGameState):
         :param player_index: (int)
         :return: (str) e.g. 'BIG BLIND', 'BUTTON'
         """
+        if not (0 <= player_index < self.num_players):
+            raise ValueError(
+                f'CommunityGameState.player_name: invalid player_index arg: '
+                f'{player_index}'
+                f'\n'
+                f'Must be 0 <= player_index < num_players'
+            )
+
         if self.num_players == 2:
             return (
                 'BUTTON' if player_index == 1
@@ -256,4 +264,7 @@ class CommunityGameState(PokerGameState):
         elif player_index == self.num_players - 3:
             return 'HIJACK'
         else:
-            return f'{self.num_players - player_index - 1}-OFF / UTG+{(player_index - 2) or ""}'
+            utg_str = f'+{player_index - 2}' if player_index - 2 else ''
+            return (
+                f'{self.num_players - player_index - 1}-OFF / UTG{utg_str}'
+            )
