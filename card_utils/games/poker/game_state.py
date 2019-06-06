@@ -14,27 +14,36 @@ class PokerGameState:
     def __init__(self,
                  num_players: int,
                  deck: List[str],
-                 hands: List[List[str]],
                  starting_stacks: List[int],
+                 hands: List[List[str]],
                  boards: List[List[str]] = None,
                  ante: int = 0,
                  blinds: List[int] = None,
+                 stacks: List[int] = None,
+                 action: int = 0,
+                 street: int = 0,
                  actions: List[Dict] = None,
+                 last_actions: Dict[int, str] = None,
+                 pot_balances: Dict[int, int] = None,
                  ):
         """
         :param num_players: (int)
         :param deck: ([str])
+        :param starting_stacks: ([int])
         :param hands: ([[str]])
-        :param starting_stacks: ([[int]])
         :param boards: ([[str]])
         :param ante: (int)
         :param blinds: ([int])
+        :param action: (int)
+        :param street: (int)
         :param actions: ([dict]) list of dicts like:
             {
                 "player": int,
                 "action": str,
                 "amount": int  [only necessary for bet/call/raises]
             }
+        :param last_actions: ({int: str})
+        :param pot_balances: ({int: int})
         """
         if num_players < 2:
             raise ValueError(
@@ -59,7 +68,8 @@ class PokerGameState:
                 f'PokerGameState.__init__: '
                 f'must have exactly one starting stack per player'
             )
-        self.stacks = starting_stacks
+        self.starting_stacks = starting_stacks
+        self.stacks = stacks or [stack for stack in starting_stacks]
 
         boards = boards or [[]]
         if len(boards) not in {1, num_players}:
@@ -73,14 +83,52 @@ class PokerGameState:
         self.ante = ante
         self.blinds = blinds or []
 
-        self.actions = []
-        self.pot = Pot(self.num_players)
-        self.last_actions = {}
+        self.action = action
+        self.street = street
+        self.actions = [Action(**a) for a in actions or []]
+
+        self.pot = Pot(self.num_players, pot_balances)
+        self.last_actions = last_actions or {}
         self.payouts = {}
         self.is_complete = False
-        self.action = 0
-        self.street = 1
-        self.reset_state_from_actions(actions or [])
+
+    @staticmethod
+    def from_actions(num_players: int,
+                     deck: List[str],
+                     hands: List[List[str]],
+                     starting_stacks: List[int],
+                     boards: List[List[str]] = None,
+                     ante: int = 0,
+                     blinds: List[int] = None,
+                     actions: List[Dict] = None,
+                     ):
+        """
+        :param num_players: (int)
+        :param deck: ([str])
+        :param hands: ([[str]])
+        :param starting_stacks: ([[int]])
+        :param boards: ([[str]])
+        :param ante: (int)
+        :param blinds: ([int])
+        :param actions: ([dict]) list of dicts like:
+            {
+                "player": int,
+                "action": str,
+                "amount": int  [only necessary for bet/call/raises]
+            }
+        :return: (PokerGameState)
+        """
+        game_state = PokerGameState(
+            num_players=num_players,
+            deck=deck,
+            hands=hands,
+            starting_stacks=starting_stacks,
+            boards=boards,
+            ante=ante,
+            blinds=blinds,
+        )
+        game_state.reset_state_from_actions(actions or [])
+        return game_state
 
     def get_starting_action(self):
         """ the player who starts the action
@@ -476,7 +524,7 @@ class PokerGameState:
         :param player: (int)
         :return: (float)
         """
-        return self.payouts.get(player, 0) - self.pot.money_from[player]
+        return self.payouts.get(player, 0) - self.starting_stacks[player]
 
     @property
     def pnl(self):
