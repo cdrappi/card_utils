@@ -99,6 +99,44 @@ class CommunityGameState(PokerGameState):
             pot_balances=pot_balances
         )
 
+    @property
+    def valid_actions(self):
+        """ big blind also gets option
+
+        :return: ({str})
+        """
+        valid_action_set = super().valid_actions
+        if self.is_acting_last_preflop():
+            valid_action_set.add(Action.action_raise)
+        return valid_action_set
+
+    @property
+    def big_blind_player(self):
+        """
+        :return: (bool)
+        """
+        return 0 if self.num_players == 2 else 1
+
+    @property
+    def utg_preflop(self):
+        """
+        In heads-up, player 1 is the button AND the small blind,
+        and therefore starts the action before the flop
+
+        Otherwise, the "UTG" player goes first.
+        In 3-handed games, this is the dealer
+
+        :return: (int)
+        """
+        return 1 if self.num_players == 2 else 2
+
+    def is_acting_last_preflop(self):
+        """ big blind acts last pre-flop
+
+        :return: (bool)
+        """
+        return self.street == 0 and self.action == self.big_blind_player
+
     def order_hands(self, players):
         """ given a list of players who've seen the hand to showdown,
             sort them by their hand strength,
@@ -127,14 +165,7 @@ class CommunityGameState(PokerGameState):
         """
         if self.street == 0:
             # Pre-flop action begins with UTG (2) except 2-handed
-            return (
-                # In heads-up, player 1 is the button AND the small blind,
-                # and therefore starts the action before the flop
-                1 if self.num_players == 2
-                # Otherwise, the "UTG" player goes first.
-                # In 3-handed games, this is the dealer
-                else 2
-            )
+            return self.utg_preflop()
         else:
             # Post-flop action always begins with the first player
             # left of the dealer who hasn't folded
