@@ -90,6 +90,7 @@ class CommunityGameState(PokerGameState):
             boards=boards,
             ante=ante,
             blinds=blinds,
+            stacks=stacks,
             action=action,
             street=street,
             actions=actions,

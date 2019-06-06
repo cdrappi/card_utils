@@ -56,3 +56,13 @@ class Action:
         self.player = player
         self.action = action
         self.amount = amount
+
+    def to_dict(self):
+        """
+        :return: (dict)
+        """
+        return {
+            'player': self.player,
+            'action': self.action,
+            'amount': self.amount
+        }
