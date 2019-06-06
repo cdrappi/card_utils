@@ -165,7 +165,7 @@ class CommunityGameState(PokerGameState):
         """
         if self.street == 0:
             # Pre-flop action begins with UTG (2) except 2-handed
-            return self.utg_preflop()
+            return self.utg_preflop
         else:
             # Post-flop action always begins with the first player
             # left of the dealer who hasn't folded
