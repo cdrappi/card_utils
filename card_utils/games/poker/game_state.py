@@ -80,8 +80,13 @@ class PokerGameState:
             )
         self.boards = boards
 
+        blinds = blinds or []
+        if not (ante or any(blinds)):
+            raise ValueError(
+                f'There must be either an ante or blinds to play poker'
+            )
         self.ante = ante
-        self.blinds = blinds or []
+        self.blinds = blinds
 
         self.action = action
         self.street = street
@@ -292,20 +297,15 @@ class PokerGameState:
                 f'{action.player}'
             )
 
-        if self.amount_to_call == 0:
-            if action.action in Action.nonzero_to_call:
-                raise ValueError(
-                    f'it is 0 to call, so {action.action} '
-                    f'is an invalid action'
-                )
-        else:
-            if action.action in Action.zero_to_call:
-                raise ValueError(
-                    f'it is {self.amount_to_call} to call, '
-                    f'so {action.action} is an invalid action'
-                )
+        if action.action not in self.valid_actions:
+            raise ValueError(
+                f'it is {self.amount_to_call} to call, so {action.action} '
+                f'is an invalid action'
+            )
 
         if self.stacks[action.player] < action.amount:
+            # this is prevented by the max_bet property,
+            # but added here to make debugging easier
             raise Exception(
                 f'Player {action.player} only has '
                 f'{self.stacks[action.player]} in stack, '
@@ -313,7 +313,7 @@ class PokerGameState:
             )
 
         if action.action in Action.aggressions:
-            if self.min_bet is not None and action.amount < self.min_bet:
+            if action.amount < self.min_bet:
                 raise ValueError(
                     f'Invalid {action.action} size: '
                     f'amount {action.amount} '
@@ -321,12 +321,22 @@ class PokerGameState:
                 )
 
         if action.action in Action.aggressions:
-            if self.max_bet is not None and action.amount > self.max_bet:
+            if action.amount > self.max_bet:
                 raise ValueError(
                     f'Invalid {action.action} size: '
                     f'amount {action.amount} '
                     f'is greater than the limit of {self.max_bet}'
                 )
+
+    @property
+    def valid_actions(self):
+        """
+        :return: ({str})
+        """
+        if self.amount_to_call == 0:
+            return Action.zero_to_call
+        else:
+            return Action.nonzero_to_call
 
     def update_state_with_action(self, action):
         """
@@ -465,15 +475,6 @@ class PokerGameState:
             # then we action is not complete
             return False
 
-        # print(
-        #     f'folders={folders}\n'
-        #     f'checkers={checkers}\n'
-        #     f'aggr_not_all_in={aggr_not_all_in}\n'
-        #     f'all_in_last_street={all_in_last_street}\n'
-        #     f'not_yet_acted={not_yet_acted}\n'
-        #     f'{"-" * 10}'
-        # )
-
         if folders == self.num_players - 1:
             # Case 1: everyone folds except 1 person
             return True
@@ -501,9 +502,9 @@ class PokerGameState:
             and the minimum raise will be the difference
             between the last two raises
 
-        :return: (int|None)
+        :return: (int)
         """
-        biggest_blind = max(self.blinds)
+        biggest_blind = max([self.ante, *self.blinds])
 
         # TODO: very unsure about this...
         *_, second_highest, highest = sorted(self.pot.balances.values())
