@@ -146,13 +146,13 @@ class CommunityGameState(PokerGameState):
     def move_street(self):
         """ increment the street and then deal out flop/turn/river if necessary """
         super().move_street()
-        if self.street == 2 and len(self.board) == 0:
+        if self.street == 2 and not self.flop:
             # Flop
             self.deal_cards_to_board(3)
-        elif self.street == 3 and len(self.board) == 3:
+        elif self.street == 3 and not self.turn:
             # Turn
             self.deal_cards_to_board(1)
-        elif self.street == 4 and len(self.board) == 4:
+        elif self.street == 4 and not self.river:
             # River
             self.deal_cards_to_board(1)
 
@@ -172,3 +172,24 @@ class CommunityGameState(PokerGameState):
         :return: ([str])
         """
         return self.boards[0]
+
+    @property
+    def flop(self):
+        """
+        :return: ([str])
+        """
+        return self.board[0:3]
+
+    @property
+    def turn(self):
+        """
+        :return: ([str])
+        """
+        return self.board[3:4]
+
+    @property
+    def river(self):
+        """
+        :return: ([str])
+        """
+        return self.board[4:5]
