@@ -16,7 +16,7 @@ class Action:
     # for drawing games
     action_draw = 'DRAW'
 
-    zero_to_call = {action_bet, action_check, action_draw}
+    zero_to_call = {action_bet, action_check}
     nonzero_to_call = {action_fold, action_call, action_raise}
 
     zeros = {action_fold, action_check, action_draw}
