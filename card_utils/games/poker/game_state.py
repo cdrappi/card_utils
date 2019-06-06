@@ -104,6 +104,9 @@ class PokerGameState:
         self.street = street
         self.action = action or self.get_starting_action()
 
+        if action is None and not pot_balances:
+            self.extract_antes_and_blinds()
+
         self.payouts = {}
         self.is_complete = False
 
