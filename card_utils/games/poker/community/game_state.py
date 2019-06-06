@@ -21,6 +21,14 @@ class CommunityGameState(PokerGameState):
     # river = 3
     showdown_street = 4
 
+    street_names = {
+        0: 'PRE-FLOP',
+        1: 'FLOP',
+        2: 'TURN',
+        3: 'RIVER',
+        4: 'SHOWDOWN'
+    }
+
     def __init__(self,
                  num_players: int,
                  deck: List[str],
@@ -225,3 +233,27 @@ class CommunityGameState(PokerGameState):
         :return: ([str])
         """
         return self.board[4:5]
+
+    def player_name(self, player_index):
+        """
+        :param player_index: (int)
+        :return: (str) e.g. 'BIG BLIND', 'BUTTON'
+        """
+        if self.num_players == 2:
+            return (
+                'BUTTON' if player_index == 1
+                else 'BIG BLIND'
+            )
+
+        if player_index == 0:
+            return 'SMALL BLIND'
+        elif player_index == 1:
+            return 'BIG BLIND'
+        elif player_index == self.num_players - 1:
+            return 'BUTTON'
+        elif player_index == self.num_players - 2:
+            return 'CUTOFF'
+        elif player_index == self.num_players - 3:
+            return 'HIJACK'
+        else:
+            return f'{self.num_players - player_index - 1}-OFF / UTG+{(player_index - 2) or ""}'
