@@ -307,8 +307,8 @@ class PokerGameState:
 
         if action.action not in self.valid_actions:
             raise ValueError(
-                f'it is {self.amount_to_call} to call, so {action.action} '
-                f'is an invalid action'
+                f'it is {self.amount_to_call} to call, '
+                f'so {action.action} is invalid'
             )
 
         if self.stacks[action.player] < action.amount:
