@@ -40,7 +40,7 @@ class PLOGameStateTestCase(unittest.TestCase):
             starting_stacks = [200 for _ in range(num_players)]
         self.assertEqual(num_players, len(starting_stacks))
 
-        return PLOGameState(
+        return PLOGameState.from_actions(
             num_players=num_players,
             deck=deck,
             hands=hands,

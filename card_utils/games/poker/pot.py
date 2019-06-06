@@ -4,13 +4,13 @@ from card_utils.util import inverse_cumulative_sum
 class Pot:
     """ class to handle side-pot logic """
 
-    def __init__(self, num_players):
+    def __init__(self, num_players, balances=None):
         """
         :param num_players: (int)
+        :param balances: ({str: int})
         """
         self.num_players = num_players
-        self.balances = {p: 0 for p in range(num_players)}
-        self.money_from = {p: 0 for p in range(num_players)}
+        self.balances = balances or {p: 0 for p in range(num_players)}
 
     def put_money_in(self, player, amount):
         """
@@ -18,7 +18,6 @@ class Pot:
         :param amount: (int) chips
         """
         self.balances[player] += amount
-        self.money_from[player] += amount
 
     def settle_showdown(self, winning_players):
         """
