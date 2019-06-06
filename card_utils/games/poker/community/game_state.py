@@ -24,21 +24,36 @@ class CommunityGameState(PokerGameState):
     def __init__(self,
                  num_players: int,
                  deck: List[str],
-                 hands: List[List[str]],
                  starting_stacks: List[int],
+                 hands: List[List[str]],
                  boards: List[List[str]] = None,
                  ante: int = 0,
                  blinds: List[int] = None,
+                 stacks: List[int] = None,
+                 action: int = 0,
+                 street: int = 0,
                  actions: List[Dict] = None,
+                 last_actions: Dict[int, str] = None,
+                 pot_balances: Dict[int, int] = None,
                  ):
         """
         :param num_players: (int)
         :param deck: ([str])
+        :param starting_stacks: ([int])
         :param hands: ([[str]])
-        :param starting_stacks: ([[int]])
         :param boards: ([[str]])
+        :param ante: (int)
         :param blinds: ([int])
-        :param actions: ([dict])
+        :param action: (int)
+        :param street: (int)
+        :param actions: ([dict]) list of dicts like:
+            {
+                "player": int,
+                "action": str,
+                "amount": int  [only necessary for bet/call/raises]
+            }
+        :param last_actions: ({int: str})
+        :param pot_balances: ({int: int})
         """
         if boards is None:
             boards = [[]]
@@ -70,12 +85,16 @@ class CommunityGameState(PokerGameState):
         super().__init__(
             num_players=num_players,
             deck=deck,
-            hands=hands,
             starting_stacks=starting_stacks,
+            hands=hands,
             boards=boards,
             ante=ante,
             blinds=blinds,
+            action=action,
+            street=street,
             actions=actions,
+            last_actions=last_actions,
+            pot_balances=pot_balances
         )
 
     def order_hands(self, players):
