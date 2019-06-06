@@ -263,11 +263,12 @@ class PokerGameState:
         self.actions.append(action_obj)
         self.update_state_with_action(action_obj)
 
-    def build_action(self, player, action, amount=None):
+    def build_action(self, player, action, amount=None, **state):
         """
         :param player: (int)
         :param action: (str)
         :param amount: (int)
+        :param state: (dict) extra state to pass into Action
         :return: (Action)
         """
         if amount is None:
@@ -284,8 +285,7 @@ class PokerGameState:
             player=player,
             action=action,
             amount=amount,
-            street=self.street,
-            pot_before_action=self.pot.total_money
+            **state,
         )
 
     def validate_action(self, action):
