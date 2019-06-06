@@ -87,7 +87,7 @@ class PLOGameStateTestCase(unittest.TestCase):
         # action starts on the button
         self.assertEqual(plo.action, 1)
         # street 1 is preflop
-        self.assertEqual(plo.street, 1)
+        self.assertEqual(plo.street, 0)
 
     def test_multi_way_initialisation(self):
         """ test seeding the action """
@@ -95,7 +95,7 @@ class PLOGameStateTestCase(unittest.TestCase):
         # action starts UTG
         self.assertEqual(plo.action, 2)
         # street 1 is preflop
-        self.assertEqual(plo.street, 1)
+        self.assertEqual(plo.street, 0)
 
     def test_heads_up_preflop_fold(self):
         """ test whether the action works correctly
@@ -130,10 +130,10 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo.append_action(0, Action.action_call)
 
         self.assertTrue(plo.is_action_closed())
-        self.assertEqual(plo.street, 1)
+        self.assertEqual(plo.street, 0)
         plo.advance_action()
 
-        self.assertEqual(plo.street, 2)
+        self.assertEqual(plo.street, 1)
         plo.act(0, Action.action_check)
         plo.act(1, Action.action_bet, 4)
 
@@ -201,14 +201,14 @@ class PLOGameStateTestCase(unittest.TestCase):
 
         plo = self._create_random_setup(num_players=3)
 
-        self.assertEqual(plo.street, 1)
+        self.assertEqual(plo.street, 0)
 
         # Preflop
         plo.act(2, Action.action_raise, amount=plo.max_bet)
         plo.act(0, Action.action_call)
         plo.act(1, Action.action_call)
 
-        self.assertEqual(plo.street, 2)
+        self.assertEqual(plo.street, 1)
 
         # Flop
         plo.act(0, Action.action_check)
@@ -217,7 +217,7 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo.act(0, Action.action_call)
         plo.act(1, Action.action_call)
 
-        self.assertEqual(plo.street, 3)
+        self.assertEqual(plo.street, 2)
 
         # Turn
         plo.act(0, Action.action_check)
@@ -226,7 +226,7 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo.act(0, Action.action_call)
         plo.act(1, Action.action_call)
 
-        self.assertEqual(plo.street, 4)
+        self.assertEqual(plo.street, 3)
 
         # River
         plo.act(0, Action.action_check)
@@ -235,7 +235,7 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo.act(0, Action.action_fold)
         plo.act(1, Action.action_fold)
 
-        self.assertEqual(plo.street, 5)
+        self.assertEqual(plo.street, 4)
 
         self._assert_equal_payouts(
             payouts=plo.payouts,
@@ -269,7 +269,7 @@ class PLOGameStateTestCase(unittest.TestCase):
             ]
         )
 
-        self.assertEqual(plo.street, 1)
+        self.assertEqual(plo.street, 0)
 
         # Preflop
         plo.act(2, Action.action_fold)
@@ -281,7 +281,7 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo.act(0, Action.action_fold)
         plo.act(1, Action.action_call)
 
-        self.assertEqual(plo.street, 2)
+        self.assertEqual(plo.street, 1)
 
         # Flop
         plo.act(1, Action.action_check)
@@ -289,7 +289,7 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo.act(7, Action.action_call)
         plo.act(1, Action.action_call)
 
-        self.assertEqual(plo.street, 3)
+        self.assertEqual(plo.street, 2)
 
         # Turn makes flush for poor button
         plo.act(1, Action.action_check)
@@ -297,13 +297,13 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo.act(7, Action.action_call)
         plo.act(1, Action.action_fold)
 
-        self.assertEqual(plo.street, 4)
+        self.assertEqual(plo.street, 3)
 
         # River
         plo.act(3, Action.action_bet, amount=plo.stacks[3])
         plo.act(7, Action.action_call)
 
-        self.assertEqual(plo.street, 5)
+        self.assertEqual(plo.street, 4)
 
         self._assert_equal_payouts(
             payouts=plo.payouts,

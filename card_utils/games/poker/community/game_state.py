@@ -15,11 +15,11 @@ class CommunityGameState(PokerGameState):
     name = 'abstract_community'
     num_hole_cards = 0
 
-    # preflop = 1
-    # postflop = 2
-    # turn = 3
-    # river = 4
-    showdown_street = 5
+    # preflop = 0
+    # postflop = 1
+    # turn = 2
+    # river = 3
+    showdown_street = 4
 
     def __init__(self,
                  num_players: int,
@@ -125,7 +125,7 @@ class CommunityGameState(PokerGameState):
             - action
             - players who have folded
         """
-        if self.street == 1:
+        if self.street == 0:
             # Pre-flop action begins with UTG (2) except 2-handed
             return (
                 # In heads-up, player 1 is the button AND the small blind,
@@ -147,13 +147,13 @@ class CommunityGameState(PokerGameState):
     def move_street(self):
         """ increment the street and then deal out flop/turn/river if necessary """
         super().move_street()
-        if self.street == 2 and not self.flop:
+        if self.street == 1 and not self.flop:
             # Flop
             self.deal_cards_to_board(3)
-        elif self.street == 3 and not self.turn:
+        elif self.street == 2 and not self.turn:
             # Turn
             self.deal_cards_to_board(1)
-        elif self.street == 4 and not self.river:
+        elif self.street == 3 and not self.river:
             # River
             self.deal_cards_to_board(1)
 

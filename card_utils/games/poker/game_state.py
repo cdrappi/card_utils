@@ -20,7 +20,7 @@ class PokerGameState:
                  ante: int = 0,
                  blinds: List[int] = None,
                  stacks: List[int] = None,
-                 action: int = 0,
+                 action: int = None,
                  street: int = 0,
                  actions: List[Action] = None,
                  action_dicts: List[Dict] = None,
@@ -89,8 +89,7 @@ class PokerGameState:
         self.ante = ante
         self.blinds = blinds
 
-        self.action = action
-        self.street = street
+        self.last_actions = last_actions or {}
 
         if actions and action_dicts:
             raise ValueError(
@@ -100,9 +99,11 @@ class PokerGameState:
         elif action_dicts:
             actions = [Action(**ad) for ad in action_dicts]
         self.actions = actions or []
-
         self.pot = Pot(self.num_players, pot_balances)
-        self.last_actions = last_actions or {}
+
+        self.street = street
+        self.action = action or self.get_starting_action()
+
         self.payouts = {}
         self.is_complete = False
 
@@ -241,7 +242,7 @@ class PokerGameState:
         self.last_actions = {}
         self.payouts = {}
         self.extract_antes_and_blinds()
-        self.street = 1
+        self.street = 0
         self.action = self.get_starting_action()
 
         for action_dict in action_dicts:
