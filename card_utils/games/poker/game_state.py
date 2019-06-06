@@ -536,7 +536,11 @@ class PokerGameState:
         :param player: (int)
         :return: (float)
         """
-        return self.payouts.get(player, 0) - self.starting_stacks[player]
+        return (
+            self.payouts.get(player, 0)
+            + self.stacks[player]
+            - self.starting_stacks[player]
+        )
 
     @property
     def pnl(self):
