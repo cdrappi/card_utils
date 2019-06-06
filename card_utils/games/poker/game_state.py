@@ -92,8 +92,9 @@ class PokerGameState:
         self.payouts = {}
         self.is_complete = False
 
-    @staticmethod
-    def from_actions(num_players: int,
+    @classmethod
+    def from_actions(cls,
+                     num_players: int,
                      deck: List[str],
                      hands: List[List[str]],
                      starting_stacks: List[int],
@@ -118,7 +119,7 @@ class PokerGameState:
             }
         :return: (PokerGameState)
         """
-        game_state = PokerGameState(
+        game_state = cls(
             num_players=num_players,
             deck=deck,
             hands=hands,
