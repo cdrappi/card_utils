@@ -40,14 +40,14 @@ class PLOGameStateTestCase(unittest.TestCase):
             starting_stacks = [200 for _ in range(num_players)]
         self.assertEqual(num_players, len(starting_stacks))
 
-        return PLOGameState.from_actions(
+        return PLOGameState.from_action_dicts(
             num_players=num_players,
             deck=deck,
             hands=hands,
             boards=boards,
             starting_stacks=starting_stacks,
             blinds=blinds,
-            actions=actions
+            action_dicts=actions
         )
 
     def _create_random_setup(self,
