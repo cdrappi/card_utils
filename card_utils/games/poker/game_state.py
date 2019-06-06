@@ -1,5 +1,5 @@
 from typing import List, Dict
-
+import copy
 from card_utils.games.poker.action import Action
 from card_utils.games.poker.pot import Pot
 
@@ -70,7 +70,7 @@ class PokerGameState:
                 f'must have exactly one starting stack per player'
             )
         self.starting_stacks = starting_stacks
-        self.stacks = stacks or [stack for stack in starting_stacks]
+        self.stacks = stacks or copy.deepcopy(starting_stacks)
 
         boards = boards or [[]]
         if len(boards) not in {1, num_players}:
@@ -241,6 +241,7 @@ class PokerGameState:
         to set these four helper state variables given
         the list of StreetAction objects
         """
+        self.stacks = copy.deepcopy(self.starting_stacks)
         self.pot = Pot(self.num_players)
         self.last_actions = {}
         self.payouts = {}

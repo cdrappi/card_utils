@@ -30,7 +30,7 @@ class CommunityGameState(PokerGameState):
                  ante: int = 0,
                  blinds: List[int] = None,
                  stacks: List[int] = None,
-                 action: int = 0,
+                 action: int = None,
                  street: int = 0,
                  actions: List[Dict] = None,
                  last_actions: Dict[int, str] = None,
