@@ -102,10 +102,11 @@ class CommunityGameState(PokerGameState):
     @property
     def valid_actions(self):
         """ big blind also gets option
+
         :return: ({str})
         """
         valid_action_set = super().valid_actions
-        if self.street == 0 and self.action == self.big_blind_player:
+        if self.is_acting_last_preflop():
             valid_action_set.add(Action.action_raise)
         return valid_action_set
 
@@ -129,11 +130,12 @@ class CommunityGameState(PokerGameState):
         """
         return 1 if self.num_players == 2 else 2
 
-    def acts_last_preflop(self):
-        """ the big blind
+    def is_acting_last_preflop(self):
+        """ big blind acts last pre-flop
+
         :return: (bool)
         """
-        return self.action == self.big_blind_player
+        return self.street == 0 and self.action == self.big_blind_player
 
     def order_hands(self, players):
         """ given a list of players who've seen the hand to showdown,
