@@ -80,8 +80,13 @@ class PokerGameState:
             )
         self.boards = boards
 
+        blinds = blinds or []
+        if not (ante or any(blinds)):
+            raise ValueError(
+                f'There must be either an ante or blinds to play poker'
+            )
         self.ante = ante
-        self.blinds = blinds or []
+        self.blinds = blinds
 
         self.action = action
         self.street = street
