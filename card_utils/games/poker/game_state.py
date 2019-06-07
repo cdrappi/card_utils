@@ -493,13 +493,20 @@ class PokerGameState:
             # Case 1: everyone folds except 1 person
             return True
 
+        if len(not_all_in_balances) == 1:
+            # Case 2: if everyone is all in except one person,
+            # then everyone else must have either
+            # folded or been all in last street
+            if folders + all_in_last_street == self.num_players - 1:
+                return True
+
         if folders + checkers + all_in_last_street == self.num_players:
-            # Case 2: no one this street has made any bets,
+            # Case 3: no one this street has made any bets,
             # and everyone had either folded or went all on a previous street,
             # or checked on this street
             return True
 
-        # Case 3:
+        # Case 4:
         # Everyone must have acted and not checked
         return not_yet_acted == 0
 
