@@ -269,25 +269,12 @@ class CommunityGameState(PokerGameState):
                 f'{self.num_players - player_index - 1}-OFF / UTG{utg_str}'
             )
 
-    def state_to_dict(self, player):
+    def state_dict(self, player):
         """ serialise all game state to dictionary
+            from the perspective of the input player
 
         :param player: (int)
         :return: (dict)
-
-        num_players: int,
-        deck: List[str],
-        starting_stacks: List[int],
-        hands: List[List[str]],
-        boards: List[List[str]] = None,
-        ante: int = 0,
-        blinds: List[int] = None,
-        stacks: List[int] = None,
-        action: int = None,
-        street: int = 0,
-        actions: List[Dict] = None,
-        last_actions: Dict[int, str] = None,
-        pot_balances: Dict[int, int] = None,
         """
         return {
             'player': player,
@@ -295,6 +282,11 @@ class CommunityGameState(PokerGameState):
             'starting_stacks': self.starting_stacks,
             'hand': self.hands[player],
             'board': self.board,
+            'ante': self.ante,
+            'blinds': self.blinds,
+            'action': self.action,
+            'street': self.street,
+            'actions': [action.to_dict() for action in self.actions],
+            'last_actions': self.last_actions,
             'pot_balances': self.pot.balances,
-
         }
