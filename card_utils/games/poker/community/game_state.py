@@ -180,10 +180,7 @@ class CommunityGameState(PokerGameState):
             # e.g. small blind (0), then big blind (1)... etc
             return next(
                 p for p in range(self.num_players)
-                if bool(
-                    self.last_actions.get(p) != Action.action_fold
-                    and not self.is_all_in(p)
-                )
+                if not self.cannot_act(p)
             )
 
     def move_street(self):
