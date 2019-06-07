@@ -445,9 +445,11 @@ class PokerGameState:
         except StopIteration:
             if not self.is_action_closed():
                 raise Exception(
-                    f'Could not find a player to start the action, '
-                    f'but the action is not closed, so we have a bug.'
+                    'The action is not closed, but we could not '
+                    'find the player who starts the action, '
+                    'so there is a bug. Fix me'
                 )
+            self.action = None
 
     def is_action_closed(self):
         """ whether the action is closed for a particular street
@@ -460,12 +462,7 @@ class PokerGameState:
         not_yet_acted = 0
         not_all_in_set = set()
 
-        players_in_action_order = (
-            self.mod_n(self.action + p)
-            for p in range(self.num_players)
-        )
-
-        for player in players_in_action_order:
+        for player in range(self.num_players):
             last_action = self.last_actions.get(player)
             is_all_in = self.is_all_in(player)
 
