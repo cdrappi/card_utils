@@ -1,7 +1,5 @@
 from card_utils.deck.utils import random_deck
-from card_utils.games.poker import (
-    inverse_hand_order
-)
+from card_utils.games.poker import inverse_hand_order
 
 
 def pretty_hand_rank(hand_rank_tuple):
