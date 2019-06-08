@@ -35,3 +35,36 @@ def inverse_cumulative_sum(increasing_numbers: List[Union[int, float]]):
         inv_cumsum.append(e2 - e1)
 
     return inv_cumsum
+
+
+class LightDefaultDict(dict):
+
+    def __init__(self, default_factory, **kwargs):
+        """
+        :param default_factory: (function) e.g. int, float, list
+        """
+        super().__init__(**kwargs)
+        self.default_factory = default_factory
+
+    def __getitem__(self, item):
+        """
+        :param item: (hashable object)
+        :return: (object)
+        """
+        try:
+            return super().__getitem__(item)
+        except KeyError:
+            return self.default_factory()
+
+
+def count_items(items):
+    """
+    :param items: (list)
+    :return: (dict) items --> count of item
+    """
+    counts = LightDefaultDict(int)
+
+    for item in items:
+        counts[item] += 1
+
+    return counts

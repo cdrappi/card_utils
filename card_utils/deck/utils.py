@@ -1,4 +1,3 @@
-import copy
 import random
 
 from card_utils import deck
@@ -8,7 +7,7 @@ def random_deck():
     """
     :return: ([str]) randomly shuffled deck of 52 cards
     """
-    deck_copy = copy.deepcopy(deck.cards)
+    deck_copy = [c for c in deck.cards]
     random.shuffle(deck_copy)
     return deck_copy
 

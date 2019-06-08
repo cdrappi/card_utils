@@ -22,7 +22,7 @@ hand_2 = ['5s', '2h', '8h', '8c']
 hands  = [hand_1, hand_2]
 
 """
-import collections
+
 import itertools
 from typing import Tuple
 
@@ -45,6 +45,7 @@ from card_utils.games.poker import (
     HIGH_CARD,
 )
 from card_utils.games.poker.util import get_best_hands_generic
+from card_utils.util import count_items, LightDefaultDict
 
 
 def get_best_hands_fast(board, hands):
@@ -130,8 +131,9 @@ def get_hand_strength_fast(board, hand) -> Tuple:
 
     hand_values_list = [ace_high_rank_to_value[r] for r, _ in hand]
 
-    hand_values = collections.Counter(hand_values_list)
-    board_values = collections.Counter({
+    hand_values = count_items(hand_values_list)
+    board_values = LightDefaultDict(int)
+    board_values.update({
         ace_high_rank_to_value[rank]: len(suits)
         for rank, suits in board_by_ranks.items()
     })
@@ -377,8 +379,8 @@ def _get_best_flush(hand_flush_values):
 
 def _get_best_quads(hands_values, board_values):
     """
-    :param hands_values: (collections.Counter({int: int}))
-    :param board_values: (collections.Counter({int: int}))
+    :param hands_values: (LightDefaultDict({int: int}))
+    :param board_values: (LightDefaultDict({int: int}))
     :return: (int, int) quads value, kicker
     """
     best_quads = tuple()
@@ -401,8 +403,8 @@ def _get_best_quads(hands_values, board_values):
 
 def _get_best_full_house(hands_values, board_values):
     """
-    :param hands_values: (collections.Counter({int: int}))
-    :param board_values: (collections.Counter({int: int}))
+    :param hands_values: (LightDefaultDict({int: int}))
+    :param board_values: (LightDefaultDict({int: int}))
     :return: (int, int) trips value, pair value
     """
     best_boat = tuple()  # "boat" is another term for full house
@@ -458,8 +460,8 @@ def _get_best_full_house(hands_values, board_values):
 
 def _get_best_three_of_a_kind(hand_values, board_values):
     """
-    :param hand_values: (collections.Counter({int: int}))
-    :param board_values: (collections.Counter({int: int}))
+    :param hand_values: (LightDefaultDict({int: int}))
+    :param board_values: (LightDefaultDict({int: int}))
     :return: (int, int, int) trips value, best kicker, 2nd best kicker
     """
     best_three_of_a_kind = tuple()
@@ -531,8 +533,8 @@ def _get_best_three_of_a_kind(hand_values, board_values):
 
 def _get_best_two_pair(hand_values, board_values):
     """
-    :param hand_values: (collections.Counter({int: int}))
-    :param board_values: (collections.Counter({int: int}))
+    :param hand_values: (LightDefaultDict({int: int}))
+    :param board_values: (LightDefaultDict({int: int}))
     :return: (int, int, int) top pair, bottom pair, kicker
     """
     best_two_pair = tuple()
@@ -581,8 +583,8 @@ def _get_best_two_pair(hand_values, board_values):
 
 def _get_best_pair(hand_values, board_values):
     """
-    :param hand_values: (collections.Counter({int: int}))
-    :param board_values: (collections.Counter({int: int}))
+    :param hand_values: (LightDefaultDict({int: int}))
+    :param board_values: (LightDefaultDict({int: int}))
     :return: (int, int, int, int) pair, best kicker, 2nd best, 3rd best
     """
     best_pair = tuple()
@@ -625,8 +627,8 @@ def _get_best_pair(hand_values, board_values):
 
 def _get_best_high_card(hand_values, board_values):
     """
-    :param hand_values: (collections.Counter({int: int}))
-    :param board_values: (collections.Counter({int: int}))
+    :param hand_values: (LightDefaultDict({int: int}))
+    :param board_values: (LightDefaultDict({int: int}))
     :return: (tuple) 5 card values
     """
     best_3_board_values = sorted(board_values, reverse=True)[0:3]

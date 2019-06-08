@@ -1,4 +1,3 @@
-import copy
 from typing import List, Dict
 
 from card_utils.games.poker.action import Action
@@ -71,7 +70,7 @@ class PokerGameState:
                 f'must have exactly one starting stack per player'
             )
         self.starting_stacks = starting_stacks
-        self.stacks = stacks or copy.deepcopy(starting_stacks)
+        self.stacks = stacks or [s for s in starting_stacks]
 
         boards = boards or [[]]
         if len(boards) not in {1, num_players}:
@@ -244,7 +243,7 @@ class PokerGameState:
         to set these four helper state variables given
         the list of StreetAction objects
         """
-        self.stacks = copy.deepcopy(self.starting_stacks)
+        self.stacks = [s for s in self.starting_stacks]
         self.pot = Pot(self.num_players)
         self.last_actions = {}
         self.payouts = {}
@@ -530,8 +529,8 @@ class PokerGameState:
         biggest_blind = max([self.ante, *self.blinds])
 
         # TODO: very unsure about this...
-        *_, second_highest, highest = sorted(self.pot.balances.values())
-        last_raise_delta = highest - second_highest
+        sorted_pot_balances = sorted(self.pot.balances.values(), reverse=True)
+        last_raise_delta = sorted_pot_balances[0] - sorted_pot_balances[1]
 
         min_bet = max(biggest_blind, last_raise_delta + self.amount_to_call)
         stack_size = self.stacks[self.action]

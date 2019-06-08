@@ -1,5 +1,3 @@
-import collections
-
 from card_utils.deck.utils import (
     ranks_to_sorted_values,
 )
@@ -15,13 +13,14 @@ from card_utils.games.poker import (
     ONE_PAIR,
     HIGH_CARD,
 )
+from card_utils.util import count_items, LightDefaultDict
 
 
 def five_card_hand_rank(five_card_hand):
     """
 
     :param five_card_hand: ([str]) a hand of exactly 5 cards
-    :return:
+    :return: (tuple(int))
     """
     if len(five_card_hand) != 5:
         raise ValueError(
@@ -138,13 +137,17 @@ def _get_inverse_ah_value_counts(aces_high_values):
     :param aces_high_values: ([str]) e.g. [2, 12, 13, 14, 14]
     :return: ({int: [int]}) e.g. {2: [14], 1: [13,12,2]}
     """
-    ah_value_counts = collections.Counter(aces_high_values)
+    ah_value_counts = count_items(aces_high_values)
 
-    reverse_counts = collections.defaultdict(list)
+    reverse_counts = {}
     for value, ct in ah_value_counts.items():
+        if ct not in reverse_counts:
+            reverse_counts[ct] = []
         reverse_counts[ct].append(value)
 
     for ct in reverse_counts:
         reverse_counts[ct].sort(reverse=True)
 
-    return reverse_counts
+    ldd = LightDefaultDict(list)
+    ldd.update(reverse_counts)
+    return ldd
