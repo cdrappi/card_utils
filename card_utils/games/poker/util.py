@@ -7,8 +7,7 @@ def pretty_hand_rank(hand_rank_tuple):
     :param hand_rank_tuple: (tuple(int))
     :return: (str)
     """
-    hand_order_ = next(hand_rank_tuple)
-    return inverse_hand_order[hand_order_]
+    return inverse_hand_order[hand_rank_tuple[0]]
 
 
 def get_best_hands_generic(hand_strength_function, board, hands):

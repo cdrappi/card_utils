@@ -132,7 +132,8 @@ def get_hand_strength_fast(board, hand) -> Tuple:
     hand_values_list = [ace_high_rank_to_value[r] for r, _ in hand]
 
     hand_values = count_items(hand_values_list)
-    board_values = LightDefaultDict({
+    board_values = LightDefaultDict(int)
+    board_values.update({
         ace_high_rank_to_value[rank]: len(suits)
         for rank, suits in board_by_ranks.items()
     })

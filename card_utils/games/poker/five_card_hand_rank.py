@@ -13,7 +13,7 @@ from card_utils.games.poker import (
     ONE_PAIR,
     HIGH_CARD,
 )
-from card_utils.util import count_items
+from card_utils.util import count_items, LightDefaultDict
 
 
 def five_card_hand_rank(five_card_hand):
@@ -148,4 +148,6 @@ def _get_inverse_ah_value_counts(aces_high_values):
     for ct in reverse_counts:
         reverse_counts[ct].sort(reverse=True)
 
-    return reverse_counts
+    ldd = LightDefaultDict(list)
+    ldd.update(reverse_counts)
+    return ldd
