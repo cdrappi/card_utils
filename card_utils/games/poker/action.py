@@ -58,7 +58,7 @@ class Action:
         self.action = action
         self.amount = amount
 
-        self.state = {**state}
+        self.state = state
 
     def to_dict(self):
         """

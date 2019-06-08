@@ -7,7 +7,7 @@ def pretty_hand_rank(hand_rank_tuple):
     :param hand_rank_tuple: (tuple(int))
     :return: (str)
     """
-    hand_order_, *kickers_ = hand_rank_tuple
+    hand_order_ = next(hand_rank_tuple)
     return inverse_hand_order[hand_order_]
 
 

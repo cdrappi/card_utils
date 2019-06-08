@@ -35,3 +35,29 @@ def inverse_cumulative_sum(increasing_numbers: List[Union[int, float]]):
         inv_cumsum.append(e2 - e1)
 
     return inv_cumsum
+
+
+class LightDefaultDict(dict):
+
+    def __getitem__(self, item):
+        """
+        :param item: (hashable object)
+        :return: (object)
+        """
+        try:
+            return super().__getitem__(item)
+        except KeyError:
+            return 0
+
+
+def count_items(items):
+    """
+    :param items: (list)
+    :return: (dict) items --> count of item
+    """
+    counts = LightDefaultDict()
+
+    for item in items:
+        counts[item] += 1
+
+    return counts
