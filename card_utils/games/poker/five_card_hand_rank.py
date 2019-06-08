@@ -20,7 +20,7 @@ def five_card_hand_rank(five_card_hand):
     """
 
     :param five_card_hand: ([str]) a hand of exactly 5 cards
-    :return:
+    :return: (tuple(int))
     """
     if len(five_card_hand) != 5:
         raise ValueError(

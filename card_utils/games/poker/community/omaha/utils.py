@@ -45,7 +45,7 @@ from card_utils.games.poker import (
     HIGH_CARD,
 )
 from card_utils.games.poker.util import get_best_hands_generic
-from card_utils.util import count_items
+from card_utils.util import count_items, LightDefaultDict
 
 
 def get_best_hands_fast(board, hands):
@@ -132,10 +132,10 @@ def get_hand_strength_fast(board, hand) -> Tuple:
     hand_values_list = [ace_high_rank_to_value[r] for r, _ in hand]
 
     hand_values = count_items(hand_values_list)
-    board_values = {
+    board_values = LightDefaultDict({
         ace_high_rank_to_value[rank]: len(suits)
         for rank, suits in board_by_ranks.items()
-    }
+    })
 
     if is_paired_board:
         best_quads = _get_best_quads(hand_values, board_values)
