@@ -83,7 +83,10 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
         """
         self._test_hi_point_count(
             hand=['As', 'Kd', 'Qh', 'Ts'],
-            expected_value=31
+            # NOTE: Hutchinson actually gets this incorrect,
+            #       as step three should only award the hand 19 points,
+            #       because it has an ace!
+            expected_value=27
         )
 
     def test_wheel_broadway_double_suited(self):
