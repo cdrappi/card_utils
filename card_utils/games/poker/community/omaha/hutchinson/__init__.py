@@ -136,30 +136,46 @@ def straights_contribution(hand):
         distinct=True
     )
 
-    four_contribution = _straights_contribution(sorted_values, 4)
+    four_contribution, _ = _straights_contribution(sorted_values, 4)
     if four_contribution:
         return four_contribution
 
-    three_contribution = _straights_contribution(sorted_values, 3)
+    three_contribution, indices = _straights_contribution(sorted_values, 3)
     if three_contribution:
         # check if there is also a dangling two contribution
+        assert len(indices) == 1
+        [[i1, i2, i3]] = indices
+        if i1 > 0:
+            low_two_contribution, _ = _straights_contribution(sorted_values[:i2], 2)
+            three_contribution += low_two_contribution
+        if i3 < 4:
+            high_two_contribution, _ = _straights_contribution(sorted_values[i3:], 2)
+            three_contribution += high_two_contribution
         return three_contribution
 
-    return _straights_contribution(sorted_values, 2)
+    two_contribution, _ = _straights_contribution(sorted_values, 2)
+    return two_contribution
 
 
 def _straights_contribution(sorted_values, subset_size):
     """
     :param sorted_values: ([int])
     :param subset_size: (int) 2, 3 or 4
-    :return: ()
+    :return: (int, [[int]])
     """
-    count = 0
-    for ii in range(5 - subset_size):
-        values_sublist = sorted_values[ii:ii + subset_size]
-        count += _straights_sub_contribution(values_sublist)
+    n_values = len(sorted_values)
+    contributing_indices = []
 
-    return count
+    count = 0
+    for ii in range(n_values + 1 - subset_size):
+        sub_contribution = _straights_sub_contribution(
+            sorted_values_sublist=sorted_values[ii:ii + subset_size]
+        )
+        if sub_contribution:
+            count += sub_contribution
+            contributing_indices.append(list(range(ii, ii + subset_size)))
+
+    return count, contributing_indices
 
 
 def _straights_sub_contribution(sorted_values_sublist):
@@ -169,17 +185,19 @@ def _straights_sub_contribution(sorted_values_sublist):
     """
     count = 0
 
-    n_gaps = max(sorted_values_sublist) - min(sorted_values_sublist) - 1
+    n_values = len(sorted_values_sublist)
+    n_gaps = (
+        max(sorted_values_sublist)
+        - min(sorted_values_sublist)
+        - n_values
+        + 1
+    )
     if n_gaps <= 3:
-        # all 4 cards, so return 25 minus n_gaps
-        n_cards = len(sorted_values_sublist)
-        count += straight_contribution_values[n_cards] - 2 * n_gaps
+        count += straight_contribution_values[n_values] - 2 * n_gaps
 
         has_hi_ace = 14 in sorted_values_sublist
         has_lo_ace = 1 in sorted_values_sublist
         if has_lo_ace or has_hi_ace:
             count -= 4
-        if has_lo_ace:
-            wheel_cards = sum(1 for v in sorted_values_sublist if 2 <= v <= 5)
-            count += 6 * min(2, wheel_cards)
+
     return count

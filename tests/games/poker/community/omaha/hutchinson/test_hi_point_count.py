@@ -4,7 +4,11 @@ from card_utils.games.poker.community.omaha.hutchinson import hi_point_count
 
 
 class BestOmahaHighHandTestCase(unittest.TestCase):
-    """ Test for the Omaha hi hutchinson point count """
+    """ Test for the Omaha hi hutchinson point count
+
+        cases come directly from:
+            http://erh.homestead.com/omaha.html
+    """
 
     def setUp(self):
         pass
