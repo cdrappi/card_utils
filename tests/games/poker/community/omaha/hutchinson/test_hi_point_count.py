@@ -101,3 +101,9 @@ class BestOmahaHighHandTestCase(unittest.TestCase):
             hand=['As', '3s', 'Kd', '4d'],
             expected_value=30
         )
+
+    def test_two_three_straight_contributions(self):
+        self._test_hi_point_count(
+            hand=['7s', 'Tc', 'Ac', 'Jh'],
+            expected_value=32  # 14 + (18 - 2 * 2) + 8 - 4
+        )
