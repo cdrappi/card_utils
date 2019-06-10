@@ -143,8 +143,13 @@ def straights_contribution(hand):
     three_contribution, indices = _straights_contribution(sorted_values, 3)
     if three_contribution:
         # check if there is also a dangling two contribution
-        assert len(indices) == 1
-        [[i1, i2, i3]] = indices
+        max_indices = max(
+            indices,
+            key=lambda k: _straights_sub_contribution(
+                sorted_values_sublist=sorted_values[k[0]:k[0] + 3]
+            )
+        )
+        [i1, i2, i3] = max_indices
         if i1 > 0:
             low_two_contribution, _ = _straights_contribution(sorted_values[:i2], 2)
             three_contribution += low_two_contribution
