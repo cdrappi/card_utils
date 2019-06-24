@@ -125,6 +125,7 @@ class PokerGameState:
         ante: int = 0,
         blinds: List[int] = None,
         action_dicts: List[Dict] = None,
+        all_in_runouts: int = 1,
     ):
         """
         :param num_players: (int)
@@ -140,6 +141,7 @@ class PokerGameState:
                 "action": str,
                 "amount": int  [only necessary for bet/call/raises]
             }
+        :param all_in_runouts: (int)
         :return: (PokerGameState)
         """
         game_state = cls(
@@ -150,6 +152,7 @@ class PokerGameState:
             boards=boards,
             ante=ante,
             blinds=blinds,
+            all_in_runouts=all_in_runouts,
         )
         game_state.reset_state_from_action_dicts(action_dicts or [])
         return game_state
@@ -410,9 +413,7 @@ class PokerGameState:
 
         cards_remaining = self.get_cards_remaining()
         num_runouts = (
-            self.all_in_runouts
-            if cards_remaining and self.action is None
-            else 1
+            self.all_in_runouts if cards_remaining and self.action is None else 1
         )
         avg_payouts = {p: 0 for p in range(self.num_players)}
         for _ in range(num_runouts):
