@@ -291,4 +291,3 @@ class PLOGameStateTestCase(unittest.TestCase):
         self.assertEqual(plo.street, 4)
 
         self._assert_equal_payouts(payouts=plo.payouts, expected_payouts={3: 426})
-
