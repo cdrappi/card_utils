@@ -1,5 +1,6 @@
 """ class for generic omaha game state """
 import logging
+import random
 from typing import Dict, List
 
 from card_utils.games.poker.action import Action
@@ -157,6 +158,25 @@ class CommunityGameState(PokerGameState):
             f"to decide who wins at showdown"
         )
 
+    def get_cards_remaining(self) -> int:
+        """
+        :return: (int)
+        """
+        return 5 - len(self.board)
+
+    def fill_all_in_board(self, cards_remaining: int):
+        """
+        :param cards_remaining: (int)
+        """
+        runout = random.sample(self.deck, cards_remaining)
+        self.boards[0] = self.boards[0] + runout
+
+    def reset_all_in_board(self, cards_remaining: int):
+        """
+        :param cards_remaining: (int)
+        """
+        self.boards[0] = self.boards[0][0:5 - cards_remaining]
+
     def extract_blinds(self):
         """ move blinds from self.stacks to self.pot """
         for player, blind in enumerate(self.blinds):
@@ -181,6 +201,13 @@ class CommunityGameState(PokerGameState):
     def move_street(self):
         """ increment the street and then deal out flop/turn/river if necessary """
         super().move_street()
+        if self.action is None:
+            # the action is closed because everyone is all in,
+            # and we need to deal multiple runouts,
+            # and this is persisted back to PokerGameState
+            # by setting self.action to None
+            return
+
         if self.street == 1 and not self.flop:
             # Flop
             self.deal_cards_to_board(3)

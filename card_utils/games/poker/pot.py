@@ -1,3 +1,4 @@
+from typing import List
 from card_utils.util import inverse_cumulative_sum
 
 
@@ -19,9 +20,9 @@ class Pot:
         """
         self.balances[player] += amount
 
-    def settle_showdown(self, winning_players):
+    def settle_showdown(self, winning_players: List[List[int]]):
         """
-        :param winning_players: ([[int]]) list of players who made it
+        :param winning_players: ([[int]]) list of list of players who made it
             to showdown, sorted by hand strength (strongest first)
         :return: ({int: int}) player index --> amount won
         """
