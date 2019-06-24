@@ -50,7 +50,6 @@ class PLOGameStateTestCase(unittest.TestCase):
             starting_stacks=starting_stacks,
             blinds=blinds,
             action_dicts=actions,
-            all_in_runouts=2,
         )
 
     def _create_random_setup(
