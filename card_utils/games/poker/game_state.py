@@ -409,22 +409,22 @@ class PokerGameState:
             return self.pot.settle_showdown([players_at_showdown])
 
         cards_remaining = self.get_cards_remaining()
-        runouts = (
+        num_runouts = (
             self.all_in_runouts
             if cards_remaining and self.action is None
             else 1
         )
         avg_payouts = {p: 0 for p in range(self.num_players)}
-        for _ in range(board_runouts):
+        for _ in range(num_runouts):
             pot = Pot(
                 num_players=self.num_players,
-                pot_balances={p: bal for p, bal in self.pot.balances.items()},
+                balances={p: bal for p, bal in self.pot.balances.items()},
             )
-            self.fill_all_in_board(cards_remaining)
+            self.runout_all_in_board(cards_remaining)
             winners = self.order_hands(players_at_showdown)
             runout_payouts = pot.settle_showdown(winners)
             for p, amt in runout_payouts.items():
-                avg_payouts[p] += amt / runouts
+                avg_payouts[p] += amt / num_runouts
             self.reset_all_in_board(cards_remaining)
         return avg_payouts
 

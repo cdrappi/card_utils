@@ -164,7 +164,7 @@ class CommunityGameState(PokerGameState):
         """
         return 5 - len(self.board)
 
-    def fill_all_in_board(self, cards_remaining: int):
+    def runout_all_in_board(self, cards_remaining: int):
         """
         :param cards_remaining: (int)
         """
@@ -175,7 +175,7 @@ class CommunityGameState(PokerGameState):
         """
         :param cards_remaining: (int)
         """
-        self.boards[0] = self.boards[0][0:5 - cards_remaining]
+        self.boards[0] = self.boards[0][0 : 5 - cards_remaining]
 
     def extract_blinds(self):
         """ move blinds from self.stacks to self.pot """
