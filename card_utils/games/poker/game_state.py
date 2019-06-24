@@ -474,16 +474,19 @@ class PokerGameState:
             for player, action in self.last_actions.items()
             if action == Action.action_fold
         }
+
+        if self.is_action_closed():
+            self.action = None
+            return
+
         try:
             self.action = self.get_starting_action()
         except StopIteration:
-            if not self.is_action_closed():
-                raise Exception(
-                    "The action is not closed, but we could not "
-                    "find the player who starts the action, "
-                    "so there is a bug. Fix me"
-                )
-            self.action = None
+            raise Exception(
+                "The action is not closed, but we could not "
+                "find the player who starts the action, "
+                "so there is a bug. Fix me"
+            )
 
     def is_action_closed(self):
         """ whether the action is closed for a particular street
