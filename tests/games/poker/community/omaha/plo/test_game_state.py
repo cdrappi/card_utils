@@ -50,6 +50,7 @@ class PLOGameStateTestCase(unittest.TestCase):
             starting_stacks=starting_stacks,
             blinds=blinds,
             action_dicts=actions,
+            all_in_runouts=2,
         )
 
     def _create_random_setup(
@@ -151,6 +152,7 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo = self._create_fixed_setup(
             num_players=2,
             hands=[hand_0, hand_1],
+            boards=boards,
             deck=[c for c in DECK_CARDS if c not in hand_0 + hand_1 + boards[0]],
         )
 
@@ -172,6 +174,7 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo = self._create_fixed_setup(
             num_players=3,
             hands=[hand_0, hand_1, hand_2],
+            boards=boards,
             deck=[
                 c for c in DECK_CARDS if c not in hand_0 + hand_1 + hand_2 + boards[0]
             ],
