@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict, List
 
 from card_utils.games.poker.action import Action
 from card_utils.games.poker.pot import Pot
@@ -26,6 +26,7 @@ class PokerGameState:
                  action_dicts: List[Dict] = None,
                  last_actions: Dict[int, str] = None,
                  pot_balances: Dict[int, int] = None,
+                 all_in_runouts: int = 1,
                  ):
         """
         :param num_players: (int)
@@ -45,6 +46,7 @@ class PokerGameState:
             }
         :param last_actions: ({int: str})
         :param pot_balances: ({int: int})
+        :param all_in_runouts: (int)
         """
         if num_players < 2:
             raise ValueError(
@@ -90,6 +92,7 @@ class PokerGameState:
         self.blinds = blinds
 
         self.last_actions = last_actions or {}
+        self.all_in_runouts = all_in_runouts
 
         if actions and action_dicts:
             raise ValueError(

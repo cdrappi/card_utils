@@ -1,6 +1,6 @@
 """ class for generic omaha game state """
 import logging
-from typing import List, Dict
+from typing import Dict, List
 
 from card_utils.games.poker.action import Action
 from card_utils.games.poker.game_state import PokerGameState
@@ -12,7 +12,7 @@ class CommunityGameState(PokerGameState):
     """ basic community card game state """
 
     # NOTE: override these in subclasses!
-    name = 'abstract_community'
+    name = "abstract_community"
     num_hole_cards = 0
 
     # preflop = 0
@@ -21,29 +21,25 @@ class CommunityGameState(PokerGameState):
     # river = 3
     showdown_street = 4
 
-    street_names = {
-        0: 'PRE-FLOP',
-        1: 'FLOP',
-        2: 'TURN',
-        3: 'RIVER',
-        4: 'SHOWDOWN'
-    }
+    street_names = {0: "PRE-FLOP", 1: "FLOP", 2: "TURN", 3: "RIVER", 4: "SHOWDOWN"}
 
-    def __init__(self,
-                 num_players: int,
-                 deck: List[str],
-                 starting_stacks: List[int],
-                 hands: List[List[str]],
-                 boards: List[List[str]] = None,
-                 ante: int = 0,
-                 blinds: List[int] = None,
-                 stacks: List[int] = None,
-                 action: int = None,
-                 street: int = 0,
-                 actions: List[Dict] = None,
-                 last_actions: Dict[int, str] = None,
-                 pot_balances: Dict[int, int] = None,
-                 ):
+    def __init__(
+        self,
+        num_players: int,
+        deck: List[str],
+        starting_stacks: List[int],
+        hands: List[List[str]],
+        boards: List[List[str]] = None,
+        ante: int = 0,
+        blinds: List[int] = None,
+        stacks: List[int] = None,
+        action: int = None,
+        street: int = 0,
+        actions: List[Dict] = None,
+        last_actions: Dict[int, str] = None,
+        pot_balances: Dict[int, int] = None,
+        all_in_runouts: int = 1,
+    ):
         """
         :param num_players: (int)
         :param deck: ([str])
@@ -62,32 +58,33 @@ class CommunityGameState(PokerGameState):
             }
         :param last_actions: ({int: str})
         :param pot_balances: ({int: int})
+        :param all_in_runouts: (int)
         """
         if boards is None:
             boards = [[]]
 
         if len(boards) != 1:
             raise ValueError(
-                f'{self.name} is a community-card game, '
-                f'so it must only have one board'
+                f"{self.name} is a community-card game, "
+                f"so it must only have one board"
             )
         for hand in hands:
             if len(hand) != self.num_hole_cards:
                 raise ValueError(
-                    f'Hands in {self.name} must have exactly '
-                    f'{self.num_hole_cards} cards. '
-                    f'You provided {len(hand)}\n'
-                    f'Perhaps you need to override the num_hole_cards '
-                    f'class variable in {self.__class__.__name__}'
+                    f"Hands in {self.name} must have exactly "
+                    f"{self.num_hole_cards} cards. "
+                    f"You provided {len(hand)}\n"
+                    f"Perhaps you need to override the num_hole_cards "
+                    f"class variable in {self.__class__.__name__}"
                 )
 
         if num_players == 2 and blinds[0] < blinds[1]:
             logger.warning(
-                f'Flipping the blinds for 2-handed play. To suppress this warning, '
-                f'you should flip the order of blinds in heads up play. '
-                f'e.g. input the blinds as [2, 1] rather than [1, 2] '
-                f'because the dealer pays the small blind '
-                f'and acts second on all later streets'
+                f"Flipping the blinds for 2-handed play. To suppress this warning, "
+                f"you should flip the order of blinds in heads up play. "
+                f"e.g. input the blinds as [2, 1] rather than [1, 2] "
+                f"because the dealer pays the small blind "
+                f"and acts second on all later streets"
             )
             blinds = [blinds[1], blinds[0]]
 
@@ -104,7 +101,8 @@ class CommunityGameState(PokerGameState):
             street=street,
             actions=actions,
             last_actions=last_actions,
-            pot_balances=pot_balances
+            pot_balances=pot_balances,
+            all_in_runouts=all_in_runouts,
         )
 
     @property
@@ -155,8 +153,8 @@ class CommunityGameState(PokerGameState):
         :return: ([[int]])
         """
         raise NotImplementedError(
-            f'All CommunityGameState objects must implement order_hands '
-            f'to decide who wins at showdown'
+            f"All CommunityGameState objects must implement order_hands "
+            f"to decide who wins at showdown"
         )
 
     def extract_blinds(self):
@@ -178,10 +176,7 @@ class CommunityGameState(PokerGameState):
             # Post-flop action always begins with the first player
             # left of the dealer who hasn't folded
             # e.g. small blind (0), then big blind (1)... etc
-            return next(
-                p for p in range(self.num_players)
-                if not self.cannot_act(p)
-            )
+            return next(p for p in range(self.num_players) if not self.cannot_act(p))
 
     def move_street(self):
         """ increment the street and then deal out flop/turn/river if necessary """
@@ -241,33 +236,28 @@ class CommunityGameState(PokerGameState):
         """
         if not (0 <= player_index < self.num_players):
             raise ValueError(
-                f'CommunityGameState.player_name: invalid player_index arg: '
-                f'{player_index}'
-                f'\n'
-                f'Must be 0 <= player_index < num_players'
+                f"CommunityGameState.player_name: invalid player_index arg: "
+                f"{player_index}"
+                f"\n"
+                f"Must be 0 <= player_index < num_players"
             )
 
         if self.num_players == 2:
-            return (
-                'BUTTON' if player_index == 1
-                else 'BIG BLIND'
-            )
+            return "BUTTON" if player_index == 1 else "BIG BLIND"
 
         if player_index == 0:
-            return 'SMALL BLIND'
+            return "SMALL BLIND"
         elif player_index == 1:
-            return 'BIG BLIND'
+            return "BIG BLIND"
         elif player_index == self.num_players - 1:
-            return 'BUTTON'
+            return "BUTTON"
         elif player_index == self.num_players - 2:
-            return 'CUTOFF'
+            return "CUTOFF"
         elif player_index == self.num_players - 3:
-            return 'HIJACK'
+            return "HIJACK"
         else:
-            utg_str = f'+{player_index - 2}' if player_index - 2 else ''
-            return (
-                f'{self.num_players - player_index - 1}-OFF / UTG{utg_str}'
-            )
+            utg_str = f"+{player_index - 2}" if player_index - 2 else ""
+            return f"{self.num_players - player_index - 1}-OFF / UTG{utg_str}"
 
     def state_dict(self, player):
         """ serialise all game state to dictionary
@@ -277,16 +267,16 @@ class CommunityGameState(PokerGameState):
         :return: (dict)
         """
         return {
-            'player': player,
-            'num_players': self.num_players,
-            'starting_stacks': self.starting_stacks,
-            'hand': self.hands[player],
-            'board': self.board,
-            'ante': self.ante,
-            'blinds': self.blinds,
-            'action': self.action,
-            'street': self.street,
-            'actions': [action.to_dict() for action in self.actions],
-            'last_actions': self.last_actions,
-            'pot_balances': self.pot.balances,
+            "player": player,
+            "num_players": self.num_players,
+            "starting_stacks": self.starting_stacks,
+            "hand": self.hands[player],
+            "board": self.board,
+            "ante": self.ante,
+            "blinds": self.blinds,
+            "action": self.action,
+            "street": self.street,
+            "actions": [action.to_dict() for action in self.actions],
+            "last_actions": self.last_actions,
+            "pot_balances": self.pot.balances,
         }
