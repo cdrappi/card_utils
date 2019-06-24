@@ -15,5 +15,5 @@ pip-delete-this-directory.txt
 # Environments
 card_utils_venv/
 
-# Editors: PyCharm
-.idea/*
+# Editors: VSCode
+.vscode/*
