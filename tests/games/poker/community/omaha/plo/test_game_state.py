@@ -15,14 +15,16 @@ class PLOGameStateTestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def _create_fixed_setup(self,
-                            num_players,
-                            deck,
-                            hands,
-                            boards=None,
-                            actions=None,
-                            blinds=None,
-                            starting_stacks=None):
+    def _create_fixed_setup(
+        self,
+        num_players,
+        deck,
+        hands,
+        boards=None,
+        actions=None,
+        blinds=None,
+        starting_stacks=None,
+    ):
         """
         :param num_players: (int)
         :param deck: ([str])
@@ -47,14 +49,12 @@ class PLOGameStateTestCase(unittest.TestCase):
             boards=boards,
             starting_stacks=starting_stacks,
             blinds=blinds,
-            action_dicts=actions
+            action_dicts=actions,
         )
 
-    def _create_random_setup(self,
-                             num_players,
-                             actions=None,
-                             blinds=None,
-                             starting_stacks=None):
+    def _create_random_setup(
+        self, num_players, actions=None, blinds=None, starting_stacks=None
+    ):
         """
         :param num_players: (int)
         :param actions: ([dict])
@@ -68,7 +68,7 @@ class PLOGameStateTestCase(unittest.TestCase):
             hands=hands,
             actions=actions,
             blinds=blinds,
-            starting_stacks=starting_stacks
+            starting_stacks=starting_stacks,
         )
 
     def _assert_equal_payouts(self, payouts, expected_payouts):
@@ -145,16 +145,13 @@ class PLOGameStateTestCase(unittest.TestCase):
         preflop:  pot-pot-pot-pot-all in-call
                   BB wins with flopped royal flush
         """
-        hand_0 = ['As', 'Ah', 'Ks', 'Kh']
-        hand_1 = ['2c', '2d', '2h', '2s']
-        boards = [['Qs', 'Js', 'Ts']]
+        hand_0 = ["As", "Ah", "Ks", "Kh"]
+        hand_1 = ["2c", "2d", "2h", "2s"]
+        boards = [["Qs", "Js", "Ts"]]
         plo = self._create_fixed_setup(
             num_players=2,
             hands=[hand_0, hand_1],
-            deck=[
-                c for c in DECK_CARDS
-                if c not in hand_0 + hand_1 + boards[0]
-            ]
+            deck=[c for c in DECK_CARDS if c not in hand_0 + hand_1 + boards[0]],
         )
 
         plo.act(1, Action.action_raise, amount=plo.max_bet)
@@ -164,24 +161,20 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo.act(1, Action.action_raise, amount=plo.stacks[1])
         plo.act(0, Action.action_call)
 
-        self._assert_equal_payouts(
-            payouts=plo.payouts,
-            expected_payouts={0: 400}
-        )
+        self._assert_equal_payouts(payouts=plo.payouts, expected_payouts={0: 400})
 
     def test_three_way_all_in_preflop(self):
         """ three way all in, small blind wins with flopped royal """
-        hand_0 = ['As', 'Ah', 'Ks', 'Kh']
-        hand_1 = ['2c', '2d', '2h', '2s']
-        hand_2 = ['3c', '3d', '3h', '3s']
-        boards = [['Qs', 'Js', 'Ts']]
+        hand_0 = ["As", "Ah", "Ks", "Kh"]
+        hand_1 = ["2c", "2d", "2h", "2s"]
+        hand_2 = ["3c", "3d", "3h", "3s"]
+        boards = [["Qs", "Js", "Ts"]]
         plo = self._create_fixed_setup(
             num_players=3,
             hands=[hand_0, hand_1, hand_2],
             deck=[
-                c for c in DECK_CARDS
-                if c not in hand_0 + hand_1 + hand_2 + boards[0]
-            ]
+                c for c in DECK_CARDS if c not in hand_0 + hand_1 + hand_2 + boards[0]
+            ],
         )
 
         plo.act(2, Action.action_raise, amount=plo.max_bet)
@@ -191,10 +184,7 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo.act(0, Action.action_call)
         plo.act(1, Action.action_call)
 
-        self._assert_equal_payouts(
-            payouts=plo.payouts,
-            expected_payouts={0: 600}
-        )
+        self._assert_equal_payouts(payouts=plo.payouts, expected_payouts={0: 600})
 
     def test_three_way_river_fold(self):
         """ button pots every street and they fold on the river """
@@ -237,36 +227,31 @@ class PLOGameStateTestCase(unittest.TestCase):
 
         self.assertEqual(plo.street, 4)
 
-        self._assert_equal_payouts(
-            payouts=plo.payouts,
-            expected_payouts={2: 424}
-        )
+        self._assert_equal_payouts(payouts=plo.payouts, expected_payouts={2: 424})
 
     def test_eight_way_normal_hand(self):
         """ a reasonable 8-way hand """
 
         hands = [
-            ['7c', '3s', '6s', '3h'],  # [0] SB - folds
-            ['Td', '7s', 'Jh', '3c'],  # [1] BB - calls
-            ['Js', '6d', '2h', 'Kh'],  # [2] 5-off - folds
-            ['Ah', '6c', 'Qs', 'Kd'],  # [3] 4-off - raises
-            ['Qc', '2s', '7h', 'Ks'],  # [4] 3-off - folds
-            ['4c', 'Jc', '5c', 'Ac'],  # [5] Hijack - folds
-            ['4d', 'Ad', '8s', '6h'],  # [6] Cutoff - folds
-            ['8d', '5d', '7d', 'Ts']  # [7] Button - calls
+            ["7c", "3s", "6s", "3h"],  # [0] SB - folds
+            ["Td", "7s", "Jh", "3c"],  # [1] BB - calls
+            ["Js", "6d", "2h", "Kh"],  # [2] 5-off - folds
+            ["Ah", "6c", "Qs", "Kd"],  # [3] 4-off - raises
+            ["Qc", "2s", "7h", "Ks"],  # [4] 3-off - folds
+            ["4c", "Jc", "5c", "Ac"],  # [5] Hijack - folds
+            ["4d", "Ad", "8s", "6h"],  # [6] Cutoff - folds
+            ["8d", "5d", "7d", "Ts"],  # [7] Button - calls
         ]
-        boards = [['Kc', 'Qh', 'Qd', '9d', '3d']]
+        boards = [["Kc", "Qh", "Qd", "9d", "3d"]]
         plo = self._create_fixed_setup(
             num_players=8,
             hands=hands,
             boards=boards,
             deck=[
-                c for c in DECK_CARDS
-                if not bool(
-                    any(c in h for h in hands)
-                    or (c in boards[0])
-                )
-            ]
+                c
+                for c in DECK_CARDS
+                if not bool(any(c in h for h in hands) or (c in boards[0]))
+            ],
         )
 
         self.assertEqual(plo.street, 0)
@@ -305,7 +290,5 @@ class PLOGameStateTestCase(unittest.TestCase):
 
         self.assertEqual(plo.street, 4)
 
-        self._assert_equal_payouts(
-            payouts=plo.payouts,
-            expected_payouts={3: 426}
-        )
+        self._assert_equal_payouts(payouts=plo.payouts, expected_payouts={3: 426})
+
