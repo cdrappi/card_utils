@@ -22,30 +22,40 @@ hand_2 = ['5s', '2h', '8h', '8c']
 hands  = [hand_1, hand_2]
 
 """
-
 import itertools
-from typing import Tuple
+from typing import List, Tuple
 
 from card_utils.deck import ace_high_rank_to_value
-from card_utils.deck.utils import (
-    rank_partition,
-    suit_partition,
-    ranks_to_sorted_values,
-)
-from card_utils.games.poker import (
-    hand_order,
-    STRAIGHT_FLUSH,
-    QUADS,
-    FULL_HOUSE,
-    FLUSH,
-    STRAIGHT,
-    THREE_OF_A_KIND,
-    TWO_PAIR,
-    ONE_PAIR,
-    HIGH_CARD,
-)
+from card_utils.deck.utils import (rank_partition, ranks_to_sorted_values,
+                                   suit_partition)
+from card_utils.games.poker import (FLUSH, FULL_HOUSE, HIGH_CARD, ONE_PAIR,
+                                    QUADS, STRAIGHT, STRAIGHT_FLUSH,
+                                    THREE_OF_A_KIND, TWO_PAIR, hand_order)
+from card_utils.games.poker.community.utils import simulate_all_in_equity
 from card_utils.games.poker.util import get_best_hands_generic
-from card_utils.util import count_items, LightDefaultDict
+from card_utils.util import LightDefaultDict, count_items
+
+
+def sim_omaha_all_in_equity(
+    board: List[str],
+    hands: List[List[str]],
+    deck: List[str] = None,
+    n: int = 100
+) -> List[float]:
+    """
+    :param board: (List[str])
+    :param hands: (List[List[str]])
+    :param hand_strength_function: (Callable)
+    :param n: (int) how many sims
+    :return: (List[float])
+    """
+    return simulate_all_in_equity(
+        board=board,
+        hands=hands,
+        hand_strength_function=get_best_hands_fast,
+        deck=deck,
+        n=n,
+    )
 
 
 def get_best_hands_fast(board, hands):
@@ -58,9 +68,7 @@ def get_best_hands_fast(board, hands):
             every hand rank except straight flushes, quads and flushes
     """
     return get_best_hands_generic(
-        hand_strength_function=get_hand_strength_fast,
-        board=board,
-        hands=hands,
+        hand_strength_function=get_hand_strength_fast, board=board, hands=hands
     )
 
 
@@ -120,7 +128,7 @@ def get_hand_strength_fast(board, hand) -> Tuple:
                 # filter hands by suit, and then we can use the
                 # same function for straight flushes
                 # as we use for straights
-                hand=set(f'{r}{s}' for r, s in hand if s == flush_suit)
+                hand=set(f"{r}{s}" for r, s in hand if s == flush_suit),
             )
             if best_straight_flush:
                 return hand_order[STRAIGHT_FLUSH], best_straight_flush
@@ -133,10 +141,12 @@ def get_hand_strength_fast(board, hand) -> Tuple:
 
     hand_values = count_items(hand_values_list)
     board_values = LightDefaultDict(int)
-    board_values.update({
-        ace_high_rank_to_value[rank]: len(suits)
-        for rank, suits in board_by_ranks.items()
-    })
+    board_values.update(
+        {
+            ace_high_rank_to_value[rank]: len(suits)
+            for rank, suits in board_by_ranks.items()
+        }
+    )
 
     if is_paired_board:
         best_quads = _get_best_quads(hand_values, board_values)
@@ -150,9 +160,7 @@ def get_hand_strength_fast(board, hand) -> Tuple:
     if flush_suit is not None:
         best_hand_flush = _get_best_flush(
             hand_flush_values=set(
-                ace_high_rank_to_value[r]
-                for r, s in hand
-                if s == flush_suit
+                ace_high_rank_to_value[r] for r, s in hand if s == flush_suit
             )
         )
         if best_hand_flush:
@@ -160,7 +168,7 @@ def get_hand_strength_fast(board, hand) -> Tuple:
                 ranks=board_by_suits[flush_suit],
                 aces_high=True,
                 aces_low=False,
-                reverse=True
+                reverse=True,
             )
             all_flush_cards = board_suit_values[0:3] + list(best_hand_flush)
             return (hand_order[FLUSH], *sorted(all_flush_cards, reverse=True))
@@ -168,15 +176,13 @@ def get_hand_strength_fast(board, hand) -> Tuple:
     possible_straights = get_possible_straights([r for r, _ in board])
     if possible_straights:
         best_straight = get_best_straight(
-            possible_straights=possible_straights,
-            hand=hand
+            possible_straights=possible_straights, hand=hand
         )
         if best_straight:
             return hand_order[STRAIGHT], best_straight
 
     best_three_of_a_kind = _get_best_three_of_a_kind(
-        hand_values=hand_values,
-        board_values=board_values
+        hand_values=hand_values, board_values=board_values
     )
     if best_three_of_a_kind:
         return (hand_order[THREE_OF_A_KIND], *best_three_of_a_kind)
@@ -200,9 +206,9 @@ def _validate_board(board):
     """
     if len(board) != 5:
         raise ValueError(
-            f'omaha.utils.get_best_hand: '
-            f'board must have 5 cards\n'
-            f'input: {board}'
+            f"omaha.utils.get_best_hand: "
+            f"board must have 5 cards\n"
+            f"input: {board}"
         )
 
 
@@ -214,9 +220,9 @@ def _validate_hand(hand):
     """
     if len(hand) != 4:
         raise ValueError(
-            f'omaha.utils._validate_hands: '
-            f'all hands must have 4 cards\n'
-            f'invalid hand: {hand}'
+            f"omaha.utils._validate_hands: "
+            f"all hands must have 4 cards\n"
+            f"invalid hand: {hand}"
         )
 
 
@@ -286,7 +292,7 @@ def _get_connecting_values(v1, v2, v3):
         values_to_make_straight = straight_values - cards_on_board
         connectors = tuple(sorted(values_to_make_straight))
         if len(connectors) != 2:
-            raise ValueError(f'Omaha connectors must be length 2 only!')
+            raise ValueError(f"Omaha connectors must be length 2 only!")
         connecting_values.add(connectors)
 
     return connecting_values
@@ -307,10 +313,7 @@ def get_possible_straights(ranks):
         return {}
 
     values = ranks_to_sorted_values(
-        ranks=ranks,
-        aces_high=True,
-        aces_low=True,
-        distinct=True
+        ranks=ranks, aces_high=True, aces_low=True, distinct=True
     )
 
     connecting_values = {}
@@ -338,9 +341,7 @@ def get_best_straight(possible_straights, hand):
     highest_straight_value = 0  # e.g. 14 for broadway, 5 for the wheel
     hand_values = set(
         ranks_to_sorted_values(
-            ranks=[r for r, _ in hand],
-            aces_high=True,
-            aces_low=True
+            ranks=[r for r, _ in hand], aces_high=True, aces_low=True
         )
     )
     for connecting_values, max_value in possible_straights.items():
@@ -367,8 +368,7 @@ def _get_best_flush(hand_flush_values):
     if len(hand_flush_values) >= 2:
         max_flush_value = max(hand_flush_values)
         second_flush_value = _get_highest_except(
-            values=hand_flush_values,
-            excluded_values={max_flush_value}
+            values=hand_flush_values, excluded_values={max_flush_value}
         )
         flush = (max_flush_value, second_flush_value)
         if flush > highest_flush_value:
@@ -438,10 +438,7 @@ def _get_best_full_house(hands_values, board_values):
                 other_pairs = [
                     hand_value
                     for hand_value, hand_count in hands_values.items()
-                    if bool(
-                        hand_value != board_value
-                        and board_values[hand_value] >= 1
-                    )
+                    if bool(hand_value != board_value and board_values[hand_value] >= 1)
                 ]
                 for hv in other_pairs:
                     boat = (board_value, hv)
@@ -492,7 +489,7 @@ def _get_best_three_of_a_kind(hand_values, board_values):
                 # and the best kicker from the board
                 k_1 = _get_highest_except(
                     values=set(board_values).union(hand_values),
-                    excluded_values={board_value}
+                    excluded_values={board_value},
                 )
                 if k_1 in board_values and k_1 not in hand_values:
                     # then k_2 has to come from the hand
@@ -508,7 +505,7 @@ def _get_best_three_of_a_kind(hand_values, board_values):
                     # from either board or hand
                     k_2 = _get_highest_except(
                         values=set(board_values).union(hand_values),
-                        excluded_values={board_value, k_1}
+                        excluded_values={board_value, k_1},
                     )
                 three_of_a_kind = (board_value, k_1, k_2)
                 if three_of_a_kind > best_three_of_a_kind:
@@ -547,9 +544,8 @@ def _get_best_two_pair(hand_values, board_values):
         pairs_in_union = pairs_on_board | pairs_in_hand
         top_pair = max(pairs_in_union)
         second_pair = (
-            max(pairs_in_hand)
-            if top_pair in pairs_on_board
-            else max(pairs_on_board)
+            max(pairs_in_hand) if top_pair in pairs_on_board else max(
+                pairs_on_board)
         )
         kicker = _get_highest_except(board_values, {top_pair, second_pair})
         best_two_pair = (top_pair, second_pair, kicker)
@@ -633,9 +629,7 @@ def _get_best_high_card(hand_values, board_values):
     """
     best_3_board_values = sorted(board_values, reverse=True)[0:3]
     best_2_hand_values = sorted(hand_values, reverse=True)[0:2]
-    return tuple(
-        sorted(best_3_board_values + best_2_hand_values, reverse=True)
-    )
+    return tuple(sorted(best_3_board_values + best_2_hand_values, reverse=True))
 
 
 """ fin """
