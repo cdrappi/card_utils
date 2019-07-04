@@ -22,7 +22,8 @@ class CommunityGameState(PokerGameState):
     # river = 3
     showdown_street = 4
 
-    street_names = {0: "PRE-FLOP", 1: "FLOP", 2: "TURN", 3: "RIVER", 4: "SHOWDOWN"}
+    street_names = {0: "PRE-FLOP", 1: "FLOP",
+                    2: "TURN", 3: "RIVER", 4: "SHOWDOWN"}
 
     def __init__(
         self,
@@ -89,7 +90,8 @@ class CommunityGameState(PokerGameState):
             )
             blinds = [blinds[1], blinds[0]]
 
-        super().__init__(
+        PokerGameState.__init__(
+            self,
             num_players=num_players,
             deck=deck,
             starting_stacks=starting_stacks,
@@ -112,7 +114,7 @@ class CommunityGameState(PokerGameState):
 
         :return: ({str})
         """
-        valid_action_set = super().valid_actions
+        valid_action_set = PokerGameState.valid_actions(self)
         if self.is_acting_last_preflop():
             valid_action_set.add(Action.action_raise)
         return valid_action_set
@@ -175,7 +177,7 @@ class CommunityGameState(PokerGameState):
         """
         :param cards_remaining: (int)
         """
-        self.boards[0] = self.boards[0][0 : 5 - cards_remaining]
+        self.boards[0] = self.boards[0][0: 5 - cards_remaining]
 
     def extract_blinds(self):
         """ move blinds from self.stacks to self.pot """
@@ -200,7 +202,7 @@ class CommunityGameState(PokerGameState):
 
     def move_street(self):
         """ increment the street and then deal out flop/turn/river if necessary """
-        super().move_street()
+        PokerGameState.move_street(self)
         if self.action is None:
             # the action is closed because everyone is all in,
             # and we need to deal multiple runouts,
