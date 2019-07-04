@@ -43,7 +43,7 @@ class LightDefaultDict(dict):
         """
         :param default_factory: (function) e.g. int, float, list
         """
-        super().__init__(**kwargs)
+        dict.__init__(self, **kwargs)
         self.default_factory = default_factory
 
     def __getitem__(self, item):
@@ -52,7 +52,7 @@ class LightDefaultDict(dict):
         :return: (object)
         """
         try:
-            return super().__getitem__(item)
+            return dict.__getitem__(self, item)
         except KeyError:
             return self.default_factory()
 
