@@ -114,7 +114,7 @@ class CommunityGameState(PokerGameState):
 
         :return: ({str})
         """
-        valid_action_set = PokerGameState.valid_actions(self)
+        valid_action_set = PokerGameState.valid_actions.fget(self)
         if self.is_acting_last_preflop():
             valid_action_set.add(Action.action_raise)
         return valid_action_set

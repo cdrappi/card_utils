@@ -13,7 +13,7 @@ class PLOGameState(OmahaGameState):
 
         :return: (int)
         """
-        return min(OmahaGameState.max_bet(self), self.pot_sized_bet)
+        return min(OmahaGameState.max_bet.fget(self), self.pot_sized_bet)
 
     @property
     def pot_sized_bet(self):

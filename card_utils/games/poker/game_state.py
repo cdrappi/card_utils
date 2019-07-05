@@ -2,6 +2,7 @@ from typing import Dict, List
 
 from card_utils.games.poker.action import Action
 from card_utils.games.poker.pot import Pot
+from card_utils.games.poker.util import is_action_closed
 
 
 class PokerGameState:
@@ -86,7 +87,8 @@ class PokerGameState:
 
         blinds = blinds or []
         if not (ante or any(blinds)):
-            raise ValueError(f"There must be either an ante or blinds to play poker")
+            raise ValueError(
+                f"There must be either an ante or blinds to play poker")
         self.ante = ante
         self.blinds = blinds
 
@@ -212,7 +214,7 @@ class PokerGameState:
 
     def reset_all_in_board(self, cards_remaining):
         """ reset board to pre-all-in-runout state
-        
+
         :param cards_remaining: (int)
         """
         raise NotImplementedError(
@@ -316,7 +318,8 @@ class PokerGameState:
             elif action in Action.zeros:
                 amount = 0
             else:
-                raise ValueError(f"Amount cannot be None for action type {action}")
+                raise ValueError(
+                    f"Amount cannot be None for action type {action}")
 
         return Action(player=player, action=action, amount=amount, **state)
 
@@ -493,59 +496,12 @@ class PokerGameState:
 
         :return: (bool)
         """
-        folders = 0
-        checkers = 0
-        all_in_last_street = 0
-        not_yet_acted = 0
-        not_all_in_set = set()
-
-        for player in range(self.num_players):
-            last_action = self.last_actions.get(player)
-            is_all_in = self.is_all_in(player)
-
-            if last_action != Action.action_fold and not is_all_in:
-                not_all_in_set.add(player)
-
-            if last_action is None and is_all_in:
-                all_in_last_street += 1
-            elif last_action is None:
-                not_yet_acted += 1
-            elif last_action == Action.action_fold:
-                folders += 1
-            elif last_action == Action.action_check:
-                checkers += 1
-
-        not_all_in_balances = {
-            *{self.pot.balances[p] for p in not_all_in_set},
-            max(self.pot.balances.values()),
-        }
-        if len(not_all_in_balances) > 1:
-            # if those who are not all in but have not folded
-            # have different balances, and their balance is not equal
-            # to the max any player has put in the pot,
-            # then we action is not complete
-            return False
-
-        if folders == self.num_players - 1:
-            # Case 1: everyone folds except 1 person
-            return True
-
-        if len(not_all_in_balances) == 1:
-            # Case 2: if everyone is all in except one person,
-            # then everyone else must have either
-            # folded or been all in last street
-            if folders + all_in_last_street == self.num_players - 1:
-                return True
-
-        if folders + checkers + all_in_last_street == self.num_players:
-            # Case 3: no one this street has made any bets,
-            # and everyone had either folded or went all on a previous street,
-            # or checked on this street
-            return True
-
-        # Case 4:
-        # Everyone must have acted and not checked
-        return not_yet_acted == 0
+        return is_action_closed(
+            num_players=self.num_players,
+            last_actions=self.last_actions,
+            pot=self.pot,
+            stacks=self.stacks,
+        )
 
     @property
     def amount_to_call(self):
