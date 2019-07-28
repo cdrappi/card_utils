@@ -1,22 +1,21 @@
 import random
-from typing import Callable, List
+from typing import Callable, Dict, List
 
 from card_utils.deck import cards
 
 
-def simulate_all_in_equity(
-    board: List[str],
-    hands: List[List[str]],
-    hand_strength_function: Callable,
-    deck: List[str] = None,
-    n: int = 100
-) -> List[float]:
+def simulate_all_in_equity(board: List[str],
+                           hands: List[List[str]],
+                           hand_strength_function: Callable,
+                           deck: List[str] = None,
+                           n: int = 100
+                           ) -> Dict[int, float]:
     """
     :param board: (List[str])
     :param hands: (List[List[str]])
     :param hand_strength_function: (Callable)
     :param n: (int) how many sims
-    :return: (List[float])
+    :return: (Dict[float])
     """
     if deck is None:
         used_cards = {*board, *{c for hand in hands for c in hand}}

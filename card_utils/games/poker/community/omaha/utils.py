@@ -23,7 +23,7 @@ hands  = [hand_1, hand_2]
 
 """
 import itertools
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 from card_utils.deck import ace_high_rank_to_value
 from card_utils.deck.utils import (rank_partition, ranks_to_sorted_values,
@@ -41,13 +41,13 @@ def sim_omaha_all_in_equity(
     hands: List[List[str]],
     deck: List[str] = None,
     n: int = 100
-) -> List[float]:
+) -> Dict[int, float]:
     """
     :param board: (List[str])
     :param hands: (List[List[str]])
     :param hand_strength_function: (Callable)
     :param n: (int) how many sims
-    :return: (List[float])
+    :return: (Dict[int, float])
     """
     return simulate_all_in_equity(
         board=board,
