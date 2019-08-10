@@ -54,11 +54,15 @@ def deal_random_hands(n_hands, n_cards):
     return deck[n_cards * n_hands:], hands
 
 
-def is_action_closed(num_players: int, last_actions: Dict, pot: Pot, stacks: List[int]) -> bool:
+def is_action_closed(num_players: int,
+                     last_actions: Dict[int, int],
+                     pot_balances: Dict[int, int],
+                     stacks: List[int]
+                     ) -> bool:
     """
     :param num_players: (int)
     :param last_actions: (Dict)
-    :param pot: (Pot)
+    :param pot_balances: (Dict[int, int])
     :param stacks: (List[int])
     :return: (bool)
     """
@@ -85,8 +89,8 @@ def is_action_closed(num_players: int, last_actions: Dict, pot: Pot, stacks: Lis
             checkers += 1
 
     not_all_in_balances = {
-        *{pot.balances[p] for p in not_all_in_set},
-        max(pot.balances.values()),
+        *{pot_balances[p] for p in not_all_in_set},
+        max(pot_balances.values()),
     }
     if len(not_all_in_balances) > 1:
         # if those who are not all in but have not folded
