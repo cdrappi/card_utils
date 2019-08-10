@@ -499,7 +499,7 @@ class PokerGameState:
         return is_action_closed(
             num_players=self.num_players,
             last_actions=self.last_actions,
-            pot=self.pot,
+            pot_balances=self.pot.balances,
             stacks=self.stacks,
         )
 
