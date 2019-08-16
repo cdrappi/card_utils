@@ -555,3 +555,69 @@ class PokerGameState:
         :return: ({int: float})
         """
         return {player: self.player_pnl(player) for player in range(self.num_players)}
+
+    @property
+    def state_string(self) -> str:
+        """
+        :return: (str)
+        """
+        return self.build_state_string(
+            num_players=self.num_players,
+            starting_stacks=self.starting_stacks,
+            hand=self.hand,
+            boards=self.boards,
+            ante=self.ante,
+            blinds=self.blinds,
+            actions=[a.to_dict() for a in self.actions]
+        )
+
+    @classmethod
+    def build_state_string(cls,
+                           num_players: int,
+                           starting_stacks: List[int],
+                           hand: List[str],
+                           boards: List[List[str]],
+                           ante: int,
+                           blinds: List[int],
+                           actions: List[Dict]
+                           ) -> str:
+        """
+        :param num_players: (int)
+        :param starting_stacks: (List[int])
+        :param hand: (List[str])
+        :param boards: (List[List[str]])
+        :param ante: (int)
+        :param blinds: (List[int])
+        :param actions: (List[Dict])
+        :return: (str)
+        """
+        return (
+            f'game={cls.name}|'
+            f'players={num_players}|'
+            f'hand={"".join(hand)}|'
+            f'boards={",".join("".join(board) for board in boards)}|'
+            f'starting_stacks={",".join(str(s) for s in starting_stacks)}|'
+            f'ante={ante}|'
+            f'blinds={",".join(str(b) for b in blinds)}|'
+            f'actions={",".join(cls.transform_action(a) for a in actions)}'
+        )
+
+    @staticmethod
+    def transform_action(action: Dict) -> str:
+        """
+        :param action: (Dict)
+            {
+                'street': 0,
+                'player': 2,
+                'action': 'RAISE',
+                'amount': 7,
+                'pot_sized_bet': 7
+            }
+        :return: (str)
+        """
+        if action['action'] not in Action.aggressions:
+            return f'{action["action"]}'
+        elif action['amount'] == action.get('pot_sized_bet'):
+            return 'p'
+        else:
+            return f'[{action["amount"]}]'
