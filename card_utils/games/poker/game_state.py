@@ -592,15 +592,14 @@ class PokerGameState:
         :param actions: (List[Dict])
         :return: (str)
         """
+        boards = [[c for c in board if c] for board in boards]
         return (
-            f'game={cls.name}|'
-            f'players={num_players}|'
-            f'hand={"".join(hand)}|'
-            f'boards={",".join("".join(board) for board in boards)}|'
-            f'starting_stacks={",".join(str(s) for s in starting_stacks)}|'
-            f'ante={ante}|'
-            f'blinds={",".join(str(b) for b in blinds)}|'
-            f'actions={",".join(cls.transform_action(a) for a in actions)}'
+            f'{cls.name}{num_players}:'
+            f'{"".join(hand)}|'
+            f'{",".join("".join(board) for board in boards)}|'
+            f'{"".join(cls.transform_action(a) for a in actions)}|'
+            f'{ante}-{"/".join(str(b) for b in blinds)}|'
+            f'{",".join(str(s) for s in starting_stacks)}'
         )
 
     @staticmethod
@@ -617,7 +616,7 @@ class PokerGameState:
         :return: (str)
         """
         if action['action'] not in Action.aggressions:
-            return f'{action["action"]}'
+            return f'{Action.abbreviations[action["action"]]}'
         elif action['amount'] == action.get('pot_sized_bet'):
             return 'p'
         else:

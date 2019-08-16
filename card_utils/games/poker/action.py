@@ -3,7 +3,6 @@
 
 class Action:
     """ represent an action on a given street """
-
     # when the action is open or checked to you
     action_check = 'CHECK'
     action_bet = 'BET'
@@ -15,6 +14,12 @@ class Action:
 
     # for drawing games
     action_draw = 'DRAW'
+
+    abbreviations = {
+        action_check: 'x',
+        action_fold: 'f',
+        action_call: 'c',
+    }
 
     zero_to_call = {action_bet, action_check}
     nonzero_to_call = {action_fold, action_call, action_raise}
