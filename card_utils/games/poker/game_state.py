@@ -561,10 +561,11 @@ class PokerGameState:
         """
         :return: (str)
         """
+        active_hand = self.hands[self.action]
         return self.build_state_string(
             num_players=self.num_players,
             starting_stacks=self.starting_stacks,
-            hand=self.hand,
+            hand=active_hand,
             boards=self.boards,
             ante=self.ante,
             blinds=self.blinds,
