@@ -96,10 +96,10 @@ class NLHEGameStateTestCase(unittest.TestCase):
             deck=[c for c in DECK_CARDS if c not in hand_0 + hand_1 + boards[0]],
         )
 
-        nlhe.act(1, Action.action_raise, amount=nlhe.max_bet)
-        nlhe.act(0, Action.action_raise, amount=nlhe.max_bet)
-        nlhe.act(1, Action.action_raise, amount=nlhe.max_bet)
-        nlhe.act(0, Action.action_raise, amount=nlhe.max_bet)
+        nlhe.act(1, Action.action_raise, amount=nlhe.pot_sized_bet)
+        nlhe.act(0, Action.action_raise, amount=nlhe.pot_sized_bet)
+        nlhe.act(1, Action.action_raise, amount=nlhe.pot_sized_bet)
+        nlhe.act(0, Action.action_raise, amount=nlhe.pot_sized_bet)
         nlhe.act(1, Action.action_raise, amount=nlhe.stacks[1])
         nlhe.act(0, Action.action_call)
 
@@ -121,9 +121,9 @@ class NLHEGameStateTestCase(unittest.TestCase):
             ],
         )
 
-        nlhe.act(2, Action.action_raise, amount=nlhe.max_bet)
-        nlhe.act(0, Action.action_raise, amount=nlhe.max_bet)
-        nlhe.act(1, Action.action_raise, amount=nlhe.max_bet)
+        nlhe.act(2, Action.action_raise, amount=nlhe.pot_sized_bet)
+        nlhe.act(0, Action.action_raise, amount=nlhe.pot_sized_bet)
+        nlhe.act(1, Action.action_raise, amount=nlhe.pot_sized_bet)
         nlhe.act(2, Action.action_raise, amount=nlhe.stacks[2])
         nlhe.act(0, Action.action_call)
         nlhe.act(1, Action.action_call)
@@ -139,7 +139,7 @@ class NLHEGameStateTestCase(unittest.TestCase):
         self.assertEqual(nlhe.street, 0)
 
         # Preflop
-        nlhe.act(2, Action.action_raise, amount=nlhe.max_bet)
+        nlhe.act(2, Action.action_raise, amount=nlhe.pot_sized_bet)
         nlhe.act(0, Action.action_call)
         nlhe.act(1, Action.action_call)
 
@@ -148,7 +148,7 @@ class NLHEGameStateTestCase(unittest.TestCase):
         # Flop
         nlhe.act(0, Action.action_check)
         nlhe.act(1, Action.action_check)
-        nlhe.act(2, Action.action_bet, amount=nlhe.max_bet)
+        nlhe.act(2, Action.action_bet, amount=nlhe.pot_sized_bet)
         nlhe.act(0, Action.action_call)
         nlhe.act(1, Action.action_call)
 
@@ -157,7 +157,7 @@ class NLHEGameStateTestCase(unittest.TestCase):
         # Turn
         nlhe.act(0, Action.action_check)
         nlhe.act(1, Action.action_check)
-        nlhe.act(2, Action.action_bet, amount=nlhe.max_bet)
+        nlhe.act(2, Action.action_bet, amount=nlhe.pot_sized_bet)
         nlhe.act(0, Action.action_call)
         nlhe.act(1, Action.action_call)
 
@@ -216,7 +216,7 @@ class NLHEGameStateTestCase(unittest.TestCase):
 
         # Flop
         nlhe.act(1, Action.action_check)
-        nlhe.act(3, Action.action_bet, amount=nlhe.max_bet)
+        nlhe.act(3, Action.action_bet, amount=nlhe.pot_sized_bet)
         nlhe.act(7, Action.action_call)
         nlhe.act(1, Action.action_call)
 
@@ -224,7 +224,7 @@ class NLHEGameStateTestCase(unittest.TestCase):
 
         # Turn makes flush for poor button
         nlhe.act(1, Action.action_check)
-        nlhe.act(3, Action.action_bet, amount=nlhe.max_bet)
+        nlhe.act(3, Action.action_bet, amount=nlhe.pot_sized_bet)
         nlhe.act(7, Action.action_call)
         nlhe.act(1, Action.action_fold)
 
