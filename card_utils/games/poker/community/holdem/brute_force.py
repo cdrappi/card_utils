@@ -1,4 +1,6 @@
-""" brute force hand ranks for testing a faster, omaha-optimised function """
+""" brute force hand ranks for holdem
+    where everyone plays the best 5 card hand
+"""
 
 import itertools
 
@@ -20,13 +22,13 @@ def brute_force_holdem_rank(board, hand):
 
 
 def get_best_hands_brute_force(board, hands):
-    """ get the index of the best omaha hand given a board
+    """ get the index of the best holdem hand given a board
 
     :param board: ([str]) list of 5 cards
     :param hands: ([set(str)]) list of sets of 4 cards
-    :return: ([[int]]) indices of `hands` that makes the strongest omaha hand,
+    :return: ([[int]]) indices of `hands` that makes the strongest holdem hand,
         --> this is a list because it is possible to "chop" with
-            every hand rank except straight flushes, quads and flushes
+            every hand rank as everyone can play the board
     """
     return get_best_hands_generic(
         hand_strength_function=brute_force_holdem_rank,

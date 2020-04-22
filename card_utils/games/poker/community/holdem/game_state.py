@@ -1,11 +1,11 @@
-""" class for generic omaha game state """
+""" class for generic holdem game state """
 
 from card_utils.games.poker.community.game_state import CommunityGameState
 from card_utils.games.poker.community.holdem.utils import get_best_hands_fast
 
 
 class HoldemGameState(CommunityGameState):
-    """ basic omaha game state """
+    """ basic holdem game state """
 
     name = "abstract_holdem"
     num_hole_cards = 2
