@@ -572,6 +572,13 @@ class PokerGameState:
             actions=[a.to_dict() for a in self.actions]
         )
 
+    @property
+    def pot_sized_bet(self):
+        """
+        :return: (int)
+        """
+        return int(2 * self.amount_to_call + self.pot.total_money)
+
     @classmethod
     def build_state_string(cls,
                            num_players: int,
