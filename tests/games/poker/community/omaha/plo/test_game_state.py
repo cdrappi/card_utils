@@ -88,6 +88,10 @@ class PLOGameStateTestCase(unittest.TestCase):
         self.assertEqual(plo.action, 1)
         # street 1 is preflop
         self.assertEqual(plo.street, 0)
+        # in 1/2 PLO, min raise for first to act should be 2x the blinds
+        # but this is heads up, and the button is also the small blind,
+        # and hence in for 1 already. This raise would make it 4 total.
+        self.assertEqual(plo.min_bet, 3)
 
     def test_multi_way_initialisation(self):
         """ test seeding the action """
@@ -96,6 +100,8 @@ class PLOGameStateTestCase(unittest.TestCase):
         self.assertEqual(plo.action, 2)
         # street 1 is preflop
         self.assertEqual(plo.street, 0)
+        # in 1/2 PLO, min raise for first to act should be 2x the blinds
+        self.assertEqual(plo.min_bet, 4)
 
     def test_heads_up_preflop_fold(self):
         """ test whether the action works correctly
@@ -162,7 +168,8 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo.act(1, Action.action_raise, amount=plo.stacks[1])
         plo.act(0, Action.action_call)
 
-        self._assert_equal_payouts(payouts=plo.payouts, expected_payouts={0: 400})
+        self._assert_equal_payouts(
+            payouts=plo.payouts, expected_payouts={0: 400})
 
     def test_three_way_all_in_preflop(self):
         """ three way all in, small blind wins with flopped royal """
@@ -186,7 +193,8 @@ class PLOGameStateTestCase(unittest.TestCase):
         plo.act(0, Action.action_call)
         plo.act(1, Action.action_call)
 
-        self._assert_equal_payouts(payouts=plo.payouts, expected_payouts={0: 600})
+        self._assert_equal_payouts(
+            payouts=plo.payouts, expected_payouts={0: 600})
 
     def test_three_way_river_fold(self):
         """ button pots every street and they fold on the river """
@@ -229,7 +237,8 @@ class PLOGameStateTestCase(unittest.TestCase):
 
         self.assertEqual(plo.street, 4)
 
-        self._assert_equal_payouts(payouts=plo.payouts, expected_payouts={2: 424})
+        self._assert_equal_payouts(
+            payouts=plo.payouts, expected_payouts={2: 424})
 
     def test_eight_way_normal_hand(self):
         """ a reasonable 8-way hand """
@@ -260,7 +269,18 @@ class PLOGameStateTestCase(unittest.TestCase):
 
         # Preflop
         plo.act(2, Action.action_fold)
+        # min raise for UTG is 2x big blind (4)
+        # max raise is calling amount (2) + pot (1 + 2 + 2) = 7
+        self.assertEqual(plo.min_bet, 4)
+        self.assertEqual(plo.max_bet, 7)
         plo.act(3, Action.action_raise, amount=6)
+        # min raise should be at least as big as the last raise,
+        # which was 4 = 6 - 2 ==> min raise is 10 all day
+        # pot here should be 9 (6 + 2 + 1)
+        # so max bet is raising. 6 to call,
+        # and 15 + raising 15 on top ==> 21 total
+        self.assertEqual(plo.min_bet, 10)
+        self.assertEqual(plo.max_bet, 21)
         plo.act(4, Action.action_fold)
         plo.act(5, Action.action_fold)
         plo.act(6, Action.action_fold)
@@ -292,4 +312,5 @@ class PLOGameStateTestCase(unittest.TestCase):
 
         self.assertEqual(plo.street, 4)
 
-        self._assert_equal_payouts(payouts=plo.payouts, expected_payouts={3: 426})
+        self._assert_equal_payouts(
+            payouts=plo.payouts, expected_payouts={3: 426})
