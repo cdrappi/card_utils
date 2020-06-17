@@ -12,7 +12,13 @@ class PotTestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def _dry_test(self, amounts_in, winning_players, expected_payouts):
+    def _dry_test(self,
+                  amounts_in,
+                  winning_players,
+                  percent_rake,
+                  max_rake,
+                  expected_payouts,
+                  expected_rakes):
         """
         :param amounts_in: ({int: int})
         :param winning_players: ([[int]])
@@ -27,12 +33,13 @@ class PotTestCase(unittest.TestCase):
             if p not in expected_payouts:
                 expected_payouts[p] = 0
 
-        pot = Pot(n)
+        pot = Pot(n, percent_rake, max_rake)
         for p, amt_in in amounts_in.items():
             pot.put_money_in(p, amt_in)
 
-        payouts = pot.settle_showdown(winning_players)
+        payouts, rakes = pot.settle_showdown(winning_players)
         self.assertEqual(payouts, expected_payouts)
+        self.assertEqual(rakes, expected_rakes)
 
     def test_heads_up_winner(self):
         """ heads up, 1 player wins it all """
@@ -47,7 +54,10 @@ class PotTestCase(unittest.TestCase):
         self._dry_test(
             amounts_in={0: 20, 1: 10},
             winning_players=[[0, 1]],
-            expected_payouts={0: 20, 1: 10}
+            percent_rake=0.0,
+            max_rake=0,
+            expected_payouts={0: 20, 1: 10},
+            expected_rakes={0: 0, 1: 0},
         )
 
     def test_three_way_uneven_entered(self):
@@ -55,7 +65,10 @@ class PotTestCase(unittest.TestCase):
         self._dry_test(
             amounts_in={0: 20, 1: 10, 2: 0},
             winning_players=[[1], [0]],
-            expected_payouts={0: 10, 1: 20}
+            percent_rake=0.0,
+            max_rake=0,
+            expected_payouts={0: 10, 1: 20},
+            expected_rakes={0: 0, 1: 0},
         )
 
     def test_4_way_multi_balance_chop(self):
@@ -63,11 +76,14 @@ class PotTestCase(unittest.TestCase):
         self._dry_test(
             amounts_in={0: 10, 1: 20, 2: 30, 3: 40},
             winning_players=[[1], [2, 3]],
+            percent_rake=0.0,
+            max_rake=0,
             expected_payouts={
                 1: 70,
                 2: 10,
                 3: 20,
-            }
+            },
+            expected_rakes={0: 0, 1: 0},
         )
 
     def test_eight_way_everyone_gets_stacked(self):
@@ -78,7 +94,10 @@ class PotTestCase(unittest.TestCase):
         self._dry_test(
             amounts_in=starting_stacks,
             winning_players=[[7]],
-            expected_payouts={7: sum(starting_stacks.values())}
+            percent_rake=0.0,
+            max_rake=0,
+            expected_payouts={7: sum(starting_stacks.values())},
+            expected_rakes={0: 0, 1: 0},
         )
 
     def test_eight_way_multi_balance_chop(self):
@@ -87,10 +106,13 @@ class PotTestCase(unittest.TestCase):
         self._dry_test(
             amounts_in=starting_stacks,
             winning_players=[[4, 3], [6], [7]],
+            percent_rake=0.0,
+            max_rake=0,
             expected_payouts={
                 3: 90,
                 4: 130,
                 6: 50,
                 7: 10
-            }
+            },
+            expected_rakes={0: 0, 1: 0},
         )
