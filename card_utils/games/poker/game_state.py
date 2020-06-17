@@ -298,7 +298,7 @@ class PokerGameState:
         the list of StreetAction objects
         """
         self.stacks = [s for s in self.starting_stacks]
-        self.pot = Pot(self.num_players)
+        self.pot = Pot(self.num_players, self.percent_rake, self.max_rake)
         self.last_actions = {}
         self.payouts = {}
         self.extract_antes_and_blinds()
@@ -432,7 +432,10 @@ class PokerGameState:
             if self.last_actions.get(player) != Action.action_fold
         ]
         if len(players_at_showdown) < 2:
-            return self.pot.settle_showdown([players_at_showdown])
+            return self.pot.settle_showdown(
+                winning_players=[players_at_showdown],
+                rake_pot=self.should_rake_pot()
+            )
 
         cards_remaining = self.get_cards_remaining()
         num_runouts = (

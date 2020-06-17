@@ -41,6 +41,8 @@ class CommunityGameState(PokerGameState):
         last_actions: Dict[int, str] = None,
         pot_balances: Dict[int, int] = None,
         all_in_runouts: int = 1,
+        percent_rake: float = 0.0,
+        max_rake: int = 0,
     ):
         """
         :param num_players: (int)
@@ -106,6 +108,8 @@ class CommunityGameState(PokerGameState):
             last_actions=last_actions,
             pot_balances=pot_balances,
             all_in_runouts=all_in_runouts,
+            percent_rake=percent_rake,
+            max_rake=max_rake
         )
 
     @property
