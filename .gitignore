@@ -1,4 +1,5 @@
-profile.bash
+
+profile.sh
 venv
 
 .DS_Store
