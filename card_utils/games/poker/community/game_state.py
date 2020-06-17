@@ -227,6 +227,10 @@ class CommunityGameState(PokerGameState):
         cards = self.deck[0:n]
         self.deck = self.deck[n:]
         self.boards[0].extend(cards)
+    
+    def should_rake_pot(self) -> bool:
+        """ no flop, no drop """
+        return bool(self.flop)
 
     @property
     def board(self):
