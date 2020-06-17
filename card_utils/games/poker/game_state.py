@@ -417,10 +417,10 @@ class PokerGameState:
                 is_action_closed = self.is_action_closed()
 
         if self.street >= self.showdown_street:
-            self.payouts, self.rake_paid = self.get_payouts()
+            self.payouts, self.rake_paid = self.get_payouts_and_rake()
             self.is_complete = True
 
-    def get_payouts(self):
+    def get_payouts_and_rake(self):
         """ runout multiple boards if everyone is all in,
             then sort hands and ship Pot
 
