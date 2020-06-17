@@ -96,7 +96,7 @@ class Pot:
     def get_max_total_rake(self):
         return min(
             self.max_rake,
-            self.percent_take / 100 * self.total_money
+            self.percent_rake / 100 * self.total_money
         )
 
     def get_rake_per_player(self, rake_pot: bool):
