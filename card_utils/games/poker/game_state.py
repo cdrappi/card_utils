@@ -524,9 +524,15 @@ class PokerGameState:
         """
         biggest_blind = max([self.ante, *self.blinds])
         sorted_pot_balances = sorted(self.pot.balances.values(), reverse=True)
-        last_raise_delta = sorted_pot_balances[0] - sorted_pot_balances[1]
+        if self.amount_to_call == 0:
+            return biggest_blind
+        # if amount to call is 0, then this will be zero too
+        last_raise_delta = max(
+            sorted_pot_balances[0] - sorted_pot_balances[1],
+            biggest_blind
+        )
 
-        min_bet = max(biggest_blind, last_raise_delta + self.amount_to_call)
+        min_bet = last_raise_delta + self.amount_to_call
         stack_size = self.stacks[self.action]
         return min(min_bet, stack_size)
 
@@ -571,6 +577,13 @@ class PokerGameState:
             blinds=self.blinds,
             actions=[a.to_dict() for a in self.actions]
         )
+
+    @property
+    def pot_sized_bet(self):
+        """
+        :return: (int)
+        """
+        return int(2 * self.amount_to_call + self.pot.total_money)
 
     @classmethod
     def build_state_string(cls,
