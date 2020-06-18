@@ -29,6 +29,8 @@ class PokerGameState:
         last_actions: Dict[int, str] = None,
         pot_balances: Dict[int, int] = None,
         all_in_runouts: int = 1,
+        rake_fraction: float = 0.0,
+        max_rake: int = 0,
     ):
         """
         :param num_players: (int)
@@ -49,6 +51,8 @@ class PokerGameState:
         :param last_actions: ({int: str})
         :param pot_balances: ({int: int})
         :param all_in_runouts: (int)
+        :param rake_fraction: (float)
+        :param max_rake: (int)
         """
         if num_players < 2:
             raise ValueError(
@@ -63,15 +67,15 @@ class PokerGameState:
 
         if len(hands) != num_players:
             raise ValueError(
-                f"PokerGameState.__init__: (hands)"
-                f"must have exactly one hand per player"
+                "PokerGameState.__init__: (hands)"
+                "must have exactly one hand per player"
             )
         self.hands = hands
 
         if len(starting_stacks) != num_players:
             raise ValueError(
-                f"PokerGameState.__init__: "
-                f"must have exactly one starting stack per player"
+                "PokerGameState.__init__: "
+                "must have exactly one starting stack per player"
             )
         self.starting_stacks = starting_stacks
         self.stacks = stacks or [s for s in starting_stacks]
@@ -79,16 +83,17 @@ class PokerGameState:
         boards = boards or [[]]
         if len(boards) not in {1, num_players}:
             raise ValueError(
-                f"PokerGameState.__init__: (boards)"
-                f"must have exactly one board, "
-                f"or a board for every player"
+                "PokerGameState.__init__: (boards)"
+                "must have exactly one board, "
+                "or a board for every player"
             )
         self.boards = boards
 
         blinds = blinds or []
         if not (ante or any(blinds)):
             raise ValueError(
-                f"There must be either an ante or blinds to play poker")
+                "There must be either an ante or blinds to play poker"
+            )
         self.ante = ante
         self.blinds = blinds
 
@@ -103,7 +108,15 @@ class PokerGameState:
         elif action_dicts:
             actions = [Action(**ad) for ad in action_dicts]
         self.actions = actions or []
-        self.pot = Pot(self.num_players, pot_balances)
+        self.rake_fraction = rake_fraction
+        self.max_rake = max_rake
+    
+        self.pot = Pot(
+            num_players=self.num_players,
+            rake_fraction=rake_fraction,
+            max_rake=max_rake,
+            balances=pot_balances
+        )
 
         self.street = street
 
@@ -114,6 +127,7 @@ class PokerGameState:
         self.action = action
 
         self.payouts = {}
+        self.rake_paid = {}
         self.is_complete = False
 
     @classmethod
@@ -128,6 +142,8 @@ class PokerGameState:
         blinds: List[int] = None,
         action_dicts: List[Dict] = None,
         all_in_runouts: int = 1,
+        rake_fraction: float = 0.0,
+        max_rake: int = 0
     ):
         """
         :param num_players: (int)
@@ -155,6 +171,8 @@ class PokerGameState:
             ante=ante,
             blinds=blinds,
             all_in_runouts=all_in_runouts,
+            rake_fraction=rake_fraction,
+            max_rake=max_rake
         )
         game_state.reset_state_from_action_dicts(action_dicts or [])
         return game_state
@@ -280,7 +298,7 @@ class PokerGameState:
         the list of StreetAction objects
         """
         self.stacks = [s for s in self.starting_stacks]
-        self.pot = Pot(self.num_players)
+        self.pot = Pot(self.num_players, self.rake_fraction, self.max_rake)
         self.last_actions = {}
         self.payouts = {}
         self.extract_antes_and_blinds()
@@ -298,7 +316,9 @@ class PokerGameState:
     def append_action(self, *args, **kwargs):
         """ build and append action to state """
         if self.is_complete:
-            raise Exception(f"cannot append_action after the hand is_complete")
+            raise Exception(
+                "cannot append_action after the hand is_complete"
+            )
         action_obj = self.build_action(*args, **kwargs)
         self.validate_action(action_obj)
         self.actions.append(action_obj)
@@ -397,10 +417,10 @@ class PokerGameState:
                 is_action_closed = self.is_action_closed()
 
         if self.street >= self.showdown_street:
-            self.payouts = self.get_payouts()
+            self.payouts, self.rake_paid = self.get_payouts_and_rake()
             self.is_complete = True
 
-    def get_payouts(self):
+    def get_payouts_and_rake(self):
         """ runout multiple boards if everyone is all in,
             then sort hands and ship Pot
 
@@ -412,25 +432,38 @@ class PokerGameState:
             if self.last_actions.get(player) != Action.action_fold
         ]
         if len(players_at_showdown) < 2:
-            return self.pot.settle_showdown([players_at_showdown])
+            return self.pot.settle_showdown(
+                winning_players=[players_at_showdown],
+                rake_pot=self.should_rake_pot()
+            )
 
         cards_remaining = self.get_cards_remaining()
         num_runouts = (
-            self.all_in_runouts if cards_remaining and self.action is None else 1
+            self.all_in_runouts
+            if cards_remaining and self.action is None
+            else 1
         )
         avg_payouts = {p: 0 for p in range(self.num_players)}
+        avg_rake = {p: 0 for p in range(self.num_players)}
         for _ in range(num_runouts):
             pot = Pot(
                 num_players=self.num_players,
                 balances={p: bal for p, bal in self.pot.balances.items()},
+                rake_fraction=self.rake_fraction,
+                max_rake=self.max_rake
             )
             self.runout_all_in_board(cards_remaining)
             winners = self.order_hands(players_at_showdown)
-            runout_payouts = pot.settle_showdown(winners)
+            runout_payouts, rake_paid = pot.settle_showdown(
+                winning_players=winners,
+                rake_pot=self.should_rake_pot()
+            )
             for p, amt in runout_payouts.items():
                 avg_payouts[p] += amt / num_runouts
+            for p, amt in rake_paid.items():
+                avg_rake[p] += amt / num_runouts
             self.reset_all_in_board(cards_remaining)
-        return avg_payouts
+        return avg_payouts, avg_rake
 
     def cannot_act(self, player):
         """
@@ -502,6 +535,11 @@ class PokerGameState:
             pot_balances=self.pot.balances,
             stacks=self.stacks,
         )
+    
+    def should_rake_pot(self) -> bool:
+        raise NotImplementedError(
+            'Must implement should_rake_pot in PokerGameState subclasses'
+        )
 
     @property
     def amount_to_call(self):
@@ -560,7 +598,10 @@ class PokerGameState:
 
         :return: ({int: float})
         """
-        return {player: self.player_pnl(player) for player in range(self.num_players)}
+        return {
+            player: self.player_pnl(player)
+            for player in range(self.num_players)
+        }
 
     @property
     def state_string(self) -> str:

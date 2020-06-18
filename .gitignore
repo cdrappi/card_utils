@@ -1,4 +1,6 @@
-gin_utils_profile.bash
+
+profile.sh
+venv
 
 .DS_Store
 
@@ -11,10 +13,6 @@ __pycache__/
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
-
-# Environments
-venv/
-card_utils_venv/
 
 # Editors: VSCode
 .vscode/*
