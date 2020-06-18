@@ -29,7 +29,7 @@ class PokerGameState:
         last_actions: Dict[int, str] = None,
         pot_balances: Dict[int, int] = None,
         all_in_runouts: int = 1,
-        percent_rake: float = 0.0,
+        rake_fraction: float = 0.0,
         max_rake: int = 0,
     ):
         """
@@ -51,7 +51,7 @@ class PokerGameState:
         :param last_actions: ({int: str})
         :param pot_balances: ({int: int})
         :param all_in_runouts: (int)
-        :param percent_rake: (float)
+        :param rake_fraction: (float)
         :param max_rake: (int)
         """
         if num_players < 2:
@@ -108,12 +108,12 @@ class PokerGameState:
         elif action_dicts:
             actions = [Action(**ad) for ad in action_dicts]
         self.actions = actions or []
-        self.percent_rake = percent_rake
+        self.rake_fraction = rake_fraction
         self.max_rake = max_rake
     
         self.pot = Pot(
             num_players=self.num_players,
-            percent_rake=percent_rake,
+            rake_fraction=rake_fraction,
             max_rake=max_rake,
             balances=pot_balances
         )
@@ -142,7 +142,7 @@ class PokerGameState:
         blinds: List[int] = None,
         action_dicts: List[Dict] = None,
         all_in_runouts: int = 1,
-        percent_rake: float = 0.0,
+        rake_fraction: float = 0.0,
         max_rake: int = 0
     ):
         """
@@ -171,7 +171,7 @@ class PokerGameState:
             ante=ante,
             blinds=blinds,
             all_in_runouts=all_in_runouts,
-            percent_rake=percent_rake,
+            rake_fraction=rake_fraction,
             max_rake=max_rake
         )
         game_state.reset_state_from_action_dicts(action_dicts or [])
@@ -298,7 +298,7 @@ class PokerGameState:
         the list of StreetAction objects
         """
         self.stacks = [s for s in self.starting_stacks]
-        self.pot = Pot(self.num_players, self.percent_rake, self.max_rake)
+        self.pot = Pot(self.num_players, self.rake_fraction, self.max_rake)
         self.last_actions = {}
         self.payouts = {}
         self.extract_antes_and_blinds()
@@ -449,7 +449,7 @@ class PokerGameState:
             pot = Pot(
                 num_players=self.num_players,
                 balances={p: bal for p, bal in self.pot.balances.items()},
-                percent_rake=self.percent_rake,
+                rake_fraction=self.rake_fraction,
                 max_rake=self.max_rake
             )
             self.runout_all_in_board(cards_remaining)

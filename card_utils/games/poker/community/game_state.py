@@ -41,7 +41,7 @@ class CommunityGameState(PokerGameState):
         last_actions: Dict[int, str] = None,
         pot_balances: Dict[int, int] = None,
         all_in_runouts: int = 1,
-        percent_rake: float = 0.0,
+        rake_fraction: float = 0.0,
         max_rake: int = 0,
     ):
         """
@@ -84,11 +84,12 @@ class CommunityGameState(PokerGameState):
 
         if num_players == 2 and blinds[0] < blinds[1]:
             logger.warning(
-                f"Flipping the blinds for 2-handed play. To suppress this warning, "
-                f"you should flip the order of blinds in heads up play. "
-                f"e.g. input the blinds as [2, 1] rather than [1, 2] "
-                f"because the dealer pays the small blind "
-                f"and acts second on all later streets"
+                "Flipping the blinds for 2-handed play. "
+                "To suppress this warning, "
+                "you should flip the order of blinds in heads up play. "
+                "e.g. input the blinds as [2, 1] rather than [1, 2] "
+                "because the dealer pays the small blind "
+                "and acts second on all later streets"
             )
             blinds = [blinds[1], blinds[0]]
 
@@ -108,7 +109,7 @@ class CommunityGameState(PokerGameState):
             last_actions=last_actions,
             pot_balances=pot_balances,
             all_in_runouts=all_in_runouts,
-            percent_rake=percent_rake,
+            rake_fraction=rake_fraction,
             max_rake=max_rake
         )
 
@@ -202,10 +203,15 @@ class CommunityGameState(PokerGameState):
             # Post-flop action always begins with the first player
             # left of the dealer who hasn't folded
             # e.g. small blind (0), then big blind (1)... etc
-            return next(p for p in range(self.num_players) if not self.cannot_act(p))
+            return next(
+                p for p in range(self.num_players)
+                if not self.cannot_act(p)
+            )
 
     def move_street(self):
-        """ increment the street and then deal out flop/turn/river if necessary """
+        """ increment the street and then
+            deal out flop/turn/river if necessary
+        """
         PokerGameState.move_street(self)
         if self.action is None:
             # the action is closed because everyone is all in,

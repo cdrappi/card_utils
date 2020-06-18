@@ -15,7 +15,7 @@ class PotTestCase(unittest.TestCase):
     def _dry_test(self,
                   amounts_in,
                   winning_players,
-                  percent_rake,
+                  rake_fraction,
                   max_rake,
                   expected_payouts,
                   expected_rakes):
@@ -33,7 +33,7 @@ class PotTestCase(unittest.TestCase):
             if p not in expected_payouts:
                 expected_payouts[p] = 0
 
-        pot = Pot(n, percent_rake, max_rake)
+        pot = Pot(n, rake_fraction, max_rake)
         for p, amt_in in amounts_in.items():
             pot.put_money_in(p, amt_in)
 
@@ -46,7 +46,7 @@ class PotTestCase(unittest.TestCase):
         self._dry_test(
             amounts_in={0: 10, 1: 10},
             winning_players=[[1], [0]],
-            percent_rake=0.0,
+            rake_fraction=0.0,
             max_rake=0,
             expected_payouts={1: 20},
             expected_rakes={0: 0, 1: 0}
@@ -57,7 +57,7 @@ class PotTestCase(unittest.TestCase):
         self._dry_test(
             amounts_in={0: 20, 1: 10},
             winning_players=[[0, 1]],
-            percent_rake=0.0,
+            rake_fraction=0.0,
             max_rake=0,
             expected_payouts={0: 20, 1: 10},
             expected_rakes={0: 0, 1: 0},
@@ -68,7 +68,7 @@ class PotTestCase(unittest.TestCase):
         self._dry_test(
             amounts_in={0: 20, 1: 10, 2: 0},
             winning_players=[[1], [0]],
-            percent_rake=0.0,
+            rake_fraction=0.0,
             max_rake=0,
             expected_payouts={0: 10, 1: 20},
             expected_rakes={0: 0, 1: 0, 2: 0},
@@ -79,7 +79,7 @@ class PotTestCase(unittest.TestCase):
         self._dry_test(
             amounts_in={0: 10, 1: 20, 2: 30, 3: 40},
             winning_players=[[1], [2, 3]],
-            percent_rake=0.0,
+            rake_fraction=0.0,
             max_rake=0,
             expected_payouts={
                 1: 70,
@@ -97,7 +97,7 @@ class PotTestCase(unittest.TestCase):
         self._dry_test(
             amounts_in=starting_stacks,
             winning_players=[[7]],
-            percent_rake=0.0,
+            rake_fraction=0.0,
             max_rake=0,
             expected_payouts={7: sum(starting_stacks.values())},
             expected_rakes={i: 0 for i in starting_stacks},
@@ -109,7 +109,7 @@ class PotTestCase(unittest.TestCase):
         self._dry_test(
             amounts_in=starting_stacks,
             winning_players=[[4, 3], [6], [7]],
-            percent_rake=0.0,
+            rake_fraction=0.0,
             max_rake=0,
             expected_payouts={
                 3: 90,

@@ -7,7 +7,7 @@ class Pot:
 
     def __init__(self,
                  num_players: int,
-                 percent_rake: float,
+                 rake_fraction: float,
                  max_rake: int,
                  balances: Dict[int, int] = None):
         """
@@ -16,7 +16,7 @@ class Pot:
         """
         self.num_players = num_players
         self.balances = balances or {p: 0 for p in range(num_players)}
-        self.percent_rake = percent_rake
+        self.rake_fraction = rake_fraction
         self.max_rake = max_rake
     
     def put_money_in(self, player, amount):
@@ -76,7 +76,7 @@ class Pot:
             f'but there is still {self.total_money} '
             f'in the pot!'
         )
-    
+
     @property
     def total_money(self):
         """ sum of all the money in the pot from each player
@@ -96,7 +96,7 @@ class Pot:
     def get_max_total_rake(self):
         return min(
             self.max_rake,
-            self.percent_rake / 100 * self.total_money
+            self.rake_fraction * self.total_money
         )
 
     def get_rake_per_player(self, rake_pot: bool):
@@ -116,9 +116,8 @@ class Pot:
             if total_rake_left == 0:
                 return rake_per_player
             max_rake_at_level = int(total_rake_left / len(players_at_level))
-            percent_rake_at_level = int(level * self.percent_rake / 100)
-            rake_at_level = min(max_rake_at_level, percent_rake_at_level)
+            rake_fraction_at_level = int(level * self.rake_fraction)
+            rake_at_level = min(max_rake_at_level, rake_fraction_at_level)
             for player in players_at_level:
                 rake_per_player[player] += rake_at_level
-                
         return rake_per_player
