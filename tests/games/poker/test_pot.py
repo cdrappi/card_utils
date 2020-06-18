@@ -127,8 +127,8 @@ class PotTestCase(unittest.TestCase):
             winning_players=[[1], [0]],
             rake_fraction=0.10,
             max_rake=5,
-            expected_payouts={1: 20},
-            expected_rakes={0: 0, 1: 0}
+            expected_payouts={1: 18},
+            expected_rakes={0: 1, 1: 1}
         )
 
     def test_heads_up_chopped_pot_raked(self):
@@ -149,8 +149,8 @@ class PotTestCase(unittest.TestCase):
             winning_players=[[1], [0]],
             rake_fraction=0.10,
             max_rake=5,
-            expected_payouts={0: 10, 1: 20},
-            expected_rakes={0: 0, 1: 0, 2: 0},
+            expected_payouts={0: 9, 1: 18},
+            expected_rakes={0: 2, 1: 1, 2: 0},
         )
 
     def test_4_way_multi_balance_chop_raked(self):
@@ -161,11 +161,12 @@ class PotTestCase(unittest.TestCase):
             rake_fraction=0.10,
             max_rake=5,
             expected_payouts={
-                1: 70,
-                2: 10,
-                3: 20,
+                0: 0,
+                1: 66.0,
+                2: 10.0,
+                3: 19.0
             },
-            expected_rakes={0: 0, 1: 0, 2: 0, 3: 0},
+            expected_rakes={0: 1, 1: 1, 2: 1, 3: 2},
         )
 
     def test_eight_way_everyone_gets_stacked_raked(self):
@@ -178,8 +179,17 @@ class PotTestCase(unittest.TestCase):
             winning_players=[[7]],
             rake_fraction=0.10,
             max_rake=5,
-            expected_payouts={7: sum(starting_stacks.values())},
-            expected_rakes={i: 0 for i in starting_stacks},
+            expected_payouts={7: 275},
+            expected_rakes={
+                0: 0,
+                1: 0,
+                2: 0,
+                3: 1,
+                4: 1,
+                5: 1,
+                6: 1,
+                7: 1
+            },
         )
 
     def test_eight_way_multi_balance_chop_raked(self):
@@ -191,10 +201,19 @@ class PotTestCase(unittest.TestCase):
             rake_fraction=0.10,
             max_rake=5,
             expected_payouts={
-                3: 90,
-                4: 130,
+                3: 87.5,
+                4: 127.5,
                 6: 50,
                 7: 10
             },
-            expected_rakes={i: 0 for i in starting_stacks},
+            expected_rakes={
+                0: 0,
+                1: 0,
+                2: 0,
+                3: 1,
+                4: 1,
+                5: 1,
+                6: 1,
+                7: 1
+            },
         )
