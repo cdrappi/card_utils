@@ -138,8 +138,8 @@ class PotTestCase(unittest.TestCase):
             winning_players=[[0, 1]],
             rake_fraction=0.10,
             max_rake=5,
-            expected_payouts={0: 20, 1: 10},
-            expected_rakes={0: 0, 1: 0},
+            expected_payouts={0: 18, 1: 9},
+            expected_rakes={0: 2, 1: 1},
         )
 
     def test_three_way_uneven_entered_raked(self):
