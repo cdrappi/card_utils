@@ -15,7 +15,7 @@ def pretty_hand_rank(hand_rank_tuple):
 
 
 def get_best_hands_generic(hand_strength_function, board, hands):
-    """ get the index of the best omaha hand given a board
+    """get the index of the best omaha hand given a board
 
     :param hand_strength_function: (function)
         inputs (board, hand), outputs (tuple)
@@ -32,14 +32,11 @@ def get_best_hands_generic(hand_strength_function, board, hands):
             hand_strengths[hand_strength] = []
         hand_strengths[hand_strength].append(ii)
 
-    return [
-        hand_strengths[hs]
-        for hs in sorted(hand_strengths, reverse=True)
-    ]
+    return [hand_strengths[hs] for hs in sorted(hand_strengths, reverse=True)]
 
 
 def deal_random_hands(n_hands, n_cards):
-    """ deal random n_hands of n_cards each,
+    """deal random n_hands of n_cards each,
         and also return the rest of the deck
 
     :param n_hands: (int)
@@ -47,18 +44,16 @@ def deal_random_hands(n_hands, n_cards):
     :return: ([str], [[str]]) remaining deck, hands
     """
     deck = random_deck()
-    hands = [
-        deck[n_cards * ii:n_cards * (ii + 1)]
-        for ii in range(n_hands)
-    ]
-    return deck[n_cards * n_hands:], hands
+    hands = [deck[n_cards * ii : n_cards * (ii + 1)] for ii in range(n_hands)]
+    return deck[n_cards * n_hands :], hands
 
 
-def is_action_closed(num_players: int,
-                     last_actions: Dict[int, int],
-                     pot_balances: Dict[int, int],
-                     stacks: List[int]
-                     ) -> bool:
+def is_action_closed(
+    num_players: int,
+    last_actions: Dict[int, Action],
+    pot_balances: Dict[int, int],
+    stacks: List[int],
+) -> bool:
     """
     :param num_players: (int)
     :param last_actions: (Dict)

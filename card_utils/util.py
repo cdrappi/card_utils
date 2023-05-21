@@ -4,7 +4,7 @@ from typing import List, Union
 
 
 def untuple_dict(the_dict):
-    """ convert dict with keys that are tuples
+    """convert dict with keys that are tuples
         to a dict with keys that are strings
 
     :param the_dict: ({tuple: obj})
@@ -21,8 +21,8 @@ def untuple_dict(the_dict):
     return {to_key(k): v for k, v in the_dict.items()}
 
 
-def inverse_cumulative_sum(increasing_numbers: List[Union[int, float]]):
-    """ inverse function of cumulative sum
+def inverse_cumulative_sum(increasing_numbers: List[int]):
+    """inverse function of cumulative sum
 
     :param increasing_numbers: ([number]) [1,3,6]
     :return: ([number]) [1,2,3]
@@ -38,7 +38,6 @@ def inverse_cumulative_sum(increasing_numbers: List[Union[int, float]]):
 
 
 class LightDefaultDict(dict):
-
     def __init__(self, default_factory, **kwargs):
         """
         :param default_factory: (function) e.g. int, float, list

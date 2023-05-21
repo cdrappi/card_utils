@@ -1,16 +1,16 @@
-from setuptools import setup
+from setuptools import setup  # type: ignore
 
 
 def _is_install_requirement(requirement):
-    """ return True iff setup should install requirement
+    """return True iff setup should install requirement
 
     :param requirement: (str) line of requirements.txt file
     :return: (bool)
     """
-    return not (requirement.startswith('-e') or 'git+' in requirement)
+    return not (requirement.startswith("-e") or "git+" in requirement)
 
 
-with open('requirements/common.txt') as f:
+with open("requirements/common.txt") as f:
     install_requires = [
         requirement
         for requirement in f.read().splitlines()
@@ -18,8 +18,8 @@ with open('requirements/common.txt') as f:
     ]
 
 setup(
-    name='card_utils',
-    version='2020.6.17',
-    packages=['card_utils'],
+    name="card_utils",
+    version="2023.5.21",
+    packages=["card_utils"],
     install_requires=install_requires,
 )
