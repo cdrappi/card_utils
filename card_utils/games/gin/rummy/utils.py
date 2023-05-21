@@ -1,8 +1,8 @@
-from card_utils.games.gin.deal import new_game
+from card_utils.games.gin.utils import new_game
 
 
 def deal_new_game():
-    """ shuffle up and deal each player 10 cards,
+    """shuffle up and deal each player 10 cards,
         put one card in the discard list,
         and put remaining cards in deck
 
