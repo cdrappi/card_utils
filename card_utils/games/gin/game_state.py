@@ -4,8 +4,7 @@ import copy
 import random
 from typing import Dict, List, Optional
 
-from card_utils.games.gin.ricky import utils
-from card_utils.games.gin.utils import RummyAction, RummyHud
+from card_utils.games.gin.utils import RummyAction, RummyHud, RummyTurn
 
 
 class AbstractGinGameState:
@@ -31,10 +30,7 @@ class AbstractGinGameState:
         discard: List[str],
         p1_hand: List[str],
         p2_hand: List[str],
-        p1_discards: bool,
-        p1_draws: bool,
-        p2_discards: bool,
-        p2_draws: bool,
+        turn: RummyTurn,
         public_hud: Optional[Dict[str, str]] = None,
         last_draw=None,
         last_draw_from_discard=None,
@@ -43,7 +39,10 @@ class AbstractGinGameState:
         shuffles=0,
         p1_points=None,
         p2_points=None,
-        max_shuffles=None,
+        # defaults are for gin ricky
+        cards_dealt: int = 7,
+        max_shuffles: Optional[int] = None,
+        end_cards_in_deck: int = 0,
         max_turns=None,
     ):
         """
@@ -75,10 +74,7 @@ class AbstractGinGameState:
         self.p1_hand = p1_hand
         self.p2_hand = p2_hand
 
-        self.p1_discards = p1_discards
-        self.p1_draws = p1_draws
-        self.p2_discards = p2_discards
-        self.p2_draws = p2_draws
+        self.turn = turn
 
         self.last_draw = last_draw
         self.last_draw_from_discard = last_draw_from_discard
@@ -94,7 +90,10 @@ class AbstractGinGameState:
         self.p1_points = p1_points
         self.p2_points = p2_points
 
+        self.cards_dealt = cards_dealt
+
         self.max_shuffles = max_shuffles
+        self.end_cards_in_deck = end_cards_in_deck
         self.max_turns = max_turns
 
     def draw_card(self, from_discard):
@@ -110,15 +109,15 @@ class AbstractGinGameState:
                 "to call GinRickyGameState.draw_card"
             )
 
-        if self.p1_draws and len(self.p1_hand) != 7:
+        if self.p1_draws and len(self.p1_hand) != self.cards_dealt:
             raise Exception(
                 f"Player 1 cannot draw because "
-                f"they do not have 7 cards! {self.p1_hand}"
+                f"they do not have {self.cards_dealt} cards! {self.p1_hand}"
             )
-        if self.p2_draws and len(self.p2_hand) != 7:
+        if self.p2_draws and len(self.p2_hand) != self.cards_dealt:
             raise Exception(
                 f"Player 2 cannot draw because "
-                f"they do not have 7 cards! {self.p2_hand}"
+                f"they do not have {self.cards_dealt} cards! {self.p2_hand}"
             )
 
         if from_discard:
@@ -132,7 +131,7 @@ class AbstractGinGameState:
             card_drawn = self.top_of_deck
             self._add_to_hand(card_drawn)
             self.deck = self.deck[1:]
-            if len(self.deck) == 0:
+            if len(self.deck) == self.end_cards_in_deck:
                 self.shuffles += 1
                 if self.hit_max_shuffles():
                     self.end_game()
@@ -149,13 +148,7 @@ class AbstractGinGameState:
                     **{c: self.hud_player_2 for c in self.p2_hand},
                 }
 
-        if self.p1_draws:
-            self.p1_draws = False
-            self.p1_discards = True
-        elif self.p2_draws:
-            self.p2_draws = False
-            self.p2_discards = True
-
+        self.advance_turn()
         self.turns += 1
         self.last_draw = card_drawn
         self.last_draw_from_discard = from_discard
@@ -169,6 +162,20 @@ class AbstractGinGameState:
     @staticmethod
     def sort_hand(hand: List[str]) -> List[str]:
         raise NotImplementedError("sort_hand not implemented")
+
+    def advance_turn(self):
+        """set next player to draw
+
+        :return: None
+        """
+        if self.turn == RummyTurn.P1_DRAWS:
+            self.turn = RummyTurn.P1_DISCARDS
+        elif self.turn == RummyTurn.P1_DISCARDS:
+            self.turn = RummyTurn.P2_DRAWS
+        elif self.turn == RummyTurn.P2_DRAWS:
+            self.turn = RummyTurn.P2_DISCARDS
+        elif self.turn == RummyTurn.P2_DISCARDS:
+            self.turn = RummyTurn.P1_DRAWS
 
     def discard_card(self, card):
         """discard card from player's hand to discard pile
@@ -184,9 +191,9 @@ class AbstractGinGameState:
             )
 
         if self.p1_discards:
-            if len(self.p1_hand) != 8:
+            if len(self.p1_hand) != self.cards_dealt + 1:
                 raise Exception(
-                    f"Cannot discard: player 1 has 8 cards in hand"
+                    f"Cannot discard: player 1 has {self.cards_dealt + 1} cards in hand"
                 )
             if card not in self.p1_hand:
                 raise Exception(
@@ -198,9 +205,9 @@ class AbstractGinGameState:
             if self.get_deadwood(self.p1_hand) == 0:
                 self.end_game()
         elif self.p2_discards:
-            if len(self.p2_hand) != 8:
+            if len(self.p2_hand) != self.cards_dealt + 1:
                 raise Exception(
-                    f"Cannot discard: player 2 has 8 cards in hand"
+                    f"Cannot discard: player 2 has {self.cards_dealt + 1} cards in hand"
                 )
             if card not in self.p2_hand:
                 raise Exception(
@@ -287,7 +294,7 @@ class AbstractGinGameState:
         """
         return self.deck[0]
 
-    def to_dict(self, is_player_1):
+    def to_dict(self, is_player_1: bool):
         """
         :param is_player_1:
         :return:
@@ -297,7 +304,7 @@ class AbstractGinGameState:
         else:
             return self._incomplete_game_to_dict(is_player_1)
 
-    def _complete_game_to_dict(self, is_player_1):
+    def _complete_game_to_dict(self, is_player_1: bool):
         """
 
         :param is_player_1: (bool)
@@ -306,9 +313,9 @@ class AbstractGinGameState:
         return {
             "points": self.p1_points if is_player_1 else self.p2_points,
             "opponent_hand": self.p2_hand if is_player_1 else self.p1_hand,
-            "opponent_points": self.p2_points
-            if is_player_1
-            else self.p1_points,
+            "opponent_points": (
+                self.p2_points if is_player_1 else self.p1_points
+            ),
             "action": self.action_complete,
         }
 

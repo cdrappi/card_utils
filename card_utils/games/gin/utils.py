@@ -1,14 +1,33 @@
+import itertools
 from enum import Enum
+from typing import List, Tuple
 
 from card_utils import deck
-from card_utils.deck.utils import random_deck
+from card_utils.deck.utils import (
+    random_deck,
+    rank_partition,
+    ranks_to_sorted_values,
+)
 
 
 class RummyAction(Enum):
     DRAW = "draw"
     DISCARD = "discard"
+    KNOCK = "knock"
     COMPLETE = "complete"
     WAIT = "wait"
+
+
+class RummyTurn(Enum):
+    P1_DRAWS = "p1-draws"
+    P2_DRAWS = "p2-draws"
+
+    P1_DISCARDS = "p1-discards"
+    P2_DISCARDS = "p2-discards"
+
+    # in rummy, players can opt to knock after discarding
+    P1_MAY_KNOCK = "p1-may-knock"
+    P2_MAY_KNOCK = "p2-may-knock"
 
 
 class RummyHud(Enum):
@@ -39,3 +58,91 @@ def new_game(n_cards):
         "discard": [deck_[2 * n_cards]],
         "deck": deck_[2 * n_cards + 1 :],
     }
+
+
+def get_sets(hand: List[str]) -> Tuple[List[str], List[str]]:
+    """
+
+    :param hand: ([str])
+    :return: ([[str]], [[str]])
+    """
+    rank_to_suits = rank_partition(hand)
+    sets_3, sets_4 = [], []
+    for rank, suits in rank_to_suits.items():
+        if len(suits) == 4:
+            sets_4.append([f"{rank}{s}" for s in suits])
+            sets_3.extend(
+                [
+                    [f"{rank}{s}" for s in suit_combo]
+                    for suit_combo in itertools.combinations(suits, 3)
+                ]
+            )
+        elif len(suits) == 3:
+            sets_3.append([f"{rank}{s}" for s in suits])
+    return sets_3, sets_4
+
+
+def rank_straights(
+    ranks: List[str],
+    min_len: int = 3,
+    max_len: int = 11,
+    aces_high=True,
+    aces_low=True,
+    suit="",
+):
+    """
+    :param ranks: ([str])
+        e.g. ['A', '2', '7', 'T', 'J', 'Q', 'K']
+    :param straight_length: (int) e.g. 5
+    :param aces_high: (bool)
+    :param aces_low: (bool)
+    :param suit: (str) optional: inject a suit in the final returned value
+    :return: ([[str]]) list of list of straights,
+        each with length straight_length
+        e.g. [['T','J','Q','K','A']]
+        or [['Th', 'Jh', 'Qh', 'Kh', 'Ah']]
+    """
+    if len(ranks) < min_len:
+        # don't waste our time if its impossible to make a straight
+        return []
+
+    if suit not in {"", *deck.suits}:
+        raise ValueError(
+            f"rank_straights: suit parameter must either be "
+            f'the empty string "" or one of {deck.suits}'
+        )
+
+    values = ranks_to_sorted_values(
+        ranks,
+        aces_high=aces_high,
+        aces_low=aces_low,
+    )
+
+    values_in_a_row = 0
+    num_values = len(values)
+    last_value = values[0]
+    straights = []
+
+    for ii, value in enumerate(values[1:]):
+        if last_value + 1 == value:
+            values_in_a_row += 1
+        else:
+            values_in_a_row = 0
+
+        for straight_length in range(min_len, max_len + 1):
+            if values_in_a_row >= straight_length - 1:
+                straights.append(
+                    [
+                        f"{deck.value_to_rank[v]}{suit}"
+                        for v in range(value - straight_length + 1, value + 1)
+                    ]
+                )
+
+        if num_values + values_in_a_row < min_len + ii:
+            # exit early if there aren't enough cards left
+            # to complete a straight
+            return straights
+
+        last_value = value
+
+    return straights

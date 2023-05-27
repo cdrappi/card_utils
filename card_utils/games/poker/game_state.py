@@ -416,7 +416,8 @@ class PokerGameState:
                 is_action_closed = self.is_action_closed()
 
         if self.street >= self.showdown_street:
-            self.payouts, self.rake_paid = self.get_payouts_and_rake()
+            self.payouts, rake_paid = self.get_payouts_and_rake()
+            self.rake_paid = rake_paid  # type: ignore
             self.is_complete = True
 
     def get_payouts_and_rake(self):
@@ -505,7 +506,7 @@ class PokerGameState:
         everyone who hasn't folded
         """
         self.street += 1
-        self.last_actions = {
+        self.last_actions = {  # type: ignore
             player: Action.action_fold
             for player, action in self.last_actions.items()
             if action == Action.action_fold
