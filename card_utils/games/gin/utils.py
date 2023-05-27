@@ -29,6 +29,22 @@ class RummyTurn(Enum):
     P1_MAY_KNOCK = "p1-may-knock"
     P2_MAY_KNOCK = "p2-may-knock"
 
+    def is_action_p1(self):
+        return self in {
+            RummyTurn.P1_DRAWS,
+            RummyTurn.P1_DISCARDS,
+            RummyTurn.P1_MAY_KNOCK,
+        }
+
+    def is_draw(self):
+        return self in {RummyTurn.P1_DRAWS, RummyTurn.P2_DRAWS}
+
+    def is_discard(self):
+        return self in {RummyTurn.P1_DISCARDS, RummyTurn.P2_DISCARDS}
+
+    def is_knock(self):
+        return self in {RummyTurn.P1_MAY_KNOCK, RummyTurn.P2_MAY_KNOCK}
+
 
 class RummyHud(Enum):
     PLAYER_1 = "1"
@@ -39,7 +55,7 @@ class RummyHud(Enum):
     OPPONENT = "o"
 
 
-def new_game(n_cards):
+def new_game(n_cards: int):
     """deal new game of gin
 
     :param n_cards: (int) how many cards to give to each player

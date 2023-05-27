@@ -56,29 +56,30 @@ class GinRummyGameState(AbstractGinGameState):
         best_melds, unmelded, _ = split_melds(hand)
         return [c for m in best_melds for c in m] + unmelded
 
-    def advance_turn(self):
+    @staticmethod
+    def advance_turn(turn: RummyTurn, deadwood: int) -> RummyTurn:
         """set next player to draw
 
         :return: None
         """
-        if self.turn == RummyTurn.P1_DRAWS:
-            self.turn = RummyTurn.P1_DISCARDS
-        elif self.turn == RummyTurn.P1_DISCARDS:
-            _, _, deadwood = split_melds(self.p1_hand)
+        if turn == RummyTurn.P1_DRAWS:
+            return RummyTurn.P1_DISCARDS
+        elif turn == RummyTurn.P1_DISCARDS:
             if deadwood <= 10:
-                self.turn = RummyTurn.P1_MAY_KNOCK
+                return RummyTurn.P1_MAY_KNOCK
             else:
-                self.turn = RummyTurn.P2_DRAWS
-        elif self.turn == RummyTurn.P1_MAY_KNOCK:
-            self.turn = RummyTurn.P2_DRAWS
+                return RummyTurn.P2_DRAWS
+        elif turn == RummyTurn.P1_MAY_KNOCK:
+            return RummyTurn.P2_DRAWS
 
-        elif self.turn == RummyTurn.P2_DRAWS:
-            self.turn = RummyTurn.P2_DISCARDS
-        elif self.turn == RummyTurn.P2_DISCARDS:
-            _, _, deadwood = split_melds(self.p2_hand)
+        elif turn == RummyTurn.P2_DRAWS:
+            return RummyTurn.P2_DISCARDS
+        elif turn == RummyTurn.P2_DISCARDS:
             if deadwood <= 10:
-                self.turn = RummyTurn.P2_MAY_KNOCK
+                return RummyTurn.P2_MAY_KNOCK
             else:
-                self.turn = RummyTurn.P1_DRAWS
-        elif self.turn == RummyTurn.P2_MAY_KNOCK:
-            self.turn = RummyTurn.P1_DRAWS
+                return RummyTurn.P1_DRAWS
+        elif turn == RummyTurn.P2_MAY_KNOCK:
+            return RummyTurn.P1_DRAWS
+
+        raise ValueError(f"Invalid Gin Rummy turn: {turn}")

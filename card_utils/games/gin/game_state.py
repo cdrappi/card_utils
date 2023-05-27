@@ -2,6 +2,7 @@
 
 import copy
 import random
+from re import L
 from typing import Dict, List, Optional
 
 from card_utils.games.gin.utils import RummyAction, RummyHud, RummyTurn
@@ -21,6 +22,7 @@ class AbstractGinGameState:
 
     action_draw = RummyAction.DRAW.value
     action_discard = RummyAction.DISCARD.value
+    action_knock = RummyAction.KNOCK.value
     action_complete = RummyAction.COMPLETE.value
     action_wait = RummyAction.WAIT.value
 
@@ -51,10 +53,6 @@ class AbstractGinGameState:
         :param discard: ([str])
         :param p1_hand: ([str])
         :param p2_hand: ([str])
-        :param p1_discards: (bool)
-        :param p1_draws: (bool)
-        :param p2_discards: (bool)
-        :param p2_draws: (bool)
         :param public_hud: ({str: str})
         :param last_draw: (str)
         :param last_draw_from_discard: (bool)
@@ -103,18 +101,23 @@ class AbstractGinGameState:
         :return: (str) card drawn
         """
 
-        if self.p1_draws == self.p2_draws:
-            raise Exception(
-                "exactly one player must be drawing "
-                "to call GinRickyGameState.draw_card"
+        if self.turn not in {RummyTurn.P1_DRAWS, RummyTurn.P2_DRAWS}:
+            raise ValueError(
+                "Cannot draw: it is not the player's turn to draw"
             )
 
-        if self.p1_draws and len(self.p1_hand) != self.cards_dealt:
+        if (
+            self.turn == RummyTurn.P1_DRAWS
+            and len(self.p1_hand) != self.cards_dealt
+        ):
             raise Exception(
                 f"Player 1 cannot draw because "
                 f"they do not have {self.cards_dealt} cards! {self.p1_hand}"
             )
-        if self.p2_draws and len(self.p2_hand) != self.cards_dealt:
+        if (
+            self.turn == RummyTurn.P2_DRAWS
+            and len(self.p2_hand) != self.cards_dealt
+        ):
             raise Exception(
                 f"Player 2 cannot draw because "
                 f"they do not have {self.cards_dealt} cards! {self.p2_hand}"
@@ -125,7 +128,9 @@ class AbstractGinGameState:
             self._add_to_hand(card_drawn)
             self.discard = self.discard[:-1]
             self.public_hud[card_drawn] = (
-                self.hud_player_1 if self.p1_draws else self.hud_player_2
+                self.hud_player_1
+                if self.turn.is_action_p1()
+                else self.hud_player_2
             )
         else:
             card_drawn = self.top_of_deck
@@ -148,7 +153,9 @@ class AbstractGinGameState:
                     **{c: self.hud_player_2 for c in self.p2_hand},
                 }
 
-        self.advance_turn()
+        hand = self.p1_hand if self.turn.is_action_p1() else self.p2_hand
+        deadwood = self.get_deadwood(hand)
+        self.turn = self.advance_turn(self.turn, deadwood)
         self.turns += 1
         self.last_draw = card_drawn
         self.last_draw_from_discard = from_discard
@@ -163,19 +170,9 @@ class AbstractGinGameState:
     def sort_hand(hand: List[str]) -> List[str]:
         raise NotImplementedError("sort_hand not implemented")
 
-    def advance_turn(self):
-        """set next player to draw
-
-        :return: None
-        """
-        if self.turn == RummyTurn.P1_DRAWS:
-            self.turn = RummyTurn.P1_DISCARDS
-        elif self.turn == RummyTurn.P1_DISCARDS:
-            self.turn = RummyTurn.P2_DRAWS
-        elif self.turn == RummyTurn.P2_DRAWS:
-            self.turn = RummyTurn.P2_DISCARDS
-        elif self.turn == RummyTurn.P2_DISCARDS:
-            self.turn = RummyTurn.P1_DRAWS
+    @staticmethod
+    def advance_turn(turn: RummyTurn, deadwood: int) -> RummyTurn:
+        raise NotImplementedError("advance_turn not implemented")
 
     def discard_card(self, card):
         """discard card from player's hand to discard pile
@@ -184,13 +181,12 @@ class AbstractGinGameState:
         :return: None
         """
 
-        if self.p1_discards == self.p2_discards:
+        if self.turn not in {RummyTurn.P1_DISCARDS, RummyTurn.P2_DISCARDS}:
             raise Exception(
-                "exactly one player must be discarding "
-                "to call GinRickyGameState.discard_card"
+                "Cannot discard: it is not the player's turn to discard"
             )
 
-        if self.p1_discards:
+        if self.turn == RummyTurn.P1_DISCARDS:
             if len(self.p1_hand) != self.cards_dealt + 1:
                 raise Exception(
                     f"Cannot discard: player 1 has {self.cards_dealt + 1} cards in hand"
@@ -200,11 +196,11 @@ class AbstractGinGameState:
                     f"Player 1 cannot discard {card}: not in hand!"
                 )
             self.p1_hand = [c for c in self.p1_hand if c != card]
-            self.p1_discards = False
-            self.p2_draws = True
-            if self.get_deadwood(self.p1_hand) == 0:
+            deadwood = self.get_deadwood(self.p1_hand)
+            if deadwood == 0:
                 self.end_game()
-        elif self.p2_discards:
+            self.turn = self.advance_turn(self.turn, deadwood)
+        elif self.turn == RummyTurn.P2_DISCARDS:
             if len(self.p2_hand) != self.cards_dealt + 1:
                 raise Exception(
                     f"Cannot discard: player 2 has {self.cards_dealt + 1} cards in hand"
@@ -214,10 +210,10 @@ class AbstractGinGameState:
                     f"Player 2 cannot discard {card}: not in hand!"
                 )
             self.p2_hand = [c for c in self.p2_hand if c != card]
-            self.p2_discards = False
-            self.p1_draws = True
-            if self.get_deadwood(self.p2_hand) == 0:
+            deadwood = self.get_deadwood(self.p2_hand)
+            if deadwood == 0:
                 self.end_game()
+            self.turn = self.advance_turn(self.turn, deadwood)
 
         # add discard to HUD
         if self.discard:
@@ -255,10 +251,14 @@ class AbstractGinGameState:
         :param card_drawn: (str)
         :return: None
         """
-        if self.p1_draws:
+        if self.turn == RummyTurn.P1_DRAWS:
             self.p1_hand.append(card_drawn)
-        else:
+        elif self.turn == RummyTurn.P2_DRAWS:
             self.p2_hand.append(card_drawn)
+        else:
+            raise Exception(
+                "Cannot add to hand: it is not the player's turn to draw"
+            )
 
     def get_action(self, is_p1):
         """
@@ -266,17 +266,20 @@ class AbstractGinGameState:
         :param is_p1: (bool)
         :return: (str)
         """
-
         if self.is_complete:
             return self.action_complete
 
-        is_p2 = not is_p1
-        if (self.p1_draws and is_p1) or (self.p2_draws and is_p2):
-            return self.action_draw
-        elif (is_p1 and self.p1_discards) or (is_p2 and self.p2_discards):
-            return self.action_discard
-        else:
+        if is_p1 != self.turn.is_action_p1():
             return self.action_wait
+
+        if self.turn.is_draw():
+            return self.action_draw
+
+        if self.turn.is_discard():
+            return self.action_discard
+
+        if self.turn.is_knock():
+            return self.action_knock
 
     @property
     def top_of_discard(self):

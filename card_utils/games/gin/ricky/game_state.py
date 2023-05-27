@@ -54,16 +54,19 @@ class GinRickyGameState(AbstractGinGameState):
     def sort_hand(hand: List[str]) -> List[str]:
         return sort_hand(hand)
 
-    def advance_turn(self):
+    @staticmethod
+    def advance_turn(turn: RummyTurn, deadwood: int) -> RummyTurn:
         """set next player to draw
 
         :return: None
         """
-        if self.turn == RummyTurn.P1_DRAWS:
-            self.turn = RummyTurn.P1_DISCARDS
-        elif self.turn == RummyTurn.P1_DISCARDS:
-            self.turn = RummyTurn.P2_DRAWS
-        elif self.turn == RummyTurn.P2_DRAWS:
-            self.turn = RummyTurn.P2_DISCARDS
-        elif self.turn == RummyTurn.P2_DISCARDS:
-            self.turn = RummyTurn.P1_DRAWS
+        if turn == RummyTurn.P1_DRAWS:
+            return RummyTurn.P1_DISCARDS
+        elif turn == RummyTurn.P1_DISCARDS:
+            return RummyTurn.P2_DRAWS
+        elif turn == RummyTurn.P2_DRAWS:
+            return RummyTurn.P2_DISCARDS
+        elif turn == RummyTurn.P2_DISCARDS:
+            return RummyTurn.P1_DRAWS
+
+        raise ValueError(f"Invalid Gin Ricky turn: {turn}")
