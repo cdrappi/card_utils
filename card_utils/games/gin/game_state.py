@@ -2,7 +2,6 @@
 
 import copy
 import random
-from re import L
 from typing import Dict, List, Optional
 
 from card_utils.games.gin.utils import RummyAction, RummyHud, RummyTurn
@@ -11,20 +10,7 @@ from card_utils.games.gin.utils import RummyAction, RummyHud, RummyTurn
 class AbstractGinGameState:
     """store gin ricky game state"""
 
-    hud_player_1 = RummyHud.PLAYER_1.value
-    hud_player_2 = RummyHud.PLAYER_2.value
-    hud_top_of_discard = RummyHud.TOP_OF_DISCARD.value
-    hud_discard = RummyHud.DISCARD.value
-    hud_user = RummyHud.USER.value
-    hud_opponent = RummyHud.OPPONENT.value
-
     deck_dummy_card = "?y"
-
-    action_draw = RummyAction.DRAW.value
-    action_discard = RummyAction.DISCARD.value
-    action_knock = RummyAction.KNOCK.value
-    action_complete = RummyAction.COMPLETE.value
-    action_wait = RummyAction.WAIT.value
 
     def __init__(
         self,
@@ -33,7 +19,7 @@ class AbstractGinGameState:
         p1_hand: List[str],
         p2_hand: List[str],
         turn: RummyTurn,
-        public_hud: Optional[Dict[str, str]] = None,
+        public_hud: Optional[Dict[str, RummyHud]] = None,
         last_draw=None,
         last_draw_from_discard=None,
         is_complete=False,
@@ -78,7 +64,7 @@ class AbstractGinGameState:
         self.last_draw_from_discard = last_draw_from_discard
 
         if public_hud is None:
-            public_hud = {self.discard[-1]: self.hud_top_of_discard}
+            public_hud = {self.discard[-1]: RummyHud.TOP_OF_DISCARD}
         self.public_hud = public_hud
 
         self.is_complete = is_complete
@@ -102,22 +88,14 @@ class AbstractGinGameState:
         """
 
         if self.turn not in {RummyTurn.P1_DRAWS, RummyTurn.P2_DRAWS}:
-            raise ValueError(
-                "Cannot draw: it is not the player's turn to draw"
-            )
+            raise ValueError("Cannot draw: it is not the player's turn to draw")
 
-        if (
-            self.turn == RummyTurn.P1_DRAWS
-            and len(self.p1_hand) != self.cards_dealt
-        ):
+        if self.turn == RummyTurn.P1_DRAWS and len(self.p1_hand) != self.cards_dealt:
             raise Exception(
                 f"Player 1 cannot draw because "
                 f"they do not have {self.cards_dealt} cards! {self.p1_hand}"
             )
-        if (
-            self.turn == RummyTurn.P2_DRAWS
-            and len(self.p2_hand) != self.cards_dealt
-        ):
+        if self.turn == RummyTurn.P2_DRAWS and len(self.p2_hand) != self.cards_dealt:
             raise Exception(
                 f"Player 2 cannot draw because "
                 f"they do not have {self.cards_dealt} cards! {self.p2_hand}"
@@ -128,9 +106,7 @@ class AbstractGinGameState:
             self._add_to_hand(card_drawn)
             self.discard = self.discard[:-1]
             self.public_hud[card_drawn] = (
-                self.hud_player_1
-                if self.turn.is_action_p1()
-                else self.hud_player_2
+                RummyHud.PLAYER_1 if self.turn.p1() else RummyHud.PLAYER_2
             )
         else:
             card_drawn = self.top_of_deck
@@ -149,11 +125,11 @@ class AbstractGinGameState:
                 # Both players know each others hands
                 # at this point, so we can just do this:
                 self.public_hud = {
-                    **{c: self.hud_player_1 for c in self.p1_hand},
-                    **{c: self.hud_player_2 for c in self.p2_hand},
+                    **{c: RummyHud.PLAYER_1 for c in self.p1_hand},
+                    **{c: RummyHud.PLAYER_2 for c in self.p2_hand},
                 }
 
-        hand = self.p1_hand if self.turn.is_action_p1() else self.p2_hand
+        hand = self.p1_hand if self.turn.p1() else self.p2_hand
         deadwood = self.get_deadwood(hand)
         self.turn = self.advance_turn(self.turn, deadwood)
         self.turns += 1
@@ -182,9 +158,7 @@ class AbstractGinGameState:
         """
 
         if self.turn not in {RummyTurn.P1_DISCARDS, RummyTurn.P2_DISCARDS}:
-            raise Exception(
-                "Cannot discard: it is not the player's turn to discard"
-            )
+            raise Exception("Cannot discard: it is not the player's turn to discard")
 
         if self.turn == RummyTurn.P1_DISCARDS:
             if len(self.p1_hand) != self.cards_dealt + 1:
@@ -192,9 +166,7 @@ class AbstractGinGameState:
                     f"Cannot discard: player 1 has {self.cards_dealt + 1} cards in hand"
                 )
             if card not in self.p1_hand:
-                raise Exception(
-                    f"Player 1 cannot discard {card}: not in hand!"
-                )
+                raise Exception(f"Player 1 cannot discard {card}: not in hand!")
             self.p1_hand = [c for c in self.p1_hand if c != card]
             deadwood = self.get_deadwood(self.p1_hand)
             if deadwood == 0:
@@ -206,9 +178,7 @@ class AbstractGinGameState:
                     f"Cannot discard: player 2 has {self.cards_dealt + 1} cards in hand"
                 )
             if card not in self.p2_hand:
-                raise Exception(
-                    f"Player 2 cannot discard {card}: not in hand!"
-                )
+                raise Exception(f"Player 2 cannot discard {card}: not in hand!")
             self.p2_hand = [c for c in self.p2_hand if c != card]
             deadwood = self.get_deadwood(self.p2_hand)
             if deadwood == 0:
@@ -217,8 +187,8 @@ class AbstractGinGameState:
 
         # add discard to HUD
         if self.discard:
-            self.public_hud[self.discard[-1]] = self.hud_discard
-        self.public_hud[card] = self.hud_top_of_discard
+            self.public_hud[self.discard[-1]] = RummyHud.DISCARD
+        self.public_hud[card] = RummyHud.TOP_OF_DISCARD
         self.discard.append(card)
 
         self.turns += 1
@@ -256,9 +226,7 @@ class AbstractGinGameState:
         elif self.turn == RummyTurn.P2_DRAWS:
             self.p2_hand.append(card_drawn)
         else:
-            raise Exception(
-                "Cannot add to hand: it is not the player's turn to draw"
-            )
+            raise Exception("Cannot add to hand: it is not the player's turn to draw")
 
     def get_action(self, is_p1):
         """
@@ -267,19 +235,19 @@ class AbstractGinGameState:
         :return: (str)
         """
         if self.is_complete:
-            return self.action_complete
+            return RummyAction.COMPLETE
 
-        if is_p1 != self.turn.is_action_p1():
-            return self.action_wait
+        if is_p1 != self.turn.p1():
+            return RummyAction.WAIT
 
         if self.turn.is_draw():
-            return self.action_draw
+            return RummyAction.DRAW
 
         if self.turn.is_discard():
-            return self.action_discard
+            return RummyAction.DISCARD
 
         if self.turn.is_knock():
-            return self.action_knock
+            return RummyAction.KNOCK
 
     @property
     def top_of_discard(self):
@@ -316,13 +284,11 @@ class AbstractGinGameState:
         return {
             "points": self.p1_points if is_player_1 else self.p2_points,
             "opponent_hand": self.p2_hand if is_player_1 else self.p1_hand,
-            "opponent_points": (
-                self.p2_points if is_player_1 else self.p1_points
-            ),
-            "action": self.action_complete,
+            "opponent_points": (self.p2_points if is_player_1 else self.p1_points),
+            "action": RummyAction.COMPLETE,
         }
 
-    def _incomplete_game_to_dict(self, is_player_1):
+    def _incomplete_game_to_dict(self, is_player_1: bool):
         """
 
         :param is_player_1: (bool)
@@ -333,13 +299,11 @@ class AbstractGinGameState:
             "action": self.get_action(is_player_1),
             "last_draw": None,
         }
-        if final_info["action"] == self.action_draw:
+        if final_info["action"] == RummyAction.DRAW.value:
             final_info["last_draw"] = (
-                self.last_draw
-                if self.last_draw_from_discard
-                else self.deck_dummy_card
+                self.last_draw if self.last_draw_from_discard else self.deck_dummy_card
             )
-        if final_info["action"] == self.action_discard:
+        if final_info["action"] == RummyAction.DISCARD:
             final_info["drawn_card"] = self.last_draw
 
         hand = self.sort_hand(self.p1_hand if is_player_1 else self.p2_hand)
@@ -353,7 +317,7 @@ class AbstractGinGameState:
             **final_info,
         }
 
-    def player_hud(self, is_player_1):
+    def player_hud(self, is_player_1: bool):
         """
 
         :param is_player_1:
@@ -362,10 +326,10 @@ class AbstractGinGameState:
         hand = self.p1_hand if is_player_1 else self.p2_hand
         return {
             **self._transformed_hud(is_player_1),
-            **{c: self.hud_user for c in hand},
+            **{c: RummyHud.USER for c in hand},
         }
 
-    def _transformed_hud(self, is_player_1):
+    def _transformed_hud(self, is_player_1: bool):
         """return the full hud from the player's point of view
 
         :param is_player_1: (bool)
@@ -377,16 +341,16 @@ class AbstractGinGameState:
         }
 
     @classmethod
-    def _transform_hud_card(cls, card_loc, is_player_1):
+    def _transform_hud_card(cls, card_loc: RummyHud, is_player_1: bool):
         """
 
         :param card_loc: (str) one of {"1", "2", "t", "d"}
         :param is_player_1: (bool)
         :return: (str) one of {"u", "o", "d", "t"}
         """
-        if card_loc == cls.hud_player_1:
-            return cls.hud_user if is_player_1 else cls.hud_opponent
-        elif card_loc == cls.hud_player_2:
-            return cls.hud_user if not is_player_1 else cls.hud_opponent
+        if card_loc == RummyHud.PLAYER_1:
+            return RummyHud.USER if is_player_1 else RummyHud.OPPONENT
+        elif card_loc == RummyHud.PLAYER_2:
+            return RummyHud.USER if not is_player_1 else RummyHud.OPPONENT
         else:
             return card_loc

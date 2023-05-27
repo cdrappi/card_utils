@@ -1,9 +1,9 @@
 import itertools
-from enum import Enum
+
 from typing import List, Set, Tuple
 
-from card_utils import deck
-from card_utils.deck.utils import random_deck, rank_partition, suit_partition
+from card_utils.deck import rank_to_value
+from card_utils.deck.utils import Card, suit_partition
 from card_utils.games.gin.ricky.utils import rank_straights, sort_cards_by_rank
 from card_utils.games.gin.utils import get_sets, new_game
 
@@ -43,13 +43,13 @@ def _get_sets(hand: List[str]) -> List[Set[str]]:
     return [set(s) for s in sets_3 + sets_4]
 
 
-def get_deadwood(unmelded_cards: List[str]):
+def get_deadwood(unmelded_cards: List[Card]):
     """get the deadwood points of a hand
 
     :param unmelded_cards: ([str]) list of cards
     :return: (int) deadwood points
     """
-    return sum(min(10, deck.rank_to_value[r]) for r, _ in unmelded_cards)
+    return sum(min(10, rank_to_value[c[0]]) for c in unmelded_cards)
 
 
 def split_melds(hand: List[str]) -> Tuple[List[List[str]], List[str], int]:

@@ -1,9 +1,12 @@
 import random
-
+from typing import List, Dict
 from card_utils import deck
 
 
-def random_deck():
+Card = str
+
+
+def random_deck() -> List[Card]:
     """
     :return: ([str]) randomly shuffled deck of 52 cards
     """
@@ -12,12 +15,12 @@ def random_deck():
     return deck_copy
 
 
-def rank_partition(cards):
+def rank_partition(cards) -> Dict[str, List[str]]:
     """
     :param cards: ([str])
     :return: ({str: [str]} rank --> [suit]
     """
-    rank_to_suits = {}
+    rank_to_suits: Dict[str, List[str]] = {}
     for rank, suit in cards:
         if rank not in rank_to_suits:
             rank_to_suits[rank] = []
@@ -26,12 +29,12 @@ def rank_partition(cards):
     return rank_to_suits
 
 
-def suit_partition(cards):
+def suit_partition(cards) -> Dict[str, List[str]]:
     """
     :param cards: ([str])
     :return: ({str: [str]} suit --> [ranks]
     """
-    suit_to_ranks = {}
+    suit_to_ranks: Dict[str, List[str]] = {}
     for rank, suit in cards:
         if suit not in suit_to_ranks:
             suit_to_ranks[suit] = []
@@ -40,7 +43,13 @@ def suit_partition(cards):
     return suit_to_ranks
 
 
-def ranks_to_sorted_values(ranks, aces_high, aces_low, distinct=False, reverse=False):
+def ranks_to_sorted_values(
+    ranks,
+    aces_high,
+    aces_low,
+    distinct=False,
+    reverse=False,
+) -> List[int]:
     """
     :param ranks: ([str])
     :param aces_high: (bool)
@@ -54,8 +63,8 @@ def ranks_to_sorted_values(ranks, aces_high, aces_low, distinct=False, reverse=F
 
     if not (aces_high or aces_low):
         raise ValueError(
-            'Call to ranks_to_sorted_values: '
-            'Aces cannot be neither high nor low! Makes no sense'
+            "Call to ranks_to_sorted_values: "
+            "Aces cannot be neither high nor low! Makes no sense"
         )
 
     if distinct:
@@ -65,13 +74,13 @@ def ranks_to_sorted_values(ranks, aces_high, aces_low, distinct=False, reverse=F
 
     for rank in ranks:
         value = deck.ace_low_rank_to_value[rank]
-        if value == deck.ace_low_rank_to_value['A']:
+        if value == deck.ace_low_rank_to_value["A"]:
             if aces_low:
                 # 1
-                values.append(deck.ace_low_rank_to_value['A'])
+                values.append(deck.ace_low_rank_to_value["A"])
             if aces_high:
                 # 14
-                values.append(deck.ace_high_rank_to_value['A'])
+                values.append(deck.ace_high_rank_to_value["A"])
         else:
             values.append(value)
 
