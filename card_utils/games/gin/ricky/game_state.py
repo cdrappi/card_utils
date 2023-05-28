@@ -1,4 +1,5 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
+
 from card_utils.deck.utils import Card
 from card_utils.games.gin.game_state import AbstractGinGameState
 from card_utils.games.gin.ricky.utils import hand_points, sort_hand
@@ -47,7 +48,9 @@ class GinRickyGameState(AbstractGinGameState):
         )
 
     @staticmethod
-    def get_deadwood(hand: List[str], melds: Optional[List[List[Card]]] = None) -> int:
+    def get_deadwood(
+        hand: List[str], melds: Optional[List[List[Card]]] = None
+    ) -> int:
         return hand_points(hand)
 
     @staticmethod

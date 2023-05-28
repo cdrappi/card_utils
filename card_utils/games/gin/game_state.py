@@ -2,7 +2,8 @@
 
 import copy
 import random
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
+
 from card_utils.deck.utils import Card
 from card_utils.games.gin.utils import RummyAction, RummyHud, RummyTurn
 
@@ -88,14 +89,22 @@ class AbstractGinGameState:
         """
 
         if self.turn not in {RummyTurn.P1_DRAWS, RummyTurn.P2_DRAWS}:
-            raise ValueError("Cannot draw: it is not the player's turn to draw")
+            raise ValueError(
+                "Cannot draw: it is not the player's turn to draw"
+            )
 
-        if self.turn == RummyTurn.P1_DRAWS and len(self.p1_hand) != self.cards_dealt:
+        if (
+            self.turn == RummyTurn.P1_DRAWS
+            and len(self.p1_hand) != self.cards_dealt
+        ):
             raise Exception(
                 f"Player 1 cannot draw because "
                 f"they do not have {self.cards_dealt} cards! {self.p1_hand}"
             )
-        if self.turn == RummyTurn.P2_DRAWS and len(self.p2_hand) != self.cards_dealt:
+        if (
+            self.turn == RummyTurn.P2_DRAWS
+            and len(self.p2_hand) != self.cards_dealt
+        ):
             raise Exception(
                 f"Player 2 cannot draw because "
                 f"they do not have {self.cards_dealt} cards! {self.p2_hand}"
@@ -139,7 +148,9 @@ class AbstractGinGameState:
         return card_drawn
 
     @staticmethod
-    def get_deadwood(hand: List[str], melds: Optional[List[List[Card]]] = None) -> int:
+    def get_deadwood(
+        hand: List[str], melds: Optional[List[List[Card]]] = None
+    ) -> int:
         raise NotImplementedError("get_deadwood not implemented")
 
     @staticmethod
@@ -150,7 +161,7 @@ class AbstractGinGameState:
     def advance_turn(turn: RummyTurn, deadwood: int) -> RummyTurn:
         raise NotImplementedError("advance_turn not implemented")
 
-    def discard_card(self, card):
+    def discard_card(self, card) -> List[Tuple[int, List[List[Card]]]]:
         """discard card from player's hand to discard pile
 
         :param card: (card)
@@ -158,7 +169,9 @@ class AbstractGinGameState:
         """
 
         if self.turn not in {RummyTurn.P1_DISCARDS, RummyTurn.P2_DISCARDS}:
-            raise Exception("Cannot discard: it is not the player's turn to discard")
+            raise Exception(
+                "Cannot discard: it is not the player's turn to discard"
+            )
 
         if self.turn == RummyTurn.P1_DISCARDS:
             if len(self.p1_hand) != self.cards_dealt + 1:
@@ -166,7 +179,9 @@ class AbstractGinGameState:
                     f"Cannot discard: player 1 has {self.cards_dealt + 1} cards in hand"
                 )
             if card not in self.p1_hand:
-                raise Exception(f"Player 1 cannot discard {card}: not in hand!")
+                raise Exception(
+                    f"Player 1 cannot discard {card}: not in hand!"
+                )
             self.p1_hand = [c for c in self.p1_hand if c != card]
             hand = self.p1_hand
         elif self.turn == RummyTurn.P2_DISCARDS:
@@ -175,7 +190,9 @@ class AbstractGinGameState:
                     f"Cannot discard: player 2 has {self.cards_dealt + 1} cards in hand"
                 )
             if card not in self.p2_hand:
-                raise Exception(f"Player 2 cannot discard {card}: not in hand!")
+                raise Exception(
+                    f"Player 2 cannot discard {card}: not in hand!"
+                )
             self.p2_hand = [c for c in self.p2_hand if c != card]
             hand = self.p2_hand
         else:
@@ -196,9 +213,15 @@ class AbstractGinGameState:
         if self.hit_max_turns():
             self.end_game()
 
-    def decide_knock(self, knocks: bool, melds: Optional[List[List[Card]]] = None):
+        return []
+
+    def decide_knock(
+        self, knocks: bool, melds: Optional[List[List[Card]]] = None
+    ):
         if not self.turn.is_knock():
-            raise ValueError("Cannot knock: it is not the player's turn to knock")
+            raise ValueError(
+                "Cannot knock: it is not the player's turn to knock"
+            )
 
         if self.turn == RummyTurn.P1_MAY_KNOCK:
             deadwood = self.get_deadwood(self.p1_hand)
@@ -240,7 +263,9 @@ class AbstractGinGameState:
         elif self.turn == RummyTurn.P2_DRAWS:
             self.p2_hand.append(card_drawn)
         else:
-            raise Exception("Cannot add to hand: it is not the player's turn to draw")
+            raise Exception(
+                "Cannot add to hand: it is not the player's turn to draw"
+            )
 
     def get_action(self, is_p1):
         """
@@ -298,7 +323,9 @@ class AbstractGinGameState:
         return {
             "points": self.p1_points if is_player_1 else self.p2_points,
             "opponent_hand": self.p2_hand if is_player_1 else self.p1_hand,
-            "opponent_points": (self.p2_points if is_player_1 else self.p1_points),
+            "opponent_points": (
+                self.p2_points if is_player_1 else self.p1_points
+            ),
             "action": RummyAction.COMPLETE,
         }
 
@@ -315,7 +342,9 @@ class AbstractGinGameState:
         }
         if final_info["action"] == RummyAction.DRAW.value:
             final_info["last_draw"] = (
-                self.last_draw if self.last_draw_from_discard else self.deck_dummy_card
+                self.last_draw
+                if self.last_draw_from_discard
+                else self.deck_dummy_card
             )
         if final_info["action"] == RummyAction.DISCARD:
             final_info["drawn_card"] = self.last_draw

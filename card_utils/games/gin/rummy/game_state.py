@@ -1,8 +1,8 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from card_utils.deck.utils import Card
 from card_utils.games.gin.game_state import AbstractGinGameState
-from card_utils.games.gin.rummy.utils import split_melds
+from card_utils.games.gin.rummy.utils import get_candidate_melds, split_melds
 from card_utils.games.gin.utils import RummyTurn
 
 GIN_RUMMY_MAX_SHUFFLES = 0
@@ -49,7 +49,8 @@ class GinRummyGameState(AbstractGinGameState):
 
     @staticmethod
     def get_deadwood(
-        hand: List[str], melds: Optional[List[List[Card]]] = None
+        hand: List[str],
+        melds: Optional[List[List[Card]]] = None,
     ) -> int:
         deadwood, _, _ = split_melds(hand, melds)
         return deadwood
@@ -86,3 +87,16 @@ class GinRummyGameState(AbstractGinGameState):
             return RummyTurn.P1_DRAWS
 
         raise ValueError(f"Invalid Gin Rummy turn: {turn}")
+
+    def discard_card(self, card) -> List[Tuple[int, List[List[Card]]]]:
+        """
+        at the end of a turn, if they can knock with
+        10 or fewer points, return to them all possible
+        combinations of melds they can do so with
+        """
+        super().discard_card(card)
+        if not self.turn.is_knock():
+            return []
+        hand = self.p1_hand if self.turn.p1() else self.p2_hand
+        candidates = get_candidate_melds(hand, max_deadwood=10)
+        return [(dw, melds) for dw, melds, _ in candidates]
