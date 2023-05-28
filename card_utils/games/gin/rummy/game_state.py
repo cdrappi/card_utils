@@ -1,5 +1,5 @@
 from typing import List, Optional
-
+from card_utils.deck.utils import Card
 from card_utils.games.gin.game_state import AbstractGinGameState
 from card_utils.games.gin.rummy.utils import split_melds
 from card_utils.games.gin.utils import RummyTurn
@@ -47,8 +47,8 @@ class GinRummyGameState(AbstractGinGameState):
         )
 
     @staticmethod
-    def get_deadwood(hand: List[str]) -> int:
-        _, _, deadwood = split_melds(hand)
+    def get_deadwood(hand: List[str], melds: Optional[List[List[Card]]] = None) -> int:
+        _, _, deadwood = split_melds(hand, melds)
         return deadwood
 
     @staticmethod

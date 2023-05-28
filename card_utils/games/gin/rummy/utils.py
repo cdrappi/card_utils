@@ -1,6 +1,6 @@
 import itertools
 
-from typing import List, Set, Tuple
+from typing import List, Set, Tuple, Optional
 
 from card_utils.deck import rank_to_value
 from card_utils.deck.utils import Card, suit_partition
@@ -52,7 +52,11 @@ def get_deadwood(unmelded_cards: List[Card]):
     return sum(min(10, rank_to_value[c[0]]) for c in unmelded_cards)
 
 
-def split_melds(hand: List[str]) -> Tuple[List[List[str]], List[str], int]:
+def get_candidate_melds(
+    hand: List[Card],
+    max_deadwood: Optional[int] = None,
+    stop_on_gin: bool = True,
+) -> Tuple[List[List[Card]],]:
     hand_set = set(hand)
     all_melds = _get_runs(hand) + _get_sets(hand)
     candidates: List[Tuple[List[List[str]], List[str], int]] = []
@@ -65,8 +69,24 @@ def split_melds(hand: List[str]) -> Tuple[List[List[str]], List[str], int]:
                 um_cards = sort_cards_by_rank(hand_set - melded_cards)
                 deadwood = get_deadwood(um_cards)
                 melds_list = [list(m) for m in melds]
-                if deadwood == 0:
-                    # they made gin
+                if deadwood == 0 and stop_on_gin:
+                    # they made gin, so return early
                     return melds_list, [], 0
-                candidates.append((melds_list, um_cards, deadwood))
+                if max_deadwood is None or deadwood <= max_deadwood:
+                    candidates.append((melds_list, um_cards, deadwood))
+    return candidates
+
+
+def split_melds(
+    hand: List[str],
+    melds: Optional[List[List[Card]]] = None,
+) -> Tuple[List[List[str]], List[str], int]:
+    if melds is not None:
+        hand_set = set(hand)
+        # they pick their melds to knock
+        melded_cards = {c for m in melds for c in m}
+        um_cards = sort_cards_by_rank(hand_set - melded_cards)
+        return get_deadwood(um_cards)
+
+    candidates = get_candidate_melds()
     return min(candidates, key=lambda x: x[2])

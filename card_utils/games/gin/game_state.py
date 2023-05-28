@@ -3,7 +3,7 @@
 import copy
 import random
 from typing import Dict, List, Optional
-
+from card_utils.deck.utils import Card
 from card_utils.games.gin.utils import RummyAction, RummyHud, RummyTurn
 
 
@@ -139,7 +139,7 @@ class AbstractGinGameState:
         return card_drawn
 
     @staticmethod
-    def get_deadwood(hand: List[str]) -> int:
+    def get_deadwood(hand: List[str], melds: Optional[List[List[Card]]] = None) -> int:
         raise NotImplementedError("get_deadwood not implemented")
 
     @staticmethod
@@ -168,10 +168,7 @@ class AbstractGinGameState:
             if card not in self.p1_hand:
                 raise Exception(f"Player 1 cannot discard {card}: not in hand!")
             self.p1_hand = [c for c in self.p1_hand if c != card]
-            deadwood = self.get_deadwood(self.p1_hand)
-            if deadwood == 0:
-                self.end_game()
-            self.turn = self.advance_turn(self.turn, deadwood)
+            hand = self.p1_hand
         elif self.turn == RummyTurn.P2_DISCARDS:
             if len(self.p2_hand) != self.cards_dealt + 1:
                 raise Exception(
@@ -180,10 +177,14 @@ class AbstractGinGameState:
             if card not in self.p2_hand:
                 raise Exception(f"Player 2 cannot discard {card}: not in hand!")
             self.p2_hand = [c for c in self.p2_hand if c != card]
-            deadwood = self.get_deadwood(self.p2_hand)
-            if deadwood == 0:
-                self.end_game()
-            self.turn = self.advance_turn(self.turn, deadwood)
+            hand = self.p2_hand
+        else:
+            raise ValueError("invalid discarding state")
+
+        deadwood = self.get_deadwood(hand)
+        if deadwood == 0:
+            self.end_game()
+        self.turn = self.advance_turn(self.turn, deadwood)
 
         # add discard to HUD
         if self.discard:
@@ -194,6 +195,19 @@ class AbstractGinGameState:
         self.turns += 1
         if self.hit_max_turns():
             self.end_game()
+
+    def decide_knock(self, knocks: bool, melds: Optional[List[List[Card]]] = None):
+        if not self.turn.is_knock():
+            raise ValueError("Cannot knock: it is not the player's turn to knock")
+
+        if self.turn == RummyTurn.P1_MAY_KNOCK:
+            deadwood = self.get_deadwood(self.p1_hand)
+            # p2 may lay off [TODO]
+        elif self.turn == RummyTurn.P2_MAY_KNOCK:
+            deadwood = self.get_deadwood(self.p2_hand)
+            # p1 may lay off [TODO]
+        else:
+            raise ValueError("invalid knocking state")
 
     def end_game(self):
         """set game state to complete and calculate points for each player"""
