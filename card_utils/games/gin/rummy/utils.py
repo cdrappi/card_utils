@@ -1,6 +1,5 @@
 import itertools
-
-from typing import List, Set, Tuple, Optional
+from typing import List, Optional, Set, Tuple
 
 from card_utils.deck import rank_to_value
 from card_utils.deck.utils import Card, suit_partition
@@ -56,10 +55,10 @@ def get_candidate_melds(
     hand: List[Card],
     max_deadwood: Optional[int] = None,
     stop_on_gin: bool = True,
-) -> Tuple[List[List[Card]],]:
+) -> List[Tuple[int, List[List[Card]], List[str]]]:
     hand_set = set(hand)
     all_melds = _get_runs(hand) + _get_sets(hand)
-    candidates: List[Tuple[List[List[str]], List[str], int]] = []
+    candidates: List[Tuple[int, List[List[Card]], List[Card]]] = []
     for n_combos in range(1, min(3, len(all_melds)) + 1):
         for melds in itertools.combinations(all_melds, n_combos):
             melded_cards = {c for m in melds for c in m}
@@ -71,22 +70,22 @@ def get_candidate_melds(
                 melds_list = [list(m) for m in melds]
                 if deadwood == 0 and stop_on_gin:
                     # they made gin, so return early
-                    return melds_list, [], 0
+                    return [(0, melds_list, [])]
                 if max_deadwood is None or deadwood <= max_deadwood:
-                    candidates.append((melds_list, um_cards, deadwood))
+                    candidates.append((deadwood, melds_list, um_cards))
     return candidates
 
 
 def split_melds(
     hand: List[str],
     melds: Optional[List[List[Card]]] = None,
-) -> Tuple[List[List[str]], List[str], int]:
+) -> Tuple[int, List[List[str]], List[str]]:
     if melds is not None:
         hand_set = set(hand)
         # they pick their melds to knock
         melded_cards = {c for m in melds for c in m}
         um_cards = sort_cards_by_rank(hand_set - melded_cards)
-        return get_deadwood(um_cards)
+        return get_deadwood(um_cards), melds, sort_cards_by_rank(um_cards)
 
-    candidates = get_candidate_melds()
-    return min(candidates, key=lambda x: x[2])
+    candidates = get_candidate_melds(hand, stop_on_gin=True)
+    return min(candidates)
