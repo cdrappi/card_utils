@@ -183,7 +183,7 @@ def _get_run_layoffs(
 T = TypeVar("T")
 
 
-def powerset(s: List[T]) -> Iterator[List[T]]:
+def powerset(s: List[T]) -> chain[Tuple[T, ...]]:
     return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
 
