@@ -271,6 +271,10 @@ class AbstractGinGameState:
         elif how == RummyEndGame.GIN:
             self.p1_points = p1_deadwood
             self.p2_points = p2_deadwood
+            if p1:
+                self.p2_points += self.gin_bonus
+            else:
+                self.p1_points += self.gin_bonus
         else:
             raise ValueError("invalid end game state")
 
