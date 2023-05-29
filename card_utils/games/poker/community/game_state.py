@@ -1,7 +1,7 @@
 """ class for generic omaha game state """
 import logging
 import random
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from card_utils.games.poker.action import Action
 from card_utils.games.poker.game_state import PokerGameState
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class CommunityGameState(PokerGameState):
-    """ basic community card game state """
+    """basic community card game state"""
 
     # NOTE: override these in subclasses!
     name = "abstract_community"
@@ -22,8 +22,13 @@ class CommunityGameState(PokerGameState):
     # river = 3
     showdown_street = 4
 
-    street_names = {0: "PRE-FLOP", 1: "FLOP",
-                    2: "TURN", 3: "RIVER", 4: "SHOWDOWN"}
+    street_names = {
+        0: "PRE-FLOP",
+        1: "FLOP",
+        2: "TURN",
+        3: "RIVER",
+        4: "SHOWDOWN",
+    }
 
     def __init__(
         self,
@@ -31,15 +36,15 @@ class CommunityGameState(PokerGameState):
         deck: List[str],
         starting_stacks: List[int],
         hands: List[List[str]],
-        boards: List[List[str]] = None,
+        boards: Optional[List[List[str]]] = None,
         ante: int = 0,
-        blinds: List[int] = None,
-        stacks: List[int] = None,
-        action: int = None,
+        blinds: Optional[List[int]] = None,
+        stacks: Optional[List[int]] = None,
+        action: Optional[int] = None,
         street: int = 0,
-        actions: List[Dict] = None,
-        last_actions: Dict[int, str] = None,
-        pot_balances: Dict[int, int] = None,
+        actions: Optional[List[Action]] = None,
+        last_actions: Optional[Dict[int, Action]] = None,
+        pot_balances: Optional[Dict[int, int]] = None,
         all_in_runouts: int = 1,
         rake_fraction: float = 0.0,
         max_rake: int = 0,
@@ -82,6 +87,9 @@ class CommunityGameState(PokerGameState):
                     f"class variable in {self.__class__.__name__}"
                 )
 
+        if blinds is None:
+            blinds = [1, 2]
+
         if num_players == 2 and blinds[0] < blinds[1]:
             logger.warning(
                 "Flipping the blinds for 2-handed play. "
@@ -110,12 +118,12 @@ class CommunityGameState(PokerGameState):
             pot_balances=pot_balances,
             all_in_runouts=all_in_runouts,
             rake_fraction=rake_fraction,
-            max_rake=max_rake
+            max_rake=max_rake,
         )
 
     @property
     def valid_actions(self):
-        """ big blind also gets option
+        """big blind also gets option
 
         :return: ({str})
         """
@@ -145,14 +153,14 @@ class CommunityGameState(PokerGameState):
         return 1 if self.num_players == 2 else 2
 
     def is_acting_last_preflop(self):
-        """ big blind acts last pre-flop
+        """big blind acts last pre-flop
 
         :return: (bool)
         """
         return self.street == 0 and self.action == self.big_blind_player
 
     def order_hands(self, players):
-        """ given a list of players who've seen the hand to showdown,
+        """given a list of players who've seen the hand to showdown,
             sort them by their hand strength,
             first on the resulting list having the strongest hands,
             to last on the list with the weakest hand
@@ -182,19 +190,19 @@ class CommunityGameState(PokerGameState):
         """
         :param cards_remaining: (int)
         """
-        self.boards[0] = self.boards[0][0: 5 - cards_remaining]
+        self.boards[0] = self.boards[0][0 : 5 - cards_remaining]
 
     def extract_blinds(self):
-        """ move blinds from self.stacks to self.pot """
+        """move blinds from self.stacks to self.pot"""
         for player, blind in enumerate(self.blinds):
             amount = min(self.stacks[player], blind)
             self.put_money_in_pot(player, amount)
 
     def get_starting_action(self):
-        """ given self.street_actions, derive the current:
-            - street
-            - action
-            - players who have folded
+        """given self.street_actions, derive the current:
+        - street
+        - action
+        - players who have folded
         """
         if self.street == 0:
             # Pre-flop action begins with UTG (2) except 2-handed
@@ -204,13 +212,12 @@ class CommunityGameState(PokerGameState):
             # left of the dealer who hasn't folded
             # e.g. small blind (0), then big blind (1)... etc
             return next(
-                p for p in range(self.num_players)
-                if not self.cannot_act(p)
+                p for p in range(self.num_players) if not self.cannot_act(p)
             )
 
     def move_street(self):
-        """ increment the street and then
-            deal out flop/turn/river if necessary
+        """increment the street and then
+        deal out flop/turn/river if necessary
         """
         PokerGameState.move_street(self)
         if self.action is None:
@@ -237,14 +244,14 @@ class CommunityGameState(PokerGameState):
         cards = self.deck[0:n]
         self.deck = self.deck[n:]
         self.boards[0].extend(cards)
-    
+
     def should_rake_pot(self) -> bool:
-        """ no flop, no drop """
+        """no flop, no drop"""
         return bool(self.flop)
 
     @property
     def board(self):
-        """ in community card games, there is only one board,
+        """in community card games, there is only one board,
             so use this property to set/get it
 
         :return: ([str])
@@ -303,7 +310,7 @@ class CommunityGameState(PokerGameState):
             return f"{self.num_players - player_index - 1}-OFF / UTG{utg_str}"
 
     def state_dict(self, player):
-        """ serialise all game state to dictionary
+        """serialise all game state to dictionary
             from the perspective of the input player
 
         :param player: (int)

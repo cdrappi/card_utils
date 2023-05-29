@@ -1,15 +1,18 @@
-from typing import List, Dict, Tuple
+from typing import Dict, List, Optional, Tuple
+
 from card_utils.util import inverse_cumulative_sum
 
 
 class Pot:
-    """ class to handle side-pot logic """
+    """class to handle side-pot logic"""
 
-    def __init__(self,
-                 num_players: int,
-                 rake_fraction: float,
-                 max_rake: int,
-                 balances: Dict[int, int] = None):
+    def __init__(
+        self,
+        num_players: int,
+        rake_fraction: float,
+        max_rake: int,
+        balances: Optional[Dict[int, int]] = None,
+    ):
         """
         :param num_players: (int)
         :param balances: ({int: int})
@@ -18,7 +21,7 @@ class Pot:
         self.balances = balances or {p: 0 for p in range(num_players)}
         self.rake_fraction = rake_fraction
         self.max_rake = max_rake
-    
+
     def put_money_in(self, player, amount):
         """
         :param player: (int) index
@@ -26,16 +29,15 @@ class Pot:
         """
         self.balances[player] += amount
 
-    def settle_showdown(self,
-                        winning_players: List[List[int]],
-                        rake_pot: bool
-                        ) -> Tuple[Dict[int, int], Dict[int, int]]:
+    def settle_showdown(
+        self, winning_players: List[List[int]], rake_pot: bool
+    ) -> Tuple[Dict[int, float], Dict[int, int]]:
         """
         :param winning_players: ([[int]]) list of list of players who made it
             to showdown, sorted by hand strength (strongest first)
         :return: ({int: int}) player index --> amount won
         """
-        payouts = {p: 0 for p in range(self.num_players)}
+        payouts = {p: 0.0 for p in range(self.num_players)}
         rake_per_player = self.get_rake_per_player(rake_pot)
         for player, rake_paid in rake_per_player.items():
             self.balances[player] -= rake_paid
@@ -72,14 +74,14 @@ class Pot:
                 return payouts, rake_per_player
 
         raise Exception(
-            f'Reached end of loop in Pot.settle_showdown, '
-            f'but there is still {self.total_money} '
-            f'in the pot!'
+            f"Reached end of loop in Pot.settle_showdown, "
+            f"but there is still {self.total_money} "
+            f"in the pot!"
         )
 
     @property
     def total_money(self):
-        """ sum of all the money in the pot from each player
+        """sum of all the money in the pot from each player
 
         :return: (int)
         """
@@ -94,10 +96,7 @@ class Pot:
         return inverse_cumulative_sum(cumulative_amounts)
 
     def get_max_total_rake(self):
-        return min(
-            self.max_rake,
-            self.rake_fraction * self.total_money
-        )
+        return min(self.max_rake, self.rake_fraction * self.total_money)
 
     def get_rake_per_player(self, rake_pot: bool):
         rake_per_player = {p: 0 for p in range(self.num_players)}

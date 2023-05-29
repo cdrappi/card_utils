@@ -1,17 +1,13 @@
 import itertools
-from typing import List, Tuple
+from typing import Iterable, List, Tuple
 
 from card_utils import deck
-from card_utils.deck.utils import (
-    rank_partition,
-    suit_partition,
-    ranks_to_sorted_values
-)
-from card_utils.games.gin.deal import new_game
+from card_utils.deck.utils import suit_partition
+from card_utils.games.gin.utils import get_sets, new_game, rank_straights
 
 
 def deal_new_game():
-    """ shuffle up and deal each player 7 cards,
+    """shuffle up and deal each player 7 cards,
         put one card in the discard list,
         and put remaining cards in deck
 
@@ -26,7 +22,7 @@ def deal_new_game():
     return new_game(n_cards=7)
 
 
-def sorted_hand_points(hand):
+def sorted_hand_points(hand) -> Tuple[List[str], int]:
     """
     :param hand: ([str]) list of cards
     :return: ([str], int)
@@ -57,7 +53,9 @@ def sorted_hand_points(hand):
         # print(hand, hand_without_meld, meld)
         meld_points = sum_points_by_ranks(hand_without_meld)
         if len(hand) == 8:
-            meld_points -= max(deck.rank_to_value[r] for r, _ in hand_without_meld)
+            meld_points -= max(
+                deck.rank_to_value[r] for r, _ in hand_without_meld
+            )
 
         if meld_points < hand_points_:
             sorted_hand = meld + sort_cards_by_rank(hand_without_meld)
@@ -66,89 +64,17 @@ def sorted_hand_points(hand):
     return sorted_hand, hand_points_
 
 
-def rank_straights(ranks, straight_length, aces_high=True, aces_low=True, suit=''):
-    """
-    :param ranks: ([str])
-        e.g. ['A', '2', '7', 'T', 'J', 'Q', 'K']
-    :param straight_length: (int) e.g. 5
-    :param aces_high: (bool)
-    :param aces_low: (bool)
-    :param suit: (str) optional: inject a suit in the final returned value
-    :return: ([[str]]) list of list of straights,
-        each with length straight_length
-        e.g. [['T','J','Q','K','A']]
-        or [['Th', 'Jh', 'Qh', 'Kh', 'Ah']]
-    """
-    if len(ranks) < straight_length:
-        # don't waste our time if its impossible to make a straight
-        return []
-
-    if suit not in {'', *deck.suits}:
-        raise ValueError(
-            f'rank_straights: suit parameter must either be '
-            f'the empty string "" or one of {deck.suits}'
-        )
-
-    values = ranks_to_sorted_values(ranks, aces_high=aces_high, aces_low=aces_low)
-
-    values_in_a_row = 0
-    num_values = len(values)
-    last_value = values[0]
-    straights = []
-
-    for ii, value in enumerate(values[1:]):
-        if last_value + 1 == value:
-            values_in_a_row += 1
-        else:
-            values_in_a_row = 0
-
-        if values_in_a_row >= straight_length - 1:
-            straights.append([
-                f'{deck.value_to_rank[v]}{suit}'
-                for v in range(value - straight_length + 1, value + 1)
-            ])
-
-        if num_values + values_in_a_row < straight_length + ii:
-            # exit early if there aren't enough cards left
-            # to complete a straight
-            return straights
-
-        last_value = value
-
-    return straights
-
-
 def get_runs(hand):
-    """ cleaner but slower (!?) method to get runs
+    """cleaner but slower (!?) method to get runs
     :param hand: ([str])
     :return: ([[str]], [[str]])
     """
     suit_to_ranks = suit_partition(hand)
     runs_3, runs_4 = [], []
     for suit, ranks in suit_to_ranks.items():
-        runs_3.extend(rank_straights(ranks, 3, True, True, suit=suit))
-        runs_4.extend(rank_straights(ranks, 4, True, True, suit=suit))
+        runs_3.extend(rank_straights(ranks, 3, 3, True, True, suit=suit))
+        runs_4.extend(rank_straights(ranks, 4, 4, True, True, suit=suit))
     return runs_3, runs_4
-
-
-def get_sets(hand):
-    """
-
-    :param hand: ([str])
-    :return: ([[str]], [[str]])
-    """
-    rank_to_suits = rank_partition(hand)
-    sets_3, sets_4 = [], []
-    for rank, suits in rank_to_suits.items():
-        if len(suits) == 4:
-            sets_4.append([f'{rank}{s}' for s in suits])
-            sets_3.extend([
-                [f'{rank}{s}' for s in suit_combo]
-                for suit_combo in itertools.combinations(suits, 3)
-            ])
-        elif len(suits) == 3:
-            sets_3.append([f'{rank}{s}' for s in suits])
-    return sets_3, sets_4
 
 
 def get_melds(hand) -> Tuple:
@@ -185,7 +111,7 @@ def sum_points_by_ranks(hand):
     return sum(deck.rank_to_value[r] for r, _ in hand)
 
 
-def sort_cards_by_rank(cards):
+def sort_cards_by_rank(cards: Iterable[str]):
     """
     :param cards: ([str])
     :return: ([str])
@@ -193,7 +119,7 @@ def sort_cards_by_rank(cards):
     return sorted(cards, key=lambda c: deck.rank_to_value[c[0]])
 
 
-def sort_hand(hand):
+def sort_hand(hand) -> List[str]:
     """
     :param hand: ([str])
     :return: ([str])
@@ -202,7 +128,7 @@ def sort_hand(hand):
     return sorted_hand
 
 
-def hand_points(hand):
+def hand_points(hand: List[str]) -> int:
     """
     :param hand: ([str])
     :return: (int)

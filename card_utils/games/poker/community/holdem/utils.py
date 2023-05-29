@@ -22,16 +22,29 @@ hand_2 = ['5s', '2h']
 hands  = [hand_1, hand_2]
 """
 import itertools
-from typing import List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from card_utils.deck import ace_high_rank_to_value
-from card_utils.deck.utils import (rank_partition, ranks_to_sorted_values,
-                                   suit_partition)
-from card_utils.games.poker import (FLUSH, FULL_HOUSE, HIGH_CARD, ONE_PAIR,
-                                    QUADS, STRAIGHT, STRAIGHT_FLUSH,
-                                    THREE_OF_A_KIND, TWO_PAIR, hand_order)
-from card_utils.games.poker.community.holdem.brute_force import \
-    brute_force_holdem_rank
+from card_utils.deck.utils import (
+    rank_partition,
+    ranks_to_sorted_values,
+    suit_partition,
+)
+from card_utils.games.poker import (
+    FLUSH,
+    FULL_HOUSE,
+    HIGH_CARD,
+    ONE_PAIR,
+    QUADS,
+    STRAIGHT,
+    STRAIGHT_FLUSH,
+    THREE_OF_A_KIND,
+    TWO_PAIR,
+    hand_order,
+)
+from card_utils.games.poker.community.holdem.brute_force import (
+    brute_force_holdem_rank,
+)
 from card_utils.games.poker.community.utils import simulate_all_in_equity
 from card_utils.games.poker.util import get_best_hands_generic
 from card_utils.util import LightDefaultDict, count_items
@@ -40,15 +53,15 @@ from card_utils.util import LightDefaultDict, count_items
 def sim_holdem_all_in_equity(
     board: List[str],
     hands: List[List[str]],
-    deck: List[str] = None,
-    n: int = 100
-) -> List[float]:
+    deck: Optional[List[str]] = None,
+    n: int = 100,
+) -> Dict[int, float]:
     """
     :param board: (List[str])
     :param hands: (List[List[str]])
     :param hand_strength_function: (Callable)
     :param n: (int) how many sims
-    :return: (List[float])
+    :return: (Dict[int, float])
     """
     return simulate_all_in_equity(
         board=board,
@@ -60,7 +73,7 @@ def sim_holdem_all_in_equity(
 
 
 def get_best_hands_fast(board, hands):
-    """ get the index of the best holdem hand given a board
+    """get the index of the best holdem hand given a board
 
     :param board: ([str]) list of 5 cards
     :param hands: ([set(str)]) list of sets of 4 cards
@@ -69,9 +82,7 @@ def get_best_hands_fast(board, hands):
             every hand rank except straight flushes, quads and flushes
     """
     return get_best_hands_generic(
-        hand_strength_function=get_hand_strength_fast,
-        board=board,
-        hands=hands
+        hand_strength_function=get_hand_strength_fast, board=board, hands=hands
     )
 
 
@@ -88,7 +99,7 @@ def get_hand_strength_fast(board, hand) -> Tuple:
 
 
 def _validate_board(board):
-    """ raise exception if board doesn't have exactly 5 cards
+    """raise exception if board doesn't have exactly 5 cards
     :param board: (set(str)) set of 5 cards
     :return:
     """
@@ -101,7 +112,7 @@ def _validate_board(board):
 
 
 def _validate_hand(hand):
-    """ raise exception if all hands don't have exactly 4 cards
+    """raise exception if all hands don't have exactly 4 cards
 
     :param hand: (set(str)) set of 4 cards
     :return: None
