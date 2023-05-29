@@ -2,7 +2,11 @@ from typing import List, Optional, Tuple
 
 from card_utils.deck.utils import Card
 from card_utils.games.gin.game_state import AbstractGinGameState
-from card_utils.games.gin.rummy.utils import get_candidate_melds, split_melds
+from card_utils.games.gin.rummy.utils import (
+    get_candidate_melds,
+    layoff_deadwood,
+    split_melds,
+)
 from card_utils.games.gin.utils import RummyTurn
 
 GIN_RUMMY_MAX_SHUFFLES = 0
@@ -53,9 +57,10 @@ class GinRummyGameState(AbstractGinGameState):
         melds: Optional[List[List[Card]]] = None,
         opp_melds: Optional[List[List[Card]]] = None,
     ) -> int:
-        deadwood, _, unmelded = split_melds(hand, melds)
         if opp_melds is not None:
-            opp_melded_cards = [c for m in opp_melds for c in m]
+            dw, _, _ = layoff_deadwood(hand, opp_melds)
+            return dw
+        deadwood, _, _ = split_melds(hand, melds)
         return deadwood
 
     @staticmethod
