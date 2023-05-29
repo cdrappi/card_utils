@@ -1,13 +1,13 @@
 import itertools
 from enum import Enum
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 from card_utils import deck
 from card_utils.deck.utils import (
+    Card,
     random_deck,
     rank_partition,
     ranks_to_sorted_values,
-    Card,
 )
 
 
@@ -56,6 +56,12 @@ class RummyHud(Enum):
     OPPONENT = "o"
 
 
+class RummyEndGame(Enum):
+    KNOCK = "knock"
+    GIN = "gin"
+    WALL = "hit-the-wall"
+
+
 def new_game(n_cards: int) -> Dict[str, List[Card]]:
     """deal new game of gin
 
@@ -102,7 +108,7 @@ def get_sets(hand: List[str]) -> Tuple[List[List[Card]], List[List[Card]]]:
 def rank_straights(
     ranks: List[str],
     min_len: int = 3,
-    max_len: int = 11,
+    max_len: int = 13,
     aces_high=True,
     aces_low=True,
     suit="",

@@ -1,8 +1,9 @@
+import copy
 import itertools
-from typing import List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
-from card_utils.deck import rank_to_value
-from card_utils.deck.utils import Card, suit_partition
+from card_utils.deck import rank_to_value, value_to_rank
+from card_utils.deck.utils import Card, rank_partition, suit_partition
 from card_utils.games.gin.ricky.utils import rank_straights, sort_cards_by_rank
 from card_utils.games.gin.utils import get_sets, new_game
 
@@ -89,3 +90,94 @@ def split_melds(
 
     candidates = get_candidate_melds(hand, stop_on_gin=True)
     return min(candidates)
+
+
+def _split_sets_runs(
+    melds: List[List[Card]],
+) -> Tuple[List[str], Dict[str, List[Tuple[str, str]]]]:
+    """
+    return tuple where:
+    -> first element is a list of all the ranks in the 3-sets
+    -> second element is map of suit to tuple of min/max rank in run
+    """
+    runs: Dict[str, List[Tuple[str, str]]]
+    sets, runs = [], {}
+    for meld in melds:
+        sp = suit_partition(meld)
+        rp = rank_partition(meld)
+        if len(sp) == 1:
+            [(suit, ranks)] = sp.items()
+            if suit not in runs:
+                runs[suit] = []
+            runs[suit].append((ranks[0], ranks[-1]))
+        elif len(rp) == 1:
+            [(rank, suits)] = rp.items()
+            if len(suits) == 3:
+                # if they have all 4 of the rank,
+                # then opponent can't possibly lay off
+                sets.append(rank)
+        else:
+            raise ValueError(f"invalid meld: {meld}")
+    return sorted(sets), runs
+
+
+def _get_set_layoffs(hand: List[Card], sets: List[str]) -> Set[str]:
+    """
+    return list of cards that can be added to a set
+    """
+    rp = rank_partition(hand)
+    return {f"{s}{rp[s][0]}" for s in sets if s in rp}
+
+
+def _get_suit_run_layoffs(
+    suit_ranks: List[str],
+    suit_runs: List[Tuple[str, str]],
+) -> List[str]:
+    if not suit_ranks:
+        return []
+    rank_set = set(suit_ranks)
+    laid_off = []
+    for low, high in suit_runs:
+        low_value = rank_to_value[low]
+        high_value = rank_to_value[high]
+        next_low = value_to_rank.get(low_value - 1)
+        next_high = value_to_rank.get(high_value + 1)
+        while next_low in rank_set:
+            rank_set.remove(next_low)
+            laid_off.append(next_low)
+            low_value -= 1
+            next_low = value_to_rank.get(low_value - 1)
+        while next_high in rank_set:
+            rank_set.remove(next_high)
+            laid_off.append(next_high)
+            high_value += 1
+            next_high = value_to_rank.get(high_value + 1)
+    return laid_off
+
+
+def _get_run_layoffs(
+    hand: List[Card], runs: Dict[str, List[Tuple[str, str]]]
+) -> Dict[str, List[str]]:
+    """
+    return map of suit to list of cards that can be added to a run
+    """
+    sp = suit_partition(hand)
+    return {
+        suit: _get_suit_run_layoffs(sp.get(suit, []), suit_runs)
+        for suit, suit_runs in runs.items()
+    }
+
+
+def layoff_deadwood(
+    hand: List[Card],
+    opp_melds: List[List[Card]],
+) -> Tuple[int, List[List[Card]], List[Card]]:
+    """
+    1. split the opponent melds into runs and sets
+    2. for each set, see if there are cards we can add to it
+    """
+    sets, runs = _split_sets_runs(opp_melds)
+    set_layoffs = _get_set_layoffs(hand, sets)
+    run_layoffs = _get_run_layoffs(hand, runs)
+
+    return (0, [], [])

@@ -51,8 +51,11 @@ class GinRummyGameState(AbstractGinGameState):
     def get_deadwood(
         hand: List[str],
         melds: Optional[List[List[Card]]] = None,
+        opp_melds: Optional[List[List[Card]]] = None,
     ) -> int:
-        deadwood, _, _ = split_melds(hand, melds)
+        deadwood, _, unmelded = split_melds(hand, melds)
+        if opp_melds is not None:
+            opp_melded_cards = [c for m in opp_melds for c in m]
         return deadwood
 
     @staticmethod
@@ -88,13 +91,12 @@ class GinRummyGameState(AbstractGinGameState):
 
         raise ValueError(f"Invalid Gin Rummy turn: {turn}")
 
-    def discard_card(self, card) -> List[Tuple[int, List[List[Card]]]]:
+    def get_knock_candidates(self) -> List[Tuple[int, List[List[Card]]]]:
         """
         at the end of a turn, if they can knock with
         10 or fewer points, return to them all possible
         combinations of melds they can do so with
         """
-        super().discard_card(card)
         if not self.turn.is_knock():
             return []
         hand = self.p1_hand if self.turn.p1() else self.p2_hand

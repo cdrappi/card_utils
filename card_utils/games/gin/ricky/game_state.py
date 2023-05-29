@@ -49,7 +49,9 @@ class GinRickyGameState(AbstractGinGameState):
 
     @staticmethod
     def get_deadwood(
-        hand: List[str], melds: Optional[List[List[Card]]] = None
+        hand: List[str],
+        melds: Optional[List[List[Card]]] = None,
+        opp_melds: Optional[List[List[Card]]] = None,
     ) -> int:
         return hand_points(hand)
 
