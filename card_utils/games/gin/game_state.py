@@ -184,6 +184,17 @@ class AbstractGinGameState:
     ) -> RummyTurn:
         raise NotImplementedError("advance_turn not implemented")
 
+    def first_turn_pass(self) -> None:
+        if not self.turn.is_first_draw():
+            raise ValueError("Cannot pass: it is not the first turn")
+        self.turns += 1
+        self.turn = self.advance_turn(
+            current=self.turn,
+            from_deck=False,  # arbitrary
+            first_turn=self.first_turn,
+            deadwood=10,  # arbitrary
+        )
+
     def discard_card(self, card) -> None:
         """discard card from player's hand to discard pile
 

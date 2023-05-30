@@ -1,6 +1,6 @@
 import itertools
 from enum import Enum
-from typing import Dict, List, Tuple
+from typing import Dict, Iterable, List, Tuple
 
 from card_utils import deck
 from card_utils.deck.utils import (
@@ -184,3 +184,11 @@ def rank_straights(
         last_value = value
 
     return straights
+
+
+def sort_cards_by_rank(cards: Iterable[str]):
+    """
+    :param cards: ([str])
+    :return: ([str])
+    """
+    return sorted(cards, key=lambda c: deck.rank_to_value[c[0]])
