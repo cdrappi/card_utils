@@ -99,7 +99,11 @@ class AbstractGinGameState:
         :return: (str) card drawn
         """
 
-        if not (self.turn.is_draw() or self.turn.is_first_draw()):
+        if not (
+            self.turn.is_draw()
+            or self.turn.is_first_draw()
+            or self.turn.is_draw_from_deck()
+        ):
             raise ValueError(
                 "Cannot draw: it is not the player's turn to draw"
             )

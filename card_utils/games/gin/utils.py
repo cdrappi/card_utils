@@ -52,6 +52,12 @@ class RummyTurn(Enum):
             RummyTurn.P2_DRAWS_FIRST,
         }
 
+    def is_draw_from_deck(self) -> bool:
+        return self in {
+            RummyTurn.P1_DRAWS_FROM_DECK,
+            RummyTurn.P2_DRAWS_FROM_DECK,
+        }
+
     def is_draw(self):
         return self in {
             RummyTurn.P1_DRAWS,
