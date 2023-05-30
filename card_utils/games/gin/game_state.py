@@ -153,7 +153,7 @@ class AbstractGinGameState:
         deadwood = self.get_deadwood(hand)
         self.turn = self.advance_turn(
             current=self.turn,
-            from_deck=not from_discard,
+            from_discard=from_discard,
             first_turn=self.first_turn,
             deadwood=deadwood,  # arbitrary
         )
@@ -178,7 +178,7 @@ class AbstractGinGameState:
     @staticmethod
     def advance_turn(
         current: RummyTurn,
-        from_deck: bool,
+        from_discard: bool,
         first_turn: RummyTurn,
         deadwood: int,
     ) -> RummyTurn:
@@ -190,7 +190,7 @@ class AbstractGinGameState:
         self.turns += 1
         self.turn = self.advance_turn(
             current=self.turn,
-            from_deck=False,  # arbitrary
+            from_discard=False,  # arbitrary
             first_turn=self.first_turn,
             deadwood=10,  # arbitrary
         )
@@ -242,7 +242,7 @@ class AbstractGinGameState:
             self.end_game(RummyEndGame.GIN, p1_deadwood, p2_deadwood)
         self.turn = self.advance_turn(
             current=self.turn,
-            from_deck=False,  # arbitrary
+            from_discard=False,  # arbitrary
             first_turn=self.first_turn,  # arbitrary
             deadwood=deadwood,
         )
@@ -270,7 +270,7 @@ class AbstractGinGameState:
         if not knocks:
             self.turn = self.advance_turn(
                 current=self.turn,
-                from_deck=False,  # arbitrary
+                from_discard=False,  # arbitrary
                 first_turn=self.first_turn,  # arbitrary
                 deadwood=10,  # arbitrary
             )

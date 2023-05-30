@@ -73,7 +73,7 @@ class GinRummyGameState(AbstractGinGameState):
     @staticmethod
     def advance_turn(
         current: RummyTurn,
-        from_deck: bool,
+        from_discard: bool,
         first_turn: RummyTurn,
         deadwood: int,
     ) -> RummyTurn:
@@ -82,7 +82,7 @@ class GinRummyGameState(AbstractGinGameState):
         :return: None
         """
         if current == RummyTurn.P1_DRAWS_FIRST:
-            if from_deck:
+            if from_discard:
                 # they picked up a card, so they discard now
                 return RummyTurn.P1_DISCARDS
             elif first_turn == RummyTurn.P2_DRAWS_FIRST:
@@ -91,7 +91,7 @@ class GinRummyGameState(AbstractGinGameState):
             else:
                 return RummyTurn.P2_DRAWS_FIRST
         elif current == RummyTurn.P2_DRAWS_FIRST:
-            if from_deck:
+            if from_discard:
                 return RummyTurn.P2_DISCARDS
             elif first_turn == RummyTurn.P1_DRAWS_FIRST:
                 return RummyTurn.P1_DRAWS
