@@ -331,9 +331,9 @@ class AbstractGinGameState:
         :param card_drawn: (str)
         :return: None
         """
-        if self.turn == RummyTurn.P1_DRAWS:
+        if self.turn in {RummyTurn.P1_DRAWS, RummyTurn.P1_DRAWS_FIRST}:
             self.p1_hand.append(card_drawn)
-        elif self.turn == RummyTurn.P2_DRAWS:
+        elif self.turn in {RummyTurn.P2_DRAWS, RummyTurn.P2_DRAWS_FIRST}:
             self.p2_hand.append(card_drawn)
         else:
             raise Exception(
