@@ -69,32 +69,54 @@ class GinRummyGameState(AbstractGinGameState):
         return [c for m in best_melds for c in m] + unmelded
 
     @staticmethod
-    def advance_turn(turn: RummyTurn, deadwood: int) -> RummyTurn:
+    def advance_turn(
+        current: RummyTurn,
+        from_deck: bool,
+        first_turn: RummyTurn,
+        deadwood: int,
+    ) -> RummyTurn:
         """set next player to draw
 
         :return: None
         """
-        if turn == RummyTurn.P1_DRAWS:
+        if current == RummyTurn.P1_DRAWS_FIRST:
+            if from_deck:
+                # they picked up a card, so they discard now
+                return RummyTurn.P1_DISCARDS
+            elif first_turn == RummyTurn.P2_DRAWS_FIRST:
+                # they didn't pick up a card, so the other player draws
+                return RummyTurn.P2_DRAWS
+            else:
+                return RummyTurn.P2_DRAWS_FIRST
+        elif current == RummyTurn.P2_DRAWS_FIRST:
+            if from_deck:
+                return RummyTurn.P2_DISCARDS
+            elif first_turn == RummyTurn.P1_DRAWS_FIRST:
+                return RummyTurn.P1_DRAWS
+            else:
+                return RummyTurn.P1_DRAWS_FIRST
+
+        if current == RummyTurn.P1_DRAWS:
             return RummyTurn.P1_DISCARDS
-        elif turn == RummyTurn.P1_DISCARDS:
+        elif current == RummyTurn.P1_DISCARDS:
             if deadwood <= 10:
                 return RummyTurn.P1_MAY_KNOCK
             else:
                 return RummyTurn.P2_DRAWS
-        elif turn == RummyTurn.P1_MAY_KNOCK:
+        elif current == RummyTurn.P1_MAY_KNOCK:
             return RummyTurn.P2_DRAWS
 
-        elif turn == RummyTurn.P2_DRAWS:
+        elif current == RummyTurn.P2_DRAWS:
             return RummyTurn.P2_DISCARDS
-        elif turn == RummyTurn.P2_DISCARDS:
+        elif current == RummyTurn.P2_DISCARDS:
             if deadwood <= 10:
                 return RummyTurn.P2_MAY_KNOCK
             else:
                 return RummyTurn.P1_DRAWS
-        elif turn == RummyTurn.P2_MAY_KNOCK:
+        elif current == RummyTurn.P2_MAY_KNOCK:
             return RummyTurn.P1_DRAWS
 
-        raise ValueError(f"Invalid Gin Rummy turn: {turn}")
+        raise ValueError(f"Invalid Gin Rummy turn: {current}")
 
     def get_knock_candidates(self) -> List[Tuple[int, List[List[Card]]]]:
         """

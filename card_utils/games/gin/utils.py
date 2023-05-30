@@ -15,11 +15,16 @@ class RummyAction(Enum):
     DRAW = "draw"
     DISCARD = "discard"
     KNOCK = "knock"
+    PASS = "pass"
     COMPLETE = "complete"
     WAIT = "wait"
 
 
 class RummyTurn(Enum):
+    # first draw, where you can pass or not
+    P1_DRAWS_FIRST = "p1-draws-first"
+    P2_DRAWS_FIRST = "p2-draws-first"
+
     P1_DRAWS = "p1-draws"
     P2_DRAWS = "p2-draws"
 
@@ -33,12 +38,22 @@ class RummyTurn(Enum):
     def p1(self):
         return self in {
             RummyTurn.P1_DRAWS,
+            RummyTurn.P1_DRAWS_FIRST,
             RummyTurn.P1_DISCARDS,
             RummyTurn.P1_MAY_KNOCK,
         }
 
+    def is_first_draw(self) -> bool:
+        return self in {
+            RummyTurn.P1_DRAWS_FIRST,
+            RummyTurn.P2_DRAWS_FIRST,
+        }
+
     def is_draw(self):
-        return self in {RummyTurn.P1_DRAWS, RummyTurn.P2_DRAWS}
+        return self in {
+            RummyTurn.P1_DRAWS,
+            RummyTurn.P2_DRAWS,
+        }
 
     def is_discard(self):
         return self in {RummyTurn.P1_DISCARDS, RummyTurn.P2_DISCARDS}

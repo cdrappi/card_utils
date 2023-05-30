@@ -25,6 +25,7 @@ class AbstractGinGameState:
         p1_hand: List[str],
         p2_hand: List[str],
         turn: RummyTurn,
+        first_turn: RummyTurn,
         public_hud: Optional[Dict[str, RummyHud]] = None,
         last_draw=None,
         last_draw_from_discard=None,
@@ -67,6 +68,7 @@ class AbstractGinGameState:
         self.p2_hand = p2_hand
 
         self.turn = turn
+        self.first_turn = first_turn
 
         self.last_draw = last_draw
         self.last_draw_from_discard = last_draw_from_discard
@@ -90,14 +92,14 @@ class AbstractGinGameState:
         self.underknock_bonus = underknock_bonus
         self.gin_bonus = gin_bonus
 
-    def draw_card(self, from_discard):
+    def draw_card(self, from_discard: bool):
         """draw card from top of deck or discard to player's hand
 
         :param from_discard: (bool)
         :return: (str) card drawn
         """
 
-        if self.turn not in {RummyTurn.P1_DRAWS, RummyTurn.P2_DRAWS}:
+        if not self.turn.is_draw():
             raise ValueError(
                 "Cannot draw: it is not the player's turn to draw"
             )
@@ -149,7 +151,12 @@ class AbstractGinGameState:
 
         hand = self.p1_hand if self.turn.p1() else self.p2_hand
         deadwood = self.get_deadwood(hand)
-        self.turn = self.advance_turn(self.turn, deadwood)
+        self.turn = self.advance_turn(
+            current=self.turn,
+            from_deck=not from_discard,
+            first_turn=self.first_turn,
+            deadwood=deadwood,  # arbitrary
+        )
         self.turns += 1
         self.last_draw = card_drawn
         self.last_draw_from_discard = from_discard
@@ -169,7 +176,12 @@ class AbstractGinGameState:
         raise NotImplementedError("sort_hand not implemented")
 
     @staticmethod
-    def advance_turn(turn: RummyTurn, deadwood: int) -> RummyTurn:
+    def advance_turn(
+        current: RummyTurn,
+        from_deck: bool,
+        first_turn: RummyTurn,
+        deadwood: int,
+    ) -> RummyTurn:
         raise NotImplementedError("advance_turn not implemented")
 
     def discard_card(self, card) -> None:
@@ -217,7 +229,12 @@ class AbstractGinGameState:
             p1_deadwood = 0 if is_p1 else opp_deadwood
             p2_deadwood = opp_deadwood if is_p1 else 0
             self.end_game(RummyEndGame.GIN, p1_deadwood, p2_deadwood)
-        self.turn = self.advance_turn(self.turn, deadwood)
+        self.turn = self.advance_turn(
+            current=self.turn,
+            from_deck=False,  # arbitrary
+            first_turn=self.first_turn,  # arbitrary
+            deadwood=deadwood,
+        )
 
         # add discard to HUD
         if self.discard:
@@ -240,7 +257,12 @@ class AbstractGinGameState:
             )
 
         if not knocks:
-            self.turn = self.advance_turn(self.turn, 10)  # 10 is arbitrary
+            self.turn = self.advance_turn(
+                current=self.turn,
+                from_deck=False,  # arbitrary
+                first_turn=self.first_turn,  # arbitrary
+                deadwood=10,  # arbitrary
+            )
             return
 
         if self.turn == RummyTurn.P1_MAY_KNOCK:
