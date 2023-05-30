@@ -87,18 +87,23 @@ class GinRummyGameState(AbstractGinGameState):
                 return RummyTurn.P1_DISCARDS
             elif first_turn == RummyTurn.P2_DRAWS_FIRST:
                 # they didn't pick up a card, so the other player draws
-                return RummyTurn.P2_DRAWS
+                return RummyTurn.P2_DRAWS_FROM_DECK
             else:
                 return RummyTurn.P2_DRAWS_FIRST
         elif current == RummyTurn.P2_DRAWS_FIRST:
             if from_discard:
                 return RummyTurn.P2_DISCARDS
             elif first_turn == RummyTurn.P1_DRAWS_FIRST:
-                return RummyTurn.P1_DRAWS
+                return RummyTurn.P1_DRAWS_FROM_DECK
             else:
                 return RummyTurn.P1_DRAWS_FIRST
 
-        if current == RummyTurn.P1_DRAWS:
+        elif current == RummyTurn.P1_DRAWS_FROM_DECK:
+            return RummyTurn.P1_DISCARDS
+        elif current == RummyTurn.P2_DRAWS_FROM_DECK:
+            return RummyTurn.P2_DISCARDS
+
+        elif current == RummyTurn.P1_DRAWS:
             return RummyTurn.P1_DISCARDS
         elif current == RummyTurn.P1_DISCARDS:
             if deadwood <= 10:

@@ -88,6 +88,10 @@ class GinRickyGameState(AbstractGinGameState):
                 return RummyTurn.P1_DRAWS
             else:
                 return RummyTurn.P1_DRAWS_FIRST
+        elif current == RummyTurn.P1_DRAWS_FROM_DECK:
+            return RummyTurn.P1_DISCARDS
+        elif current == RummyTurn.P2_DRAWS_FROM_DECK:
+            return RummyTurn.P2_DISCARDS
         elif current == RummyTurn.P1_DRAWS:
             return RummyTurn.P1_DISCARDS
         elif current == RummyTurn.P1_DISCARDS:

@@ -25,6 +25,9 @@ class RummyTurn(Enum):
     P1_DRAWS_FIRST = "p1-draws-first"
     P2_DRAWS_FIRST = "p2-draws-first"
 
+    P1_DRAWS_FROM_DECK = "p1-draws-from-deck"
+    P2_DRAWS_FROM_DECK = "p2-draws-from-deck"
+
     P1_DRAWS = "p1-draws"
     P2_DRAWS = "p2-draws"
 

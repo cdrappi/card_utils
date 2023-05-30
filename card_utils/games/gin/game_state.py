@@ -194,6 +194,11 @@ class AbstractGinGameState:
             first_turn=self.first_turn,
             deadwood=10,  # arbitrary
         )
+        if self.turn == RummyTurn.P1_DRAWS_FROM_DECK:
+            # they must draw from the deck now
+            self.draw_card(from_discard=False)
+        elif self.turn == RummyTurn.P2_DRAWS_FROM_DECK:
+            self.draw_card(from_discard=False)
 
     def discard_card(self, card: Card) -> None:
         """discard card from player's hand to discard pile
@@ -331,9 +336,17 @@ class AbstractGinGameState:
         :param card_drawn: (str)
         :return: None
         """
-        if self.turn in {RummyTurn.P1_DRAWS, RummyTurn.P1_DRAWS_FIRST}:
+        if self.turn in {
+            RummyTurn.P1_DRAWS,
+            RummyTurn.P1_DRAWS_FIRST,
+            RummyTurn.P1_DRAWS_FROM_DECK,
+        }:
             self.p1_hand.append(card_drawn)
-        elif self.turn in {RummyTurn.P2_DRAWS, RummyTurn.P2_DRAWS_FIRST}:
+        elif self.turn in {
+            RummyTurn.P2_DRAWS,
+            RummyTurn.P2_DRAWS_FIRST,
+            RummyTurn.P2_DRAWS_FROM_DECK,
+        }:
             self.p2_hand.append(card_drawn)
         else:
             raise Exception(
