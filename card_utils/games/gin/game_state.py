@@ -195,7 +195,7 @@ class AbstractGinGameState:
             deadwood=10,  # arbitrary
         )
 
-    def discard_card(self, card) -> None:
+    def discard_card(self, card: Card) -> None:
         """discard card from player's hand to discard pile
 
         :param card: (card)
