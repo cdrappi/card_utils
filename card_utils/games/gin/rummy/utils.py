@@ -3,8 +3,8 @@ from typing import Dict, Iterator, List, Optional, Set, Tuple, TypeVar
 
 from card_utils.deck import rank_to_value, value_to_rank
 from card_utils.deck.utils import Card, rank_partition, suit_partition
-from card_utils.games.gin.ricky.utils import rank_straights, sort_cards_by_rank
-from card_utils.games.gin.utils import get_sets, new_game
+from card_utils.games.gin.ricky.utils import rank_straights
+from card_utils.games.gin.utils import get_sets, new_game, sort_cards_by_rank
 
 
 def deal_new_game():
@@ -71,7 +71,7 @@ def get_candidate_melds(
             if unique_cards == total_cards:
                 um_cards = sort_cards_by_rank(hand_set - melded_cards)
                 deadwood = get_deadwood(um_cards)
-                melds_list = [list(m) for m in melds]
+                melds_list = [sort_cards_by_rank(m) for m in melds]
                 if deadwood == 0 and stop_on_gin:
                     # they made gin, so return early
                     return [(0, melds_list, [])]

@@ -1,6 +1,6 @@
 import itertools
 from enum import Enum
-from typing import Dict, List, Tuple
+from typing import Dict, Iterable, List, Tuple
 
 from card_utils import deck
 from card_utils.deck.utils import (
@@ -15,11 +15,19 @@ class RummyAction(Enum):
     DRAW = "draw"
     DISCARD = "discard"
     KNOCK = "knock"
+    PASS = "pass"
     COMPLETE = "complete"
     WAIT = "wait"
 
 
 class RummyTurn(Enum):
+    # first draw, where you can pass or not
+    P1_DRAWS_FIRST = "p1-draws-first"
+    P2_DRAWS_FIRST = "p2-draws-first"
+
+    P1_DRAWS_FROM_DECK = "p1-draws-from-deck"
+    P2_DRAWS_FROM_DECK = "p2-draws-from-deck"
+
     P1_DRAWS = "p1-draws"
     P2_DRAWS = "p2-draws"
 
@@ -33,12 +41,28 @@ class RummyTurn(Enum):
     def p1(self):
         return self in {
             RummyTurn.P1_DRAWS,
+            RummyTurn.P1_DRAWS_FIRST,
             RummyTurn.P1_DISCARDS,
             RummyTurn.P1_MAY_KNOCK,
         }
 
+    def is_first_draw(self) -> bool:
+        return self in {
+            RummyTurn.P1_DRAWS_FIRST,
+            RummyTurn.P2_DRAWS_FIRST,
+        }
+
+    def is_draw_from_deck(self) -> bool:
+        return self in {
+            RummyTurn.P1_DRAWS_FROM_DECK,
+            RummyTurn.P2_DRAWS_FROM_DECK,
+        }
+
     def is_draw(self):
-        return self in {RummyTurn.P1_DRAWS, RummyTurn.P2_DRAWS}
+        return self in {
+            RummyTurn.P1_DRAWS,
+            RummyTurn.P2_DRAWS,
+        }
 
     def is_discard(self):
         return self in {RummyTurn.P1_DISCARDS, RummyTurn.P2_DISCARDS}
@@ -169,3 +193,11 @@ def rank_straights(
         last_value = value
 
     return straights
+
+
+def sort_cards_by_rank(cards: Iterable[str]):
+    """
+    :param cards: ([str])
+    :return: ([str])
+    """
+    return sorted(cards, key=lambda c: deck.rank_to_value[c[0]])

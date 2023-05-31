@@ -3,7 +3,12 @@ from typing import Iterable, List, Tuple
 
 from card_utils import deck
 from card_utils.deck.utils import suit_partition
-from card_utils.games.gin.utils import get_sets, new_game, rank_straights
+from card_utils.games.gin.utils import (
+    get_sets,
+    new_game,
+    rank_straights,
+    sort_cards_by_rank,
+)
 
 
 def deal_new_game():
@@ -109,14 +114,6 @@ def sum_points_by_ranks(hand):
     :return: (int)
     """
     return sum(deck.rank_to_value[r] for r, _ in hand)
-
-
-def sort_cards_by_rank(cards: Iterable[str]):
-    """
-    :param cards: ([str])
-    :return: ([str])
-    """
-    return sorted(cards, key=lambda c: deck.rank_to_value[c[0]])
 
 
 def sort_hand(hand) -> List[str]:
