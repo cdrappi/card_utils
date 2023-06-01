@@ -2,7 +2,7 @@
 
 import copy
 import random
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 from card_utils.deck.utils import Card
 from card_utils.games.gin.utils import (
@@ -78,6 +78,7 @@ class AbstractGinGameState:
         self.public_hud = public_hud
 
         self.is_complete = is_complete
+        # draw+discard counts as ONE turn, not 2
         self.turns = turns
         self.shuffles = shuffles
 
@@ -161,7 +162,6 @@ class AbstractGinGameState:
             first_turn=self.first_turn,
             deadwood=deadwood,  # arbitrary
         )
-        self.turns += 1
         self.last_draw = card_drawn
         self.last_draw_from_discard = from_discard
 
@@ -307,18 +307,30 @@ class AbstractGinGameState:
             self.p1_points = p1_deadwood
             self.p2_points = p2_deadwood
             if p1 and self.p2_points <= self.p1_points:
-                self.p2_points += self.underknock_bonus
-            elif not p1 and self.p1_points <= self.p2_points:
+                # p1 knocked but has more points than p2
                 self.p1_points += self.underknock_bonus
+            elif not p1 and self.p1_points <= self.p2_points:
+                # p2 knocked but has more points than p1
+                self.p2_points += self.underknock_bonus
         elif how == RummyEndGame.GIN:
             self.p1_points = p1_deadwood
             self.p2_points = p2_deadwood
             if p1:
+                # p1 makes gin, p2 loses an extra gin_binus points
                 self.p2_points += self.gin_bonus
             else:
+                # p2 makes gin and loses extra bonus points
                 self.p1_points += self.gin_bonus
         else:
             raise ValueError("invalid end game state")
+
+        # winner always gets 0 points
+        if self.p1_points > self.p2_points:
+            self.p1_points -= self.p2_points
+            self.p2_points = 0
+        elif self.p2_points > self.p1_points:
+            self.p2_points -= self.p1_points
+            self.p1_points = 0
 
     def hit_max_shuffles(self):
         """:return: (bool)"""
