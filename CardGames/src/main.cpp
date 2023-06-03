@@ -68,18 +68,19 @@ enum GinAction
 {
     PICK_FROM_DECK,
     PICK_FROM_DISCARD,
-    DISCARD,
+    DISCARD_CARD,
     KNOCK,
     PASS,
 };
 
 enum GinHud
 {
+    // in user's hand
     USER = 0,
-    // we know for sure card is in opponents hand
+    // user knows for sure card is in opponents hand
     OPPONENT = 1,
-    TOP_OF_DISCARD = 2,
-    DISCARD = 3,
+    TOP_OF_DISCARD_PILE = 2,
+    IN_DISCARD_PILE = 3,
     // in opponent hand or deck
     LIVE = 4,
     // we have simmed this card to be in opponent's hand

@@ -19,7 +19,7 @@ with open("requirements/common.txt") as f:
 
 setup(
     name="card_utils",
-    version="2023.5.21",
+    version="2023.6.3",
     packages=["card_utils"],
     install_requires=install_requires,
 )

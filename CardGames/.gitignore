@@ -32,3 +32,4 @@
 *.app
 
 build/*
+!build/__init__.py

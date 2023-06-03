@@ -15,4 +15,5 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # Editors: VSCode
-.vscode/*
+.vscode/c_cpp_properties.json
+
