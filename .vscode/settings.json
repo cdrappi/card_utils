@@ -38,5 +38,29 @@
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter"
     },
-    "cmake.sourceDirectory": "${workspaceFolder}/CardGames/src",
+    "cmake.sourceDirectory": "${workspaceFolder}/CardGames",
+    "cmake.buildDirectory": "${workspaceFolder}/CardGames/build",
+    "files.associations": {
+        "stdexcept": "cpp",
+        "vector": "cpp",
+        "random": "cpp",
+        "__bit_reference": "cpp",
+        "__hash_table": "cpp",
+        "__split_buffer": "cpp",
+        "__tree": "cpp",
+        "array": "cpp",
+        "deque": "cpp",
+        "filesystem": "cpp",
+        "forward_list": "cpp",
+        "initializer_list": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "valarray": "cpp",
+        "algorithm": "cpp"
+    }
 }
