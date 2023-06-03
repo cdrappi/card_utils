@@ -9,7 +9,7 @@ from card_utils.games.gin.rummy.utils import (
 )
 from card_utils.games.gin.utils import RummyTurn
 
-GIN_RUMMY_MAX_SHUFFLES = 0
+GIN_RUMMY_MAX_SHUFFLES = 1
 GIN_RUMMY_CARDS_DEALT = 10
 GIN_RUMMY_END_CARDS_IN_DECK = 2
 
