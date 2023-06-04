@@ -299,8 +299,16 @@ static std::vector<Melds> MeldCombinations(Melds &v, int r)
 
 static std::vector<Cards> SortMelds(const Melds &melds)
 {
+    // first order the melds by size
+    Melds melds_copy = melds;
+    std::sort(
+        melds_copy.begin(),
+        melds_copy.end(),
+        [](const CardSet a, const CardSet b)
+        { return a.size() > b.size(); });
+
     std::vector<Cards> sorted_melds;
-    for (const auto &meld : melds)
+    for (const auto &meld : melds_copy)
     {
         Cards sorted_meld(meld.begin(), meld.end());
         std::sort(sorted_meld.begin(), sorted_meld.end());

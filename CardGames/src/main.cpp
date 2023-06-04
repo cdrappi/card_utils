@@ -23,13 +23,10 @@ std::tuple<int, std::vector<CardStrings>, CardStrings> SerializeSplitMelds(Split
     std::vector<CardStrings> melded_cards_strings;
     for (auto meld : melded_cards)
     {
-        SortByRank(meld);
         melded_cards_strings.push_back(ToStrings(meld));
     }
 
     Cards unmelded = std::get<2>(split_melds);
-    SortByRank(unmelded);
-    // Cards unmelded_cards = ToStrings();
     return {deadwood, melded_cards_strings, ToStrings(unmelded)};
 }
 
@@ -69,6 +66,6 @@ PYBIND11_MODULE(card_games, m)
 {
     m.def("add", &add, "A function which adds two numbers");
     m.def("get_deadwood", &get_deadwood, "Get deadwood from list of unmelded cards");
-    m.def("split_melds", &split_melds, "Split melds from list of cards");
+    m.def("split_melds", &split_melds, py::arg("hand"), py::arg("melds") = std::nullopt, "Split melds from list of cards");
     m.def("get_candidate_melds", &all_candidate_melds, "Get all candidate melds from list of cards");
 }
