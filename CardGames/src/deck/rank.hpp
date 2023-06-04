@@ -20,3 +20,4 @@ enum Rank
 
 Rank CharToRank(char ch);
 char RankToChar(Rank rank);
+Rank ValueToRank(int value);

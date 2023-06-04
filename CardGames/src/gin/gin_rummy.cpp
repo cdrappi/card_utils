@@ -16,7 +16,7 @@ int GinRummyRankDeadwood(Rank rank)
     }
 }
 
-int GinRummyCardsDeadwood(std::vector<Card> &unmelded_cards)
+int GinRummyCardsDeadwood(const std::vector<Card> &unmelded_cards)
 {
     int deadwood = 0;
     for (Card card : unmelded_cards)

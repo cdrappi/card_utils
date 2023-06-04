@@ -61,7 +61,9 @@ def get_candidate_melds(
     candidates: List[Tuple[int, List[List[Card]], List[Card]]] = []
 
     # one option is we simply make 0 melds
-    candidates.append((get_deadwood(hand), [], hand))
+    full_deadwood = get_deadwood(hand)
+    if max_deadwood is None or full_deadwood <= max_deadwood:
+        candidates.append((full_deadwood, [], hand))
 
     for n_combos in range(1, min(3, len(all_melds)) + 1):
         for melds in combinations(all_melds, n_combos):

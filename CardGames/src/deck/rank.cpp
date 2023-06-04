@@ -55,3 +55,12 @@ char RankToChar(Rank rank)
 
     throw std::invalid_argument("Invalid rank enum value");
 }
+
+Rank ValueToRank(int value)
+{
+    if (value < ACE || value > KING + 1)
+        throw std::invalid_argument("Invalid rank value");
+    if (value == KING + 1)
+        return ACE;
+    return static_cast<Rank>(value);
+}
