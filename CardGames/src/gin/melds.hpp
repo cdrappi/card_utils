@@ -7,12 +7,9 @@
 
 using Ranks = std::vector<Rank>;
 using Cards = std::vector<Card>;
-
 using CardSet = std::set<Card>;
 using Melds = std::vector<CardSet>;
-
 using RankValues = std::vector<int>;
-
 using SplitHand = std::tuple<int, std::vector<Cards>, Cards>;
 
 std::map<Rank, std::vector<Suit>> RankPartition(const std::vector<Card> &cards);
