@@ -25,6 +25,7 @@ with open("requirements/common.txt") as f:
         for requirement in f.read().splitlines()
         if _is_install_requirement(requirement)
     ]
+    print(install_requires)
 
 setup(
     name="card_utils",
