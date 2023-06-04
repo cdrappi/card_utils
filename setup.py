@@ -33,7 +33,7 @@ setup(
     name="card_utils",
     version="2023.6.3",
     packages=find_packages(),
-    package_data={"card_utils": ["stubs/card_games-stubs/*.pyi"]},
+    package_data={"": ["*.pyi", "py.typed"]},
     install_requires=install_requires,
     ext_modules=ext_modules,
     cmdclass={"build_ext": build_ext},
