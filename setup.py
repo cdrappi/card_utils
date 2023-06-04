@@ -32,10 +32,10 @@ with open("requirements/common.txt") as f:
 setup(
     name="card_utils",
     version="2023.6.3",
-    packages=find_packages(),
-    data_files=[
-        ("card_games", ["../card_games-stubs/__init__.pyi"]),
-    ],
+    packages=[*find_packages(), "card_games"],
+    package_data={
+        "card_games": ["*.pyi"],
+    },
     install_requires=install_requires,
     ext_modules=ext_modules,
     cmdclass={"build_ext": build_ext},
