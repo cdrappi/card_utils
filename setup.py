@@ -5,7 +5,7 @@ ext_modules = [
     Pybind11Extension(
         "card_games",
         ["CardGames/src/main.cpp"],
-        include_dirs=["CardGames/src"],
+        include_dirs=["CardGames/src/deck", "CardGames/src/gin"],
     ),
 ]
 
