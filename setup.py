@@ -1,6 +1,7 @@
 import glob
-from setuptools import find_packages, setup  # type: ignore
+
 from pybind11.setup_helpers import Pybind11Extension, build_ext
+from setuptools import find_packages, setup  # type: ignore
 
 _SRC = f"CardGames/src"
 
@@ -33,6 +34,7 @@ setup(
     name="card_utils",
     version="2023.6.3",
     packages=find_packages(),
+    setup_requires=["pybind11>=2.5.0"],
     install_requires=install_requires,
     ext_modules=ext_modules,
     cmdclass={"build_ext": build_ext},
