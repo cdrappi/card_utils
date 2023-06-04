@@ -8,7 +8,7 @@ version = "2023.6.3"
 description = "Python tools to manage card games"
 readme = "README.md"
 authors = [
-    {name = "Christian Drappi", email = ""},
+    {name = "Christian Drappi", email = "christiandrappi+github@gmail.com"},
 ]
 licenses = [
     {file = "MIT", name = "MIT License", url = "https://opensource.org/licenses/MIT"},
