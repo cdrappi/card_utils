@@ -1,4 +1,16 @@
-from setuptools import setup  # type: ignore
+import glob
+from setuptools import find_packages, setup  # type: ignore
+from pybind11.setup_helpers import Pybind11Extension, build_ext
+
+_SRC = f"CardGames/src"
+
+ext_modules = [
+    Pybind11Extension(
+        "card_games",
+        sorted([f"{_SRC}/main.cpp", *glob.glob(f"{_SRC}/*/*.cpp")]),
+        include_dirs=[_SRC],
+    ),
+]
 
 
 def _is_install_requirement(requirement):
@@ -19,7 +31,9 @@ with open("requirements/common.txt") as f:
 
 setup(
     name="card_utils",
-    version="2023.5.21",
-    packages=["card_utils"],
+    version="2023.6.3",
+    packages=find_packages(),
     install_requires=install_requires,
+    ext_modules=ext_modules,
+    cmdclass={"build_ext": build_ext},
 )
