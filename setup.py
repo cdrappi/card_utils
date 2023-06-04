@@ -2,10 +2,14 @@ import glob
 from setuptools import setup  # type: ignore
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 
+
+source_files = sorted(glob.glob("CardGames/src/*.cpp"))
+print(source_files)
+
 ext_modules = [
     Pybind11Extension(
         "card_games",
-        glob.glob("CardGames/src/*.cpp"),
+        source_files,
         include_dirs=["CardGames/src"],
     ),
 ]
