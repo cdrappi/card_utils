@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=42", "wheel", "pybind11"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "card_utils"
+version = "2023.6.3"
+description = "Python tools to manage card games"
+readme = "README.md"
+authors = [
+    {name = "Christian Drappi", email = ""},
+]
+licenses = [
+    {file = "MIT", name = "MIT License", url = "https://opensource.org/licenses/MIT"},
+]
+keywords = ["gin rummy", "poker"]
+
+[project.scripts]
+# none
+
+[project.dependencies]
+# none
+
+[project.optional-dependencies]
+# none
