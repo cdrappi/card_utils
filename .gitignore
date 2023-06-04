@@ -1,6 +1,7 @@
 
 profile.sh
 venv
+.env
 
 .DS_Store
 
