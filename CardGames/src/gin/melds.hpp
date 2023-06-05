@@ -3,10 +3,11 @@
 #include <vector>
 #include <tuple>
 #include <set>
+#include <map>
+
 #include "../deck/card.hpp"
 
 using Ranks = std::vector<Rank>;
-using Cards = std::vector<Card>;
 using CardSet = std::set<Card>;
 using Melds = std::vector<CardSet>;
 using RankValues = std::vector<int>;

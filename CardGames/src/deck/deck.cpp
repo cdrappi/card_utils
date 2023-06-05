@@ -5,9 +5,9 @@
 #include "card.hpp"
 #include "deck.hpp"
 
-std::vector<Card> ShuffledDeck()
+Cards ShuffledDeck()
 {
-    std::vector<Card> deck;
+    Cards deck;
 
     // Create a standard deck
     for (int s = CLUBS; s <= SPADES; ++s)

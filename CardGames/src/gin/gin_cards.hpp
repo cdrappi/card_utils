@@ -1,16 +1,18 @@
 // gin_cards.hpp
 #pragma once
 
-#include "../deck/card.hpp"
 #include <vector>
+
+#include "../deck/card.hpp"
+#include "melds.hpp"
 
 class GinCards
 {
 public:
-    std::vector<Card> player1_hand;
-    std::vector<Card> player2_hand;
-    std::vector<Card> discard_pile;
-    std::vector<Card> deck;
+    Cards player1_hand;
+    Cards player2_hand;
+    Cards discard_pile;
+    Cards deck;
 };
 
 GinCards DealHands(int n);
