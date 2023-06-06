@@ -5,7 +5,7 @@
 #include "card.hpp"
 #include "deck.hpp"
 
-Cards ShuffledDeck()
+Cards OrderedDeck()
 {
     Cards deck;
 
@@ -17,6 +17,12 @@ Cards ShuffledDeck()
             deck.push_back(Card(static_cast<Rank>(r), static_cast<Suit>(s)));
         }
     }
+    return deck;
+}
+
+Cards ShuffledDeck()
+{
+    Cards deck = OrderedDeck();
 
     // Shuffle the deck
     std::random_device rd;

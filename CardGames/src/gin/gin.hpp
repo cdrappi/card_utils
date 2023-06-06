@@ -1,5 +1,6 @@
 // gin.hpp
 #pragma once
+#include <unordered_map>
 
 enum GinTurn
 {
@@ -19,12 +20,17 @@ enum GinTurn
     P2_MAY_KNOCK
 };
 
+bool IsP1Draw(GinTurn turn);
+bool IsP2Draw(GinTurn turn);
+
 enum GinEnding
 {
     P1_KNOCKS,
     P2_KNOCKS,
     P1_GINS,
     P2_GINS,
+    P1_BIG_GINS,
+    P2_BIG_GINS,
     PLAYED_TO_THE_WALL,
 };
 
@@ -54,3 +60,5 @@ enum GinHud
     PLAYER_2 = 7,
     DECK = 8,
 };
+
+using CardsHud = std::unordered_map<Card, GinHud>;

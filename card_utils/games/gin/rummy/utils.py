@@ -114,7 +114,10 @@ def _split_sets_runs(
             [(suit, ranks)] = sp.items()
             if suit not in runs:
                 runs[suit] = []
-            runs[suit].append((ranks[0], ranks[-1]))
+            sorted_ranks = sort_cards_by_rank(ranks)
+            if sorted_ranks[0] == "A" and sorted_ranks[-1] == "K":
+                sorted_ranks = [*sorted_ranks[1:], sorted_ranks[0]]
+            runs[suit].append((sorted_ranks[0], sorted_ranks[-1]))
         elif len(rp) == 1:
             [(rank, suits)] = rp.items()
             if len(suits) == 3:
@@ -134,17 +137,21 @@ def _get_set_layoffs(hand: List[Card], sets: List[str]) -> List[str]:
     return [f"{r}{rp[r][0]}" for r in sets if r in rp]
 
 
+Rank = str
+Suit = str
+
+
 def _get_suit_run_layoffs(
-    suit_ranks: List[str],
-    suit_runs: List[Tuple[str, str]],
-) -> List[List[str]]:
+    suit_ranks: List[Rank],
+    suit_runs: List[Tuple[Rank, Rank]],
+) -> List[List[Rank]]:
     if not suit_ranks:
         return []
     rank_set = set(suit_ranks)
     layoff_ranks = []
     for low, high in suit_runs:
         low_value = rank_to_value[low]
-        high_value = rank_to_value[high]
+        high_value = rank_to_value[high] if high != "A" else 14
         next_low = value_to_rank.get(low_value - 1)
         next_high = value_to_rank.get(high_value + 1)
         laid_off_low = []
@@ -168,7 +175,8 @@ def _get_suit_run_layoffs(
 
 
 def _get_run_layoffs(
-    hand: List[Card], runs: Dict[str, List[Tuple[str, str]]]
+    hand: List[Card],
+    runs: Dict[Suit, List[Tuple[Rank, Rank]]],
 ) -> List[List[str]]:
     """
     return map of suit to list of cards that can be added to a run
@@ -177,7 +185,7 @@ def _get_run_layoffs(
     layoff_card_chunks: List[List[str]] = []
     for suit, suit_runs in runs.items():
         suit_chunks = _get_suit_run_layoffs(sp.get(suit, []), suit_runs)
-        card_chunks = [[f"{suit}{r}" for r in sc] for sc in suit_chunks]
+        card_chunks = [[f"{r}{suit}" for r in sc] for sc in suit_chunks]
         layoff_card_chunks.extend(card_chunks)
     return layoff_card_chunks
 
