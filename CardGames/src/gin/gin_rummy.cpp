@@ -27,7 +27,7 @@ int GinRummyCardsDeadwood(const std::vector<Card> &unmelded_cards)
     return deadwood;
 }
 
-AbstractGinGameState::AbstractGinGameState(
+GinRummyGameState::GinRummyGameState(
     GinCards cards,
     GinTurn turn,
     GinTurn first_turn,
@@ -39,7 +39,6 @@ AbstractGinGameState::AbstractGinGameState(
                     first_turn(first_turn),
                     last_draw_from_discard(last_draw_from_discard),
                     is_complete(is_complete),
-                    shuffles(shuffles),
                     p1_score(0),
                     p2_score(0)
 {
@@ -54,7 +53,7 @@ AbstractGinGameState::AbstractGinGameState(
     }
 }
 
-void AbstractGinGameState::FirstTurnPass()
+void GinRummyGameState::FirstTurnPass()
 {
     // TODO
     if (this->turn != GinTurn::P1_DRAWS_FIRST && this->turn != GinTurn::P2_DRAWS_FIRST)
@@ -66,7 +65,7 @@ void AbstractGinGameState::FirstTurnPass()
         this->DrawCard(false);
 };
 
-Card AbstractGinGameState::DrawCard(bool from_discard)
+Card GinRummyGameState::DrawCard(bool from_discard)
 {
     bool p1_draws = IsP1Draw(this->turn);
     bool p2_draws = IsP2Draw(this->turn);
@@ -94,8 +93,6 @@ Card AbstractGinGameState::DrawCard(bool from_discard)
         this->cards.deck.erase(this->cards.deck.begin());
         if (this->cards.deck.size() == this->end_cards_in_deck)
         {
-            this->shuffles += 1;
-            // TODO: allow reshuffling for gin ricky
             this->EndGame(GinEnding::PLAYED_TO_THE_WALL, 0, 0);
         }
         Cards hand = p1_draws ? this->cards.player1_hand : this->cards.player2_hand;
@@ -111,7 +108,7 @@ void RemoveCard(Cards &cards, Card card)
     cards.erase(std::remove(cards.begin(), cards.end(), card), cards.end());
 }
 
-void AbstractGinGameState::DiscardCard(Card card)
+void GinRummyGameState::DiscardCard(Card card)
 {
     bool p1_discards = this->turn == GinTurn::P1_DISCARDS;
     bool p2_discards = this->turn == GinTurn::P2_DISCARDS;
@@ -152,7 +149,7 @@ void AbstractGinGameState::DiscardCard(Card card)
     this->cards.discard_pile.push_back(card);
 };
 
-void AbstractGinGameState::DecideKnock(bool knocks, std::optional<Melds> melds)
+void GinRummyGameState::DecideKnock(bool knocks, std::optional<Melds> melds)
 {
     bool p1 = this->turn == GinTurn::P1_MAY_KNOCK;
     bool p2 = this->turn == GinTurn::P2_MAY_KNOCK;
@@ -179,7 +176,7 @@ void AbstractGinGameState::DecideKnock(bool knocks, std::optional<Melds> melds)
         throw std::invalid_argument("invalid knocking state");
 };
 
-void AbstractGinGameState::EndGame(GinEnding how, int p1_deadwood, int p2_deadwood)
+void GinRummyGameState::EndGame(GinEnding how, int p1_deadwood, int p2_deadwood)
 {
 
     if (how == GinEnding::PLAYED_TO_THE_WALL)
@@ -237,12 +234,7 @@ void AbstractGinGameState::EndGame(GinEnding how, int p1_deadwood, int p2_deadwo
     }
 };
 
-bool AbstractGinGameState::HitMaxShuffles()
-{
-    return this->shuffles >= this->max_shuffles;
-};
-
-void AbstractGinGameState::AddToHand(bool p1, Card card)
+void GinRummyGameState::AddToHand(bool p1, Card card)
 {
     if (p1 && IsP1Draw(this->turn))
     {
@@ -258,19 +250,19 @@ void AbstractGinGameState::AddToHand(bool p1, Card card)
     }
 };
 
-Card AbstractGinGameState::TopOfDiscard()
+Card GinRummyGameState::TopOfDiscard()
 {
     // return the item at the top of the discard pile
     return this->cards.discard_pile.back();
 };
 
-Card AbstractGinGameState::TopOfDeck()
+Card GinRummyGameState::TopOfDeck()
 {
     // return the item at the top of the deck
     return this->cards.deck.front();
 };
 
-CardsHud AbstractGinGameState::PlayerHud(bool p1)
+CardsHud GinRummyGameState::PlayerHud(bool p1)
 {
     CardsHud player_hud = {};
     for (const Card card : OrderedDeck())
@@ -302,7 +294,7 @@ CardsHud AbstractGinGameState::PlayerHud(bool p1)
     return player_hud;
 };
 
-GinTurn AbstractGinGameState::AdvanceTurn(GinTurn current, bool from_discard, int deadwood)
+GinTurn GinRummyGameState::AdvanceTurn(GinTurn current, bool from_discard, int deadwood)
 {
     switch (current)
     {
@@ -347,7 +339,7 @@ GinTurn AbstractGinGameState::AdvanceTurn(GinTurn current, bool from_discard, in
     }
 }
 
-int AbstractGinGameState::GetDeadwood(const Cards hand, std::optional<Melds> melds, std::optional<Melds> opp_melds)
+int GinRummyGameState::GetDeadwood(const Cards hand, std::optional<Melds> melds, std::optional<Melds> opp_melds)
 {
     if (opp_melds.has_value())
     {
@@ -358,7 +350,7 @@ int AbstractGinGameState::GetDeadwood(const Cards hand, std::optional<Melds> mel
     return std::get<0>(split_melds);
 };
 
-Cards AbstractGinGameState::SortHand(Cards hand)
+Cards GinRummyGameState::SortHand(Cards hand)
 {
     SplitHand split_melds = SplitMelds(hand);
     std::vector<Cards> melds = std::get<1>(split_melds);

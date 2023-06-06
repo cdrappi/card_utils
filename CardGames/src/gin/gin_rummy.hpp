@@ -10,7 +10,7 @@
 int GinRummyRankDeadwood(Rank rank);
 int GinRummyCardsDeadwood(const std::vector<Card> &unmelded_cards);
 
-class AbstractGinGameState
+class GinRummyGameState
 {
 public:
     const int cards_dealt = 10;
@@ -20,7 +20,7 @@ public:
     const int big_gin_bonus = 30;
     const int max_shuffles = 1;
 
-    AbstractGinGameState(
+    GinRummyGameState(
         GinCards cards,
         GinTurn turn,
         GinTurn first_turn,
@@ -50,11 +50,9 @@ private:
     std::unordered_map<Card, GinHud> public_hud;
     std::optional<Card> last_draw_from_discard;
     bool is_complete;
-    int shuffles;
     int p1_score;
     int p2_score;
 
-    bool HitMaxShuffles();
     void AddToHand(bool p1, Card card);
     GinTurn AdvanceTurn(GinTurn current, bool from_discard = false, int deadwood = 11);
 };
