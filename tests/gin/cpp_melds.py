@@ -18,11 +18,18 @@ def _test_deadwood() -> None:
 def test_layoffs() -> None:
     hand = ["5c", "5d", "5h", "3s", "4s", "5s", "Ac", "Ad", "4h", "7s"]
     opp_melds = [["3h", "3d", "3c"], ["7c", "7d", "7h"]]
-    print(card_games.layoff_deadwood(hand, opp_melds, True))
+    dw, *_ = card_games.layoff_deadwood(hand, opp_melds, True)
+    assert dw == 6
 
     hand = ["5c", "5d", "5h", "9d", "Td", "Jd", "3s", "4s", "Ac", "Ad"]
     opp_melds = [["5s", "6s", "7s"], ["7c", "7d", "7h"]]
-    print(card_games.layoff_deadwood(hand, opp_melds, True))
+    dw, *_ = card_games.layoff_deadwood(hand, opp_melds, True)
+    assert dw == 2
+
+    hand = ["5c", "5d", "5h", "9d", "Td", "Jd", "3s", "4s", "Ac", "Ad"]
+    opp_melds = [["5s", "6s", "7s"], ["4c", "4d", "4h"]]
+    dw, *_ = card_games.layoff_deadwood(hand, opp_melds, True)
+    assert dw == 2
 
 
 if __name__ == "__main__":
