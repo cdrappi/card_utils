@@ -553,6 +553,7 @@ LayoffDeadwood(
     Melds opp_melds,
     bool stop_on_zero)
 {
+    /*
     auto [sets, runs] = SplitSetsRuns(opp_melds);
     std::vector<std::tuple<int, std::vector<Cards>, Cards, Cards>> candidates;
 
@@ -567,7 +568,7 @@ LayoffDeadwood(
             CardSet lo_sets = CardsToSet(set_layoffs);
             CardSet um_set;
             std::set_difference(unmelded_set.begin(), unmelded_set.end(), lo_sets.begin(), lo_sets.end(), std::inserter(um_set, um_set.end()));
-            Cards rls = GetRunLayoffs(std::vector<Card>(um_set.begin(), um_set.end()), runs);
+            std::vector<Cards> rls = GetRunLayoffs(std::vector<Card>(um_set.begin(), um_set.end()), runs);
             for (auto &run_layoffs : CardsPowerset(rls))
             {
                 CardSet lo_runs = CardsToSet(run_layoffs);
@@ -593,4 +594,6 @@ LayoffDeadwood(
         candidates.end(),
         [](auto const &a, auto const &b)
         { return std::get<0>(a) < std::get<0>(b); });
+    */
+    return {0, {}, {}, {}};
 }
