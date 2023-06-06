@@ -52,6 +52,8 @@ class GinRummyGameState(AbstractGinGameState):
             shuffles=0,
             max_shuffles=GIN_RUMMY_MAX_SHUFFLES,
             end_cards_in_deck=GIN_RUMMY_END_CARDS_IN_DECK,
+            underknock_bonus=20,
+            gin_bonus=20,
         )
 
     @staticmethod
