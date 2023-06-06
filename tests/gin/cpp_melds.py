@@ -20,6 +20,10 @@ def test_layoffs() -> None:
     opp_melds = [["3h", "3d", "3c"], ["7c", "7d", "7h"]]
     print(card_games.layoff_deadwood(hand, opp_melds, True))
 
+    hand = ["5c", "5d", "5h", "9d", "Td", "Jd", "3s", "4s", "Ac", "Ad"]
+    opp_melds = [["5s", "6s", "7s"], ["7c", "7d", "7h"]]
+    print(card_games.layoff_deadwood(hand, opp_melds, True))
+
 
 if __name__ == "__main__":
     test_layoffs()
