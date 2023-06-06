@@ -553,7 +553,7 @@ std::vector<Cards> GetRunLayoffs(
 
 std::tuple<int, std::vector<Cards>, Cards, Cards>
 LayoffDeadwood(
-    std::vector<Card> hand,
+    Cards hand,
     Melds opp_melds,
     bool stop_on_zero)
 {
