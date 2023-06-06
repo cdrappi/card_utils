@@ -32,7 +32,7 @@ std::vector<Ranks> GetSuitRunLayoffs(
     Ranks suit_ranks,
     std::vector<std::pair<Rank, Rank>> suit_runs);
 
-Cards GetRunLayoffs(Cards hand, std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>> runs);
+std::vector<Cards> GetRunLayoffs(Cards hand, std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>> runs);
 
 std::tuple<int, std::vector<Cards>, Cards, Cards> LayoffDeadwood(
     Cards hand,
