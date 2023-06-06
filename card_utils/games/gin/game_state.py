@@ -137,16 +137,7 @@ class AbstractGinGameState:
             card_drawn = self.top_of_deck
             self._add_to_hand(card_drawn)
             self.deck = self.deck[1:]
-            if len(self.deck) == self.end_cards_in_deck:
-                self.shuffles += 1
-                if self.hit_max_shuffles():
-                    self.end_game(RummyEndGame.WALL, 0, 0)
-                # if there are no cards left in the deck,
-                # shuffle up the discards
-                new_deck = copy.deepcopy(self.discard)
-                random.shuffle(new_deck)
-                self.deck = new_deck
-                self.discard = []
+            if len(self.deck) == 0:
                 # Both players know each others hands
                 # at this point, so we can just do this:
                 self.public_hud = {
@@ -262,9 +253,27 @@ class AbstractGinGameState:
         self.public_hud[card] = RummyHud.TOP_OF_DISCARD
         self.discard.append(card)
 
+        if not self.turn.is_knock():
+            self._check_wall()
+
         self.turns += 1
         if self.hit_max_turns():
             self.end_game(RummyEndGame.WALL, 0, 0)
+            return
+
+    def _check_wall(self) -> bool:
+        if len(self.deck) == self.end_cards_in_deck:
+            self.shuffles += 1
+            if self.hit_max_shuffles():
+                self.end_game(RummyEndGame.WALL, 0, 0)
+                return True
+            # if there are no cards left in the deck,
+            # shuffle up the discards
+            new_deck = [*self.discard, *self.deck]
+            random.shuffle(new_deck)
+            self.deck = new_deck
+            self.discard = []
+        return False
 
     def decide_knock(
         self,
@@ -277,6 +286,8 @@ class AbstractGinGameState:
             )
 
         if not knocks:
+            if self._check_wall():
+                return
             self.turn = self.advance_turn(
                 current=self.turn,
                 from_discard=False,  # arbitrary

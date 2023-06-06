@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <map>
 #include <tuple>
+#include <vector>
+#include <iostream>
+#include <unordered_map>
 
 #include "melds.hpp"
 #include "gin_rummy.hpp"
@@ -16,9 +19,7 @@ std::map<Rank, std::vector<Suit>> RankPartition(const std::vector<Card> &cards)
 
     // Group the cards by rank
     for (const auto &card : cards)
-    {
         rankToSuitsMap[card.rank].push_back(card.suit);
-    }
 
     return rankToSuitsMap;
 }
@@ -99,18 +100,12 @@ static RankValues SortedRankValues(const Ranks &ranks, bool aces_low, bool aces_
         if (rank == ACE)
         {
             if (aces_low)
-            {
                 values.push_back(static_cast<int>(rank));
-            }
             if (aces_high)
-            {
                 values.push_back(static_cast<int>(KING) + 1);
-            }
         }
         else
-        {
             values.push_back(static_cast<int>(rank));
-        }
     }
 
     std::sort(values.begin(), values.end());
@@ -333,7 +328,9 @@ std::vector<SplitHand> GetCandidateMelds(
     int full_deadwood = GinRummyCardsDeadwood(hand);
     if (!max_deadwood.has_value() || full_deadwood <= max_deadwood.value())
     {
-        candidate_melds.push_back({full_deadwood, {}, hand});
+        Cards hand_copy = hand;
+        SortByRank(hand_copy);
+        candidate_melds.push_back({full_deadwood, {}, hand_copy});
     }
 
     Melds all_melds = FindMelds(hand);
@@ -389,4 +386,219 @@ SplitHand SplitMelds(const Cards &hand, std::optional<Melds> melds)
         { return std::get<0>(a) < std::get<0>(b); });
 
     return *split_hand;
+}
+
+#include <vector>
+#include <iostream>
+
+template <typename T>
+std::vector<std::vector<T>> Powerset(const std::vector<T> &set, int index)
+{
+    std::vector<std::vector<T>> subsets;
+    if (index == set.size())
+    {
+        // Base case: add an empty set
+        subsets.push_back({});
+    }
+    else
+    {
+        // Recursive case
+        subsets = Powerset(set, index + 1);
+        int subsetsSize = subsets.size();
+        for (int i = 0; i < subsetsSize; i++)
+        {
+            // create a new subset from the existing subsets and add the current element to it
+            std::vector<T> newSubset = subsets[i];
+            newSubset.push_back(set[index]);
+            subsets.push_back(newSubset);
+        }
+    }
+    return subsets;
+}
+
+std::tuple<std::vector<Rank>, std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>>>
+SplitSetsRuns(Melds melds)
+{
+    std::vector<Rank> sets;
+    std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>> runs;
+
+    for (auto &meld : melds)
+    {
+        auto meld_vec = std::vector<Card>(meld.begin(), meld.end());
+        auto sp = SuitPartition(meld_vec);
+        auto rp = RankPartition(meld_vec);
+        if (sp.size() == 1)
+        {
+            auto [suit, ranks] = *sp.begin();
+            if (runs.count(suit) == 0)
+            {
+                runs[suit] = {};
+            }
+            runs[suit].push_back({ranks.front(), ranks.back()});
+        }
+        else if (rp.size() == 1)
+        {
+            auto [rank, suits] = *rp.begin();
+            if (suits.size() == 3)
+            {
+                // 4-sets can't be laid off against, so only consider 3-sets
+                sets.push_back(rank);
+            }
+        }
+        else
+        {
+            throw std::invalid_argument("Invalid meld passed into SplitSetsRuns");
+        }
+    }
+
+    return {sets, runs};
+}
+
+Cards GetSetLayoffs(Cards hand, std::vector<Rank> sets)
+{
+    Cards result;
+    auto rp = RankPartition(hand);
+
+    for (const auto &r : sets)
+    {
+        if (rp.count(r) > 0)
+            result.push_back(Card(r, rp[r][0]));
+    }
+    return result;
+}
+
+std::optional<Rank> NextLowRank(int low_value)
+{
+    std::optional<Rank> next_low = std::nullopt;
+    if (low_value > Rank::ACE)
+        next_low = ValueToRank(low_value - 1);
+    return next_low;
+}
+
+std::optional<Rank> NextHighRank(int high_value)
+{
+    std::optional<Rank> next_high = std::nullopt;
+    if (high_value < Rank::KING + 1)
+    {
+        next_high = ValueToRank(high_value + 1);
+    }
+    return next_high;
+}
+
+std::vector<Ranks> GetSuitRunLayoffs(
+    Ranks suit_ranks,
+    std::vector<std::pair<Rank, Rank>> suit_runs)
+{
+
+    if (suit_ranks.empty())
+        return {};
+
+    std::set<Rank> rank_set(suit_ranks.begin(), suit_ranks.end());
+    std::vector<Ranks> layoff_ranks;
+    for (auto const &[low, high] : suit_runs)
+    {
+        int low_value = low;
+        int high_value = high != Rank::ACE ? high : Rank::KING + 1;
+        std::optional<Rank> next_low = NextLowRank(low_value);
+        std::optional<Rank> next_high = NextHighRank(high_value);
+
+        Ranks laid_off_low;
+        while (next_low.has_value() && rank_set.count(next_low.value()))
+        {
+            rank_set.erase(next_low.value());
+            laid_off_low.push_back(next_low.value());
+            low_value -= 1;
+            next_low = NextLowRank(low_value);
+        }
+        if (!laid_off_low.empty())
+            layoff_ranks.push_back(laid_off_low);
+
+        Ranks laid_off_high;
+        while (next_high.has_value() && rank_set.count(next_high.value()))
+        {
+            rank_set.erase(next_high.value());
+            laid_off_high.push_back(next_high.value());
+            high_value += 1;
+            next_high = NextHighRank(high_value);
+        }
+        if (!laid_off_high.empty())
+            layoff_ranks.push_back(laid_off_high);
+    }
+    return layoff_ranks;
+}
+
+std::vector<Cards> GetRunLayoffs(
+    Cards hand,
+    std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>> runs)
+{
+
+    auto sp = SuitPartition(hand);
+    std::vector<Cards> layoff_card_chunks;
+
+    for (auto const &[suit, suit_runs] : runs)
+    {
+        auto suit_chunks = GetSuitRunLayoffs(sp[suit], suit_runs);
+        for (auto const &sc : suit_chunks)
+        {
+            std::vector<Card> card_chunk;
+            for (auto const &r : sc)
+            {
+                card_chunk.push_back(Card(r, suit));
+            }
+            layoff_card_chunks.push_back(card_chunk);
+        }
+    }
+    return layoff_card_chunks;
+}
+
+std::tuple<int, std::vector<Cards>, Cards, Cards>
+LayoffDeadwood(
+    Cards hand,
+    Melds opp_melds,
+    bool stop_on_zero)
+{
+    auto [sets, runs] = SplitSetsRuns(opp_melds);
+    std::vector<std::tuple<int, std::vector<Cards>, Cards, Cards>> candidates;
+
+    for (auto &[_, melds, unmelded] : GetCandidateMelds(hand))
+    {
+        // loop over each possible meld we can make,
+        // and see what we can do with the remaining cards
+        CardSet unmelded_set = CardsToSet(unmelded);
+        Cards sls = GetSetLayoffs(unmelded, sets);
+        for (auto &set_layoffs : Powerset(sls))
+        {
+            CardSet lo_sets = CardsToSet(set_layoffs);
+            CardSet um_set;
+            std::set_difference(unmelded_set.begin(), unmelded_set.end(), lo_sets.begin(), lo_sets.end(), std::inserter(um_set, um_set.end()));
+            std::vector<Cards> rls = GetRunLayoffs(std::vector<Card>(um_set.begin(), um_set.end()), runs);
+            for (auto &run_layoffs : Powerset(rls))
+            {
+                CardSet lo_runs;
+                for (auto &rl : run_layoffs)
+                    for (auto &c : rl)
+                        lo_runs.insert(c);
+                CardSet um_run;
+                std::set_difference(um_set.begin(), um_set.end(), lo_runs.begin(), lo_runs.end(), std::inserter(um_run, um_run.end()));
+                int deadwood = GinRummyCardsDeadwood(Cards(um_run.begin(), um_run.end()));
+                Cards um_cards = Cards(um_run.begin(), um_run.end());
+                CardSet laid_off_cards;
+                std::set_union(lo_sets.begin(), lo_sets.end(), lo_runs.begin(), lo_runs.end(), std::inserter(laid_off_cards, laid_off_cards.end()));
+                auto candidate = std::make_tuple(
+                    deadwood,
+                    melds,
+                    Cards(laid_off_cards.begin(), laid_off_cards.end()),
+                    um_cards);
+                if (stop_on_zero && deadwood == 0)
+                    return candidate;
+                candidates.push_back(candidate);
+            }
+        }
+    }
+    return *std::min_element(
+        candidates.begin(),
+        candidates.end(),
+        [](auto const &a, auto const &b)
+        { return std::get<0>(a) < std::get<0>(b); });
+    return {0, {}, {}, {}};
 }

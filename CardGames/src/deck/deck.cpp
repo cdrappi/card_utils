@@ -5,9 +5,9 @@
 #include "card.hpp"
 #include "deck.hpp"
 
-std::vector<Card> ShuffledDeck()
+Cards OrderedDeck()
 {
-    std::vector<Card> deck;
+    Cards deck;
 
     // Create a standard deck
     for (int s = CLUBS; s <= SPADES; ++s)
@@ -17,6 +17,12 @@ std::vector<Card> ShuffledDeck()
             deck.push_back(Card(static_cast<Rank>(r), static_cast<Suit>(s)));
         }
     }
+    return deck;
+}
+
+Cards ShuffledDeck()
+{
+    Cards deck = OrderedDeck();
 
     // Shuffle the deck
     std::random_device rd;

@@ -3,10 +3,13 @@
 #include <vector>
 #include <tuple>
 #include <set>
+#include <map>
+#include <set>
+#include <unordered_map>
+
 #include "../deck/card.hpp"
 
 using Ranks = std::vector<Rank>;
-using Cards = std::vector<Card>;
 using CardSet = std::set<Card>;
 using Melds = std::vector<CardSet>;
 using RankValues = std::vector<int>;
@@ -17,3 +20,22 @@ std::map<Suit, std::vector<Rank>> SuitPartition(const std::vector<Card> &cards);
 
 SplitHand SplitMelds(const Cards &hand, std::optional<Melds> melds = std::nullopt);
 std::vector<SplitHand> GetCandidateMelds(const Cards &hand, std::optional<int> max_deadwood = std::nullopt, bool stop_on_gin = true);
+
+template <typename T>
+std::vector<std::vector<T>> Powerset(const std::vector<T> &set, int index = 0);
+
+std::tuple<std::vector<Rank>, std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>>>
+SplitSetsRuns(std::vector<std::vector<Card>> melds);
+
+Cards GetSetLayoffs(Cards hand, std::vector<Rank> sets);
+
+std::vector<Ranks> GetSuitRunLayoffs(
+    Ranks suit_ranks,
+    std::vector<std::pair<Rank, Rank>> suit_runs);
+
+std::vector<Cards> GetRunLayoffs(Cards hand, std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>> runs);
+
+std::tuple<int, std::vector<Cards>, Cards, Cards> LayoffDeadwood(
+    Cards hand,
+    Melds opp_melds,
+    bool stop_on_zero = true);

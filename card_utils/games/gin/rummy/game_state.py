@@ -61,7 +61,7 @@ class GinRummyGameState(AbstractGinGameState):
         opp_melds: Optional[List[List[Card]]] = None,
     ) -> int:
         if opp_melds is not None:
-            deadwood, _, _, _ = layoff_deadwood(hand, opp_melds)
+            deadwood, _, _, _ = card_games.layoff_deadwood(hand, opp_melds)
             return deadwood
         deadwood, _, _ = card_games.split_melds(hand, melds)
         return deadwood

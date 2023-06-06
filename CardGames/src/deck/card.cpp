@@ -30,6 +30,11 @@ bool Card::operator<(const Card &other) const
     return suit < other.suit;
 }
 
+bool Card::operator==(const Card &other) const
+{
+    return rank == other.rank && suit == other.suit;
+}
+
 static Card FromString(std::string card)
 {
     return Card(CharToRank(card[0]), CharToSuit(card[1]));
