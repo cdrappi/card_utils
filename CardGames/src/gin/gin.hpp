@@ -1,6 +1,8 @@
 // gin.hpp
 #pragma once
-#include <unordered_map>
+#include <map>
+
+#include "../deck/card.hpp"
 
 enum GinTurn
 {
@@ -61,4 +63,4 @@ enum GinHud
     DECK = 8,
 };
 
-using CardsHud = std::unordered_map<Card, GinHud>;
+using CardsHud = std::map<Card, GinHud>;

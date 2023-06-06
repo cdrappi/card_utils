@@ -5,6 +5,7 @@
 #include <tuple>
 #include <vector>
 #include <iostream>
+#include <unordered_map>
 
 #include "melds.hpp"
 #include "gin_rummy.hpp"

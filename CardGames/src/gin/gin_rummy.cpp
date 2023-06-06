@@ -100,7 +100,7 @@ Card GinRummyGameState::DrawCard(bool from_discard)
     }
 };
 
-void RemoveCard(Cards &cards, Card card)
+void RemoveCard(Cards &cards, const Card &card)
 {
     cards.erase(std::remove(cards.begin(), cards.end(), card), cards.end());
 }

@@ -15,6 +15,7 @@ public:
     std::string ToString() const;
     static Card FromString(std::string card);
     bool operator<(const Card &other) const;
+    bool operator==(const Card &other) const;
 };
 
 void SortByRank(std::vector<Card> &cards);

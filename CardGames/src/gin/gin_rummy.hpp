@@ -1,5 +1,5 @@
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <optional>
 
 #include "../deck/card.hpp"
@@ -24,7 +24,7 @@ public:
         GinCards cards,
         GinTurn turn,
         GinTurn first_turn,
-        std::optional<std::unordered_map<Card, GinHud>> public_hud = std::nullopt,
+        std::optional<std::map<Card, GinHud>> public_hud = std::nullopt,
         std::optional<Card> last_draw_from_discard = std::nullopt,
         bool is_complete = false,
         int shuffles = 0);
@@ -36,7 +36,7 @@ public:
     void EndGame(GinEnding how, int p1_deadwood, int p2_deadwood);
     Card TopOfDiscard();
     Card TopOfDeck();
-    std::unordered_map<Card, GinHud> PlayerHud(bool p1);
+    std::map<Card, GinHud> PlayerHud(bool p1);
     static int GetDeadwood(
         const Cards hand,
         std::optional<Melds> melds = std::nullopt,
@@ -47,7 +47,7 @@ private:
     GinCards cards;
     GinTurn turn;
     GinTurn first_turn;
-    std::unordered_map<Card, GinHud> public_hud;
+    std::map<Card, GinHud> public_hud;
     std::optional<Card> last_draw_from_discard;
     bool is_complete;
     int p1_score;
@@ -58,4 +58,4 @@ private:
     GinTurn AdvanceTurn(GinTurn current, bool from_discard = false, int deadwood = 11);
 };
 
-void RemoveCard(Cards &cards, Card card);
+void RemoveCard(Cards &cards, const Card &card);
