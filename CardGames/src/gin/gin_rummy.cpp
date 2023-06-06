@@ -91,13 +91,10 @@ Card GinRummyGameState::DrawCard(bool from_discard)
         this->AddToHand(p1_draws, card_drawn);
         // remove the item at index 0 of the deck
         this->cards.deck.erase(this->cards.deck.begin());
-        if (this->cards.deck.size() == this->end_cards_in_deck)
-        {
-            this->EndGame(GinEnding::PLAYED_TO_THE_WALL, 0, 0);
-        }
-        Cards hand = p1_draws ? this->cards.player1_hand : this->cards.player2_hand;
-        int deadwood = this->GetDeadwood(hand);
-        this->turn = this->AdvanceTurn(this->turn, from_discard, deadwood);
+        // TODO: allow big gin
+        // Cards hand = p1_draws ? this->cards.player1_hand : this->cards.player2_hand;
+        // int deadwood = this->GetDeadwood(hand);
+        this->turn = this->AdvanceTurn(this->turn, from_discard, 11);
         this->last_draw_from_discard = std::nullopt;
         return card_drawn;
     }
@@ -106,6 +103,16 @@ Card GinRummyGameState::DrawCard(bool from_discard)
 void RemoveCard(Cards &cards, Card card)
 {
     cards.erase(std::remove(cards.begin(), cards.end(), card), cards.end());
+}
+
+bool GinRummyGameState::EndIfHitWall()
+{
+    if (this->cards.deck.size() == this->end_cards_in_deck)
+    {
+        this->EndGame(GinEnding::PLAYED_TO_THE_WALL, 0, 0);
+        return true;
+    }
+    return false;
 }
 
 void GinRummyGameState::DiscardCard(Card card)
@@ -147,6 +154,16 @@ void GinRummyGameState::DiscardCard(Card card)
         this->public_hud[this->TopOfDiscard()] = GinHud::IN_DISCARD_PILE;
     this->public_hud[card] = GinHud::TOP_OF_DISCARD_PILE;
     this->cards.discard_pile.push_back(card);
+
+    if (this->turn != GinTurn::P1_MAY_KNOCK || this->turn != GinTurn::P2_MAY_KNOCK)
+    {
+        // if they can't knock, then check if there are 2 cards left.
+        // and if so, the game ends
+        //
+        // if not, we let them decide whether to knock,
+        // and if they don't, it ends
+        this->EndIfHitWall();
+    }
 };
 
 void GinRummyGameState::DecideKnock(bool knocks, std::optional<Melds> melds)
@@ -157,7 +174,10 @@ void GinRummyGameState::DecideKnock(bool knocks, std::optional<Melds> melds)
         throw std::invalid_argument("Cannot knock: it is not the player's turn to knock");
     if (!knocks)
     {
-        this->turn = this->AdvanceTurn(this->turn);
+        // if they don't knock, check whether the game should end
+        // based on whether we've hit the wall
+        if (!this->EndIfHitWall())
+            this->turn = this->AdvanceTurn(this->turn);
         return;
     }
     if (p1)

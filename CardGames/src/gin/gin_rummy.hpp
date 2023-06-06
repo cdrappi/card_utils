@@ -54,6 +54,7 @@ private:
     int p2_score;
 
     void AddToHand(bool p1, Card card);
+    bool EndIfHitWall();
     GinTurn AdvanceTurn(GinTurn current, bool from_discard = false, int deadwood = 11);
 };
 
