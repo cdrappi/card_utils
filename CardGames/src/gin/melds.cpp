@@ -328,7 +328,9 @@ std::vector<SplitHand> GetCandidateMelds(
     int full_deadwood = GinRummyCardsDeadwood(hand);
     if (!max_deadwood.has_value() || full_deadwood <= max_deadwood.value())
     {
-        candidate_melds.push_back({full_deadwood, {}, hand});
+        Cards hand_copy = hand;
+        SortByRank(hand_copy);
+        candidate_melds.push_back({full_deadwood, {}, hand_copy});
     }
 
     Melds all_melds = FindMelds(hand);
