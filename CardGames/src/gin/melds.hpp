@@ -21,9 +21,10 @@ std::map<Suit, std::vector<Rank>> SuitPartition(const std::vector<Card> &cards);
 SplitHand SplitMelds(const Cards &hand, std::optional<Melds> melds = std::nullopt);
 std::vector<SplitHand> GetCandidateMelds(const Cards &hand, std::optional<int> max_deadwood = std::nullopt, bool stop_on_gin = true);
 
-std::vector<Cards> CardsPowerset(const Cards &set, int index = 0);
+template <typename T>
+std::vector<std::vector<T>> Powerset(const std::vector<T> &set, int index = 0);
 
-std::tuple<std::vector<Rank>, std::map<Suit, std::vector<std::pair<Rank, Rank>>>>
+std::tuple<std::vector<Rank>, std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>>>
 SplitSetsRuns(std::vector<std::vector<Card>> melds);
 
 Cards GetSetLayoffs(Cards hand, std::vector<Rank> sets);

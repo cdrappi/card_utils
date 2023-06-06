@@ -388,9 +388,13 @@ SplitHand SplitMelds(const Cards &hand, std::optional<Melds> melds)
     return *split_hand;
 }
 
-std::vector<Cards> CardsPowerset(const Cards &set, int index)
+#include <vector>
+#include <iostream>
+
+template <typename T>
+std::vector<std::vector<T>> Powerset(const std::vector<T> &set, int index)
 {
-    std::vector<Cards> subsets;
+    std::vector<std::vector<T>> subsets;
     if (index == set.size())
     {
         // Base case: add an empty set
@@ -399,12 +403,12 @@ std::vector<Cards> CardsPowerset(const Cards &set, int index)
     else
     {
         // Recursive case
-        subsets = CardsPowerset(set, index + 1);
+        subsets = Powerset(set, index + 1);
         int subsetsSize = subsets.size();
         for (int i = 0; i < subsetsSize; i++)
         {
             // create a new subset from the existing subsets and add the current element to it
-            Cards newSubset = subsets[i];
+            std::vector<T> newSubset = subsets[i];
             newSubset.push_back(set[index]);
             subsets.push_back(newSubset);
         }
@@ -412,11 +416,11 @@ std::vector<Cards> CardsPowerset(const Cards &set, int index)
     return subsets;
 }
 
-std::tuple<std::vector<Rank>, std::map<Suit, std::vector<std::pair<Rank, Rank>>>>
+std::tuple<std::vector<Rank>, std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>>>
 SplitSetsRuns(Melds melds)
 {
     std::vector<Rank> sets;
-    std::map<Suit, std::vector<std::pair<Rank, Rank>>> runs;
+    std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>> runs;
 
     for (auto &meld : melds)
     {
@@ -553,7 +557,6 @@ LayoffDeadwood(
     Melds opp_melds,
     bool stop_on_zero)
 {
-    /*
     auto [sets, runs] = SplitSetsRuns(opp_melds);
     std::vector<std::tuple<int, std::vector<Cards>, Cards, Cards>> candidates;
 
@@ -563,15 +566,18 @@ LayoffDeadwood(
         // and see what we can do with the remaining cards
         CardSet unmelded_set = CardsToSet(unmelded);
         Cards sls = GetSetLayoffs(unmelded, sets);
-        for (auto &set_layoffs : CardsPowerset(sls))
+        for (auto &set_layoffs : Powerset(sls))
         {
             CardSet lo_sets = CardsToSet(set_layoffs);
             CardSet um_set;
             std::set_difference(unmelded_set.begin(), unmelded_set.end(), lo_sets.begin(), lo_sets.end(), std::inserter(um_set, um_set.end()));
             std::vector<Cards> rls = GetRunLayoffs(std::vector<Card>(um_set.begin(), um_set.end()), runs);
-            for (auto &run_layoffs : CardsPowerset(rls))
+            for (auto &run_layoffs : Powerset(rls))
             {
-                CardSet lo_runs = CardsToSet(run_layoffs);
+                CardSet lo_runs;
+                for (auto &rl : run_layoffs)
+                    for (auto &c : rl)
+                        lo_runs.insert(c);
                 CardSet um_run;
                 std::set_difference(um_set.begin(), um_set.end(), lo_runs.begin(), lo_runs.end(), std::inserter(um_run, um_run.end()));
                 int deadwood = GinRummyCardsDeadwood(Cards(um_run.begin(), um_run.end()));
@@ -594,6 +600,5 @@ LayoffDeadwood(
         candidates.end(),
         [](auto const &a, auto const &b)
         { return std::get<0>(a) < std::get<0>(b); });
-    */
     return {0, {}, {}, {}};
 }
