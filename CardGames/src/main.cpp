@@ -1,5 +1,5 @@
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+// #include <pybind11/pybind11.h>
+// #include <pybind11/stl.h>
 #include "gin/gin_rummy.hpp"
 #include "gin/melds.hpp"
 
@@ -77,12 +77,12 @@ layoff_deadwood(
     return {std::get<0>(dw), melded_cards_strings, ToStrings(std::get<2>(dw)), ToStrings(std::get<3>(dw))};
 }
 
-namespace py = pybind11;
+// namespace py = pybind11;
 
-PYBIND11_MODULE(card_games, m)
-{
-    m.def("get_deadwood", &get_deadwood, py::arg("unmelded_cards"), "Get deadwood from list of unmelded cards");
-    m.def("split_melds", &split_melds, py::arg("hand"), py::arg("melds") = std::nullopt, "Split melds from list of cards");
-    m.def("get_candidate_melds", &all_candidate_melds, py::arg("hand"), "Get all candidate melds from list of cards");
-    m.def("layoff_deadwood", &layoff_deadwood, py::arg("hand"), py::arg("opp_melds"), py::arg("stop_on_zero") = true, "Layoff deadwood from list of cards");
-}
+// PYBIND11_MODULE(card_games, m)
+// {
+//     m.def("get_deadwood", &get_deadwood, py::arg("unmelded_cards"), "Get deadwood from list of unmelded cards");
+//     m.def("split_melds", &split_melds, py::arg("hand"), py::arg("melds") = std::nullopt, "Split melds from list of cards");
+//     m.def("get_candidate_melds", &all_candidate_melds, py::arg("hand"), "Get all candidate melds from list of cards");
+//     m.def("layoff_deadwood", &layoff_deadwood, py::arg("hand"), py::arg("opp_melds"), py::arg("stop_on_zero") = true, "Layoff deadwood from list of cards");
+// }

@@ -1,3 +1,4 @@
+#include <random>
 #include "gin_rummy.hpp"
 #include "../deck/deck.hpp"
 
@@ -384,3 +385,21 @@ Cards GinRummyGameState::SortHand(Cards hand)
     sorted_hand.insert(sorted_hand.end(), unmelded.begin(), unmelded.end());
     return sorted_hand;
 };
+
+static bool random_bool()
+{
+    std::random_device rd;                 // Initialize a random device
+    std::mt19937 gen(rd());                // Initialize a Mersenne Twister pseudorandom generator with the random device
+    std::bernoulli_distribution dist(0.5); // Initialize a Bernoulli distribution that gives 1 with a probability of 0.5
+    return dist(gen);                      // Return a random boolean
+}
+
+GinRummyGameState NewGinRummyGame()
+{
+
+    bool p1_first = random_bool();
+    GinTurn first_turn = p1_first ? GinTurn::P1_DRAWS_FIRST : GinTurn::P2_DRAWS_FIRST;
+    GinTurn turn = first_turn;
+    GinCards cards = DealHands(10);
+    return GinRummyGameState(cards, turn, first_turn);
+}

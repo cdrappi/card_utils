@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 #include <map>
 #include <optional>
@@ -57,5 +59,7 @@ private:
     bool EndIfHitWall();
     GinTurn AdvanceTurn(GinTurn current, bool from_discard = false, int deadwood = 11);
 };
+
+GinRummyGameState NewGinRummyGame();
 
 void RemoveCard(Cards &cards, const Card &card);
