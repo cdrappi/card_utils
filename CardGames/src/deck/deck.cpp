@@ -12,7 +12,7 @@ Cards OrderedDeck()
     // Create a standard deck
     for (int s = CLUBS; s <= SPADES; ++s)
     {
-        for (int r = ACE; r < KING; ++r)
+        for (int r = ACE; r <= KING; ++r)
         {
             deck.push_back(Card(static_cast<Rank>(r), static_cast<Suit>(s)));
         }
