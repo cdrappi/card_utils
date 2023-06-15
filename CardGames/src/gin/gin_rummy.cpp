@@ -409,3 +409,30 @@ GinRummyGameState NewGinRummyGame()
     GinCards cards = DealHands(10);
     return GinRummyGameState(cards, turn, first_turn);
 }
+
+void GinRummyGameState::DoAction(GinAction action, std::optional<Card> card)
+{
+    switch (action)
+    {
+    case GinAction::PICK_FROM_DECK:
+        this->DrawCard(false);
+        return;
+    case GinAction::PICK_FROM_DISCARD:
+        this->DrawCard(true);
+        return;
+    case GinAction::DISCARD_CARD:
+        this->DiscardCard(card.value());
+        return;
+    case GinAction::KNOCK:
+        this->DecideKnock(true);
+        return;
+    case GinAction::DONT_KNOCK:
+        this->DecideKnock(false);
+        return;
+    case GinAction::PASS:
+        this->FirstTurnPass();
+        return;
+    default:
+        throw std::runtime_error("Invalid action");
+    }
+}

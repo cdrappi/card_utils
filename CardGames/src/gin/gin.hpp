@@ -25,6 +25,8 @@ enum GinTurn
 bool IsP1Draw(GinTurn turn);
 bool IsP2Draw(GinTurn turn);
 
+bool IsP1Turn(GinTurn turn);
+
 enum GinEnding
 {
     P1_KNOCKS,

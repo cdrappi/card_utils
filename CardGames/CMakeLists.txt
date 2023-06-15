@@ -3,12 +3,9 @@ project(CardGames)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# add_subdirectory(lib/pybind11)
-
 # Collect source files into the SOURCES variable
 file(GLOB SOURCES "CardGames.hpp" "src/deck/*.cpp" "src/gin/*.cpp")
 
-# Add a library target
-# pybind11_add_module(card_games ${SOURCES})
-
 add_library(CardGames ${SOURCES})
+
+set_target_properties(CardGames PROPERTIES CXX_VISIBILITY_PRESET hidden)
