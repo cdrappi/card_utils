@@ -271,16 +271,24 @@ void GinRummyGameState::AddToHand(bool p1, Card card)
     }
 };
 
-Card GinRummyGameState::TopOfDiscard()
+Card GinRummyGameState::TopOfDiscard() const
 {
     // return the item at the top of the discard pile
     return this->cards.discard_pile.back();
 };
 
-Card GinRummyGameState::TopOfDeck()
+Card GinRummyGameState::TopOfDeck() const
 {
     // return the item at the top of the deck
     return this->cards.deck.front();
+};
+
+Cards GinRummyGameState::GetHand(bool p1) const
+{
+    if (p1)
+        return cards.player1_hand;
+    else
+        return cards.player2_hand;
 };
 
 CardsHud GinRummyGameState::PlayerHud(bool p1)
@@ -306,12 +314,10 @@ CardsHud GinRummyGameState::PlayerHud(bool p1)
         else if (!p1 && hud == GinHud::PLAYER_1)
             player_hud[card] = GinHud::OPPONENT;
     }
-    if (p1)
-        for (const Card card : this->cards.player1_hand)
-            player_hud[card] = GinHud::USER;
-    else
-        for (const Card card : this->cards.player2_hand)
-            player_hud[card] = GinHud::USER;
+
+    for (const Card card : this->GetHand(p1))
+        player_hud[card] = GinHud::USER;
+
     return player_hud;
 };
 

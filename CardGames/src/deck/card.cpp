@@ -32,6 +32,11 @@ Card Card::FromId(int card_id)
     return Card(rank, suit);
 }
 
+int Card::ToId() const
+{
+    return suit + 4 * ((rank - 1) % 13);
+}
+
 bool Card::operator<(const Card &other) const
 {
     if (rank != other.rank)

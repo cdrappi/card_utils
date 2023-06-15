@@ -37,14 +37,15 @@ public:
     void DiscardCard(Card card);
     void DecideKnock(bool knocks, std::optional<Melds> melds = std::nullopt);
     void EndGame(GinEnding how, int p1_deadwood, int p2_deadwood);
-    Card TopOfDiscard();
-    Card TopOfDeck();
+    Card TopOfDiscard() const;
+    Card TopOfDeck() const;
     std::map<Card, GinHud> PlayerHud(bool p1);
     static int GetDeadwood(
         const Cards hand,
         std::optional<Melds> melds = std::nullopt,
         std::optional<Melds> opp_melds = std::nullopt);
     static Cards SortHand(const Cards hand);
+    Cards GetHand(bool p1) const;
 
 private:
     GinCards cards;
