@@ -15,6 +15,7 @@ int GinRummyCardsDeadwood(const std::vector<Card> &unmelded_cards);
 class GinRummyGameState
 {
 public:
+    GinTurn turn;
     const int cards_dealt = 10;
     const int end_cards_in_deck = 2;
     const int undercut_bonus = 20;
@@ -47,7 +48,6 @@ public:
 
 private:
     GinCards cards;
-    GinTurn turn;
     GinTurn first_turn;
     std::map<Card, GinHud> public_hud;
     std::optional<Card> last_draw_from_discard;

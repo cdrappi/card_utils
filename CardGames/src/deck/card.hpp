@@ -14,6 +14,7 @@ public:
     Card(Rank r, Suit s) : rank(r), suit(s) {}
     std::string ToString() const;
     static Card FromString(std::string card);
+    static Card FromId(int card_id);
     bool operator<(const Card &other) const;
     bool operator==(const Card &other) const;
 };

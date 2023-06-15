@@ -38,11 +38,12 @@ enum GinEnding
 
 enum GinAction
 {
+    PASS,
+    KNOCK,
+    DONT_KNOCK,
     PICK_FROM_DECK,
     PICK_FROM_DISCARD,
     DISCARD_CARD,
-    KNOCK,
-    PASS,
 };
 
 enum GinHud

@@ -40,6 +40,17 @@ static Card FromString(std::string card)
     return Card(CharToRank(card[0]), CharToSuit(card[1]));
 }
 
+static Card FromId(int card_id)
+{
+    Suit suit = Suit(card_id % 4);
+    // Rank(ACE) = 0
+    // ID(As) = 51 so: (51 / 4 + 1) % 13 = 0
+    // Rank(2) = 1
+    // ID(2c) = 0  so: (0 / 4 + 1) % 13 = 1
+    Rank rank = Rank((card_id / 4 + 1) % 13);
+    return Card(rank, suit);
+}
+
 std::vector<Card> FromStrings(std::vector<std::string> cards)
 {
     std::vector<Card> cardObjects;
