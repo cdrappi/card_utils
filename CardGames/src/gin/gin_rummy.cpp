@@ -83,6 +83,7 @@ Card GinRummyGameState::DrawCard(bool from_discard)
         this->AddToHand(p1_draws, card_drawn);
         this->cards.discard_pile.pop_back();
         this->public_hud[card_drawn] = p1_draws ? GinHud::PLAYER_1 : GinHud::PLAYER_2;
+        this->turn = this->AdvanceTurn(this->turn, from_discard, 11);
         this->last_draw_from_discard = card_drawn;
         return card_drawn;
     }
@@ -291,7 +292,7 @@ Cards GinRummyGameState::GetHand(bool p1) const
         return cards.player2_hand;
 };
 
-CardsHud GinRummyGameState::PlayerHud(bool p1)
+CardsHud GinRummyGameState::PlayerHud(bool p1) const
 {
     CardsHud player_hud = {};
     for (const Card card : OrderedDeck())

@@ -1,6 +1,7 @@
 // gin.hpp
 #pragma once
 #include <map>
+#include <string>
 
 #include "../deck/card.hpp"
 
@@ -27,6 +28,8 @@ bool IsP2Draw(GinTurn turn);
 
 bool IsP1Turn(GinTurn turn);
 
+std::string TurnToString(GinTurn turn);
+
 enum GinEnding
 {
     P1_KNOCKS,
@@ -47,6 +50,8 @@ enum GinAction
     PICK_FROM_DISCARD,
     DISCARD_CARD,
 };
+
+std::string ActionToString(GinAction action);
 
 enum GinHud
 {
