@@ -1,7 +1,6 @@
 #ifndef CARDGAMES_H
 #define CARDGAMES_H
 
-// #include "main.cpp"
 #include "src/deck/card.hpp"
 #include "src/deck/deck.hpp"
 #include "src/deck/rank.hpp"

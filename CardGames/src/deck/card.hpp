@@ -14,13 +14,13 @@ public:
     Card(Rank r, Suit s) : rank(r), suit(s) {}
     std::string ToString() const;
     int ToId() const;
-    static Card FromString(std::string card);
-    static Card FromId(int card_id);
     bool operator<(const Card &other) const;
     bool operator==(const Card &other) const;
 };
 
 void SortByRank(std::vector<Card> &cards);
+Card CardFromId(int card_id);
+Card CardFromString(std::string card);
 std::vector<Card> FromStrings(std::vector<std::string> cards);
 std::vector<std::string> ToStrings(const std::vector<Card> &cards);
 

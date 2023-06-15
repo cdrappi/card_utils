@@ -21,7 +21,7 @@ std::string Card::ToString() const
     return cardString;
 }
 
-Card Card::FromId(int card_id)
+Card CardFromId(int card_id)
 {
     Suit suit = Suit(card_id % 4);
     // Rank(ACE) = 0
@@ -51,7 +51,7 @@ bool Card::operator==(const Card &other) const
     return rank == other.rank && suit == other.suit;
 }
 
-static Card FromString(std::string card)
+Card CardFromString(std::string card)
 {
     return Card(CharToRank(card[0]), CharToSuit(card[1]));
 }
@@ -61,7 +61,7 @@ std::vector<Card> FromStrings(std::vector<std::string> cards)
     std::vector<Card> cardObjects;
     for (const auto &card : cards)
     {
-        cardObjects.push_back(FromString(card));
+        cardObjects.push_back(CardFromString(card));
     }
     return cardObjects;
 }
