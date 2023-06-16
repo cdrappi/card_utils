@@ -62,7 +62,9 @@ void GinRummyGameState::FirstTurnPass()
     // TODO
     if (this->turn != GinTurn::P1_DRAWS_FIRST && this->turn != GinTurn::P2_DRAWS_FIRST)
         throw std::invalid_argument("Cannot pass: it is not your first turn");
+
     this->turn = this->AdvanceTurn(this->turn);
+    this->turns += 1;
     if (this->turn == GinTurn::P1_DRAWS_FROM_DECK)
         this->DrawCard(false);
     else if (this->turn == GinTurn::P2_DRAWS_FROM_DECK)
@@ -79,8 +81,6 @@ Card GinRummyGameState::DrawCard(bool from_discard)
         throw std::invalid_argument("Player 1 cannot draw because they have too many cards");
     if (p2_draws && (this->cards_dealt != this->cards.player2_hand.size()))
         throw std::invalid_argument("Player 2 cannot draw because they have too many cards");
-
-    this->turns += 1;
 
     if (from_discard)
     {
@@ -142,6 +142,9 @@ void GinRummyGameState::DiscardCard(Card card)
         // remove `card` from player 2's hand
         RemoveCard(this->cards.player2_hand, card);
     }
+
+    this->turns += 1;
+
     Cards hand = p1_discards ? this->cards.player1_hand : this->cards.player2_hand;
     int deadwood = this->GetDeadwood(hand);
     if (deadwood == 0)
