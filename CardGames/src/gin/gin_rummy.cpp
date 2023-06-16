@@ -114,7 +114,7 @@ void RemoveCard(Cards &cards, const Card &card)
 
 bool GinRummyGameState::EndIfHitWall()
 {
-    if (this->cards.deck.size() == this->end_cards_in_deck || this->turns == this->max_turns)
+    if (this->cards.deck.size() == this->end_cards_in_deck || this->turns >= this->max_turns)
     {
         this->EndGame(GinEnding::PLAYED_TO_THE_WALL, 0, 0);
         return true;
