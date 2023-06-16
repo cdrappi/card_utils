@@ -25,7 +25,7 @@ public:
     const int gin_bonus = 20;
     const int big_gin_bonus = 30;
     const int max_shuffles = 1;
-    const int max_turns = 50;
+    const int max_turns = 40;
 
     int p1_score;
     int p2_score;
