@@ -200,6 +200,8 @@ void GinRummyGameState::DecideKnock(bool knocks, std::optional<Melds> melds)
 
 void GinRummyGameState::EndGame(GinEnding how, int p1_deadwood, int p2_deadwood)
 {
+    if (this->is_complete)
+        throw std::invalid_argument("Cannot end game: game is already complete");
 
     if (how == GinEnding::PLAYED_TO_THE_WALL)
     {
@@ -254,6 +256,7 @@ void GinRummyGameState::EndGame(GinEnding how, int p1_deadwood, int p2_deadwood)
             this->p2_score = 0;
         }
     }
+    this->is_complete = true;
 };
 
 void GinRummyGameState::AddToHand(bool p1, Card card)
