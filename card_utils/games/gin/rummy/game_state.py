@@ -1,6 +1,5 @@
 from typing import List, Optional, Tuple
 
-import card_games
 from card_utils.deck.utils import Card
 from card_utils.games.gin.game_state import AbstractGinGameState
 from card_utils.games.gin.rummy.utils import (
@@ -63,14 +62,14 @@ class GinRummyGameState(AbstractGinGameState):
         opp_melds: Optional[List[List[Card]]] = None,
     ) -> int:
         if opp_melds is not None:
-            deadwood, _, _, _ = card_games.layoff_deadwood(hand, opp_melds)
+            deadwood, _, _, _ = layoff_deadwood(hand, opp_melds)
             return deadwood
-        deadwood, _, _ = card_games.split_melds(hand, melds)
+        deadwood, _, _ = split_melds(hand, melds)
         return deadwood
 
     @staticmethod
     def sort_hand(hand: List[str]) -> List[str]:
-        _, best_melds, unmelded = card_games.split_melds(hand)
+        _, best_melds, unmelded = split_melds(hand)
         return [c for m in best_melds for c in m] + unmelded
 
     @staticmethod
