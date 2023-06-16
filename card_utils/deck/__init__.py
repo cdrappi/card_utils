@@ -18,8 +18,6 @@ rank_ids = {rank: index for index, rank in enumerate(ranks)}
 card_id_map = {card: index for index, card in enumerate(cards)}
 reverse_card_id_map = {index: card for card, index in card_id_map.items()}
 
-print(card_id_map)
-
 digit_map = {d: int(d) for d in "23456789"}
 common_rank_to_value = {"T": 10, "J": 11, "Q": 12, "K": 13}
 common_rank_to_value.update(digit_map)
