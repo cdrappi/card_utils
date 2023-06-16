@@ -17,6 +17,7 @@ class GinRummyGameState
 public:
     GinTurn turn;
     bool is_complete;
+    std::optional<Card> last_draw_from_discard;
 
     const int cards_dealt = 10;
     const int end_cards_in_deck = 2;
@@ -56,7 +57,6 @@ private:
     GinCards cards;
     GinTurn first_turn;
     std::map<Card, GinHud> public_hud;
-    std::optional<Card> last_draw_from_discard;
 
     void AddToHand(bool p1, Card card);
     bool EndIfHitWall();
