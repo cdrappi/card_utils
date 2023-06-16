@@ -25,6 +25,7 @@ public:
     const int gin_bonus = 20;
     const int big_gin_bonus = 30;
     const int max_shuffles = 1;
+    const int max_turns = 50;
 
     int p1_score;
     int p2_score;
@@ -36,7 +37,8 @@ public:
         std::optional<std::map<Card, GinHud>> public_hud = std::nullopt,
         std::optional<Card> last_draw_from_discard = std::nullopt,
         bool is_complete = false,
-        int shuffles = 0);
+        int shuffles = 0,
+        int turns = 0);
 
     void FirstTurnPass();
     Card DrawCard(bool from_discard);
@@ -57,6 +59,8 @@ private:
     GinCards cards;
     GinTurn first_turn;
     std::map<Card, GinHud> public_hud;
+    int shuffles;
+    int turns;
 
     void AddToHand(bool p1, Card card);
     bool EndIfHitWall();

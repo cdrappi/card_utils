@@ -35,13 +35,16 @@ GinRummyGameState::GinRummyGameState(
     std::optional<CardsHud> public_hud,
     std::optional<Card> last_draw_from_discard,
     bool is_complete,
-    int shuffles) : cards(cards),
-                    turn(turn),
-                    first_turn(first_turn),
-                    last_draw_from_discard(last_draw_from_discard),
-                    is_complete(is_complete),
-                    p1_score(0),
-                    p2_score(0)
+    int shuffles,
+    int turns) : cards(cards),
+                 turn(turn),
+                 first_turn(first_turn),
+                 last_draw_from_discard(last_draw_from_discard),
+                 is_complete(is_complete),
+                 p1_score(0),
+                 p2_score(0),
+                 shuffles(shuffles),
+                 turns(turns)
 {
     if (public_hud)
     {
@@ -77,6 +80,8 @@ Card GinRummyGameState::DrawCard(bool from_discard)
     if (p2_draws && (this->cards_dealt != this->cards.player2_hand.size()))
         throw std::invalid_argument("Player 2 cannot draw because they have too many cards");
 
+    this->turns += 1;
+
     if (from_discard)
     {
         Card card_drawn = this->TopOfDiscard();
@@ -109,7 +114,7 @@ void RemoveCard(Cards &cards, const Card &card)
 
 bool GinRummyGameState::EndIfHitWall()
 {
-    if (this->cards.deck.size() == this->end_cards_in_deck)
+    if (this->cards.deck.size() == this->end_cards_in_deck || this->turns == this->max_turns)
     {
         this->EndGame(GinEnding::PLAYED_TO_THE_WALL, 0, 0);
         return true;
