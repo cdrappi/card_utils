@@ -156,6 +156,7 @@ void GinRummyGameState::DiscardCard(Card card)
         int p2_deadwood = p1_discards ? opp_deadwood : 0;
         GinEnding how = p1_discards ? GinEnding::P1_GINS : GinEnding::P2_GINS;
         this->EndGame(how, p1_deadwood, p2_deadwood);
+        return;
     }
     else
         this->turn = this->AdvanceTurn(this->turn, false, deadwood);
