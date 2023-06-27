@@ -1,7 +1,7 @@
 // suit.hpp
 #pragma once
 
-enum Suit
+enum class Suit
 {
     CLUBS,
     DIAMONDS,

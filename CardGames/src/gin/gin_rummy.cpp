@@ -14,7 +14,7 @@ int GinRummyRankDeadwood(Rank rank)
     default:
         // ace has value 0 and 9 has value 8,
         // so add 1 to all the raw ranks
-        return static_cast<int>(rank + 1);
+        return int(rank) + 1;
     }
 }
 

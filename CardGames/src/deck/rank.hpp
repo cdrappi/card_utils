@@ -1,7 +1,12 @@
 // suit.hpp
 #pragma once
 
-enum Rank
+#include <map>
+#include <stdexcept>
+#include <sstream>
+#include <iostream>
+
+enum class Rank
 {
     ACE,
     TWO,
@@ -21,3 +26,5 @@ enum Rank
 Rank CharToRank(char ch);
 char RankToChar(Rank rank);
 Rank ValueToRank(int value);
+
+int RankToIndex(Rank rank);

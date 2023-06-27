@@ -5,7 +5,7 @@
 
 #include "../deck/card.hpp"
 
-enum GinTurn
+enum class GinTurn
 {
     P1_DRAWS_FIRST,
     P2_DRAWS_FIRST,
@@ -30,7 +30,7 @@ bool IsP1Turn(GinTurn turn);
 
 std::string TurnToString(GinTurn turn);
 
-enum GinEnding
+enum class GinEnding
 {
     P1_KNOCKS,
     P2_KNOCKS,
@@ -41,7 +41,7 @@ enum GinEnding
     PLAYED_TO_THE_WALL,
 };
 
-enum GinAction
+enum class GinAction
 {
     PASS,
     KNOCK,
@@ -53,7 +53,7 @@ enum GinAction
 
 std::string ActionToString(GinAction action);
 
-enum GinHud
+enum class GinHud
 {
     // in user's hand
     USER = 0,
