@@ -7,10 +7,10 @@
 Suit CharToSuit(char ch)
 {
     std::map<char, Suit> lookup = {
-        {'c', CLUBS},
-        {'d', DIAMONDS},
-        {'h', HEARTS},
-        {'s', SPADES}};
+        {'c', Suit::CLUBS},
+        {'d', Suit::DIAMONDS},
+        {'h', Suit::HEARTS},
+        {'s', Suit::SPADES}};
 
     auto it = lookup.find(ch);
     if (it != lookup.end())
@@ -24,10 +24,10 @@ Suit CharToSuit(char ch)
 char SuitToChar(Suit suit)
 {
     std::map<Suit, char> lookup = {
-        {CLUBS, 'c'},
-        {DIAMONDS, 'd'},
-        {HEARTS, 'h'},
-        {SPADES, 's'},
+        {Suit::CLUBS, 'c'},
+        {Suit::DIAMONDS, 'd'},
+        {Suit::HEARTS, 'h'},
+        {Suit::SPADES, 's'},
     };
 
     auto it = lookup.find(suit);

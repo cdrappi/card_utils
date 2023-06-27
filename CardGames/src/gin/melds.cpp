@@ -97,12 +97,12 @@ static RankValues SortedRankValues(const Ranks &ranks, bool aces_low, bool aces_
 
     for (const auto &rank : ranks)
     {
-        if (rank == ACE)
+        if (rank == Rank::ACE)
         {
             if (aces_low)
                 values.push_back(static_cast<int>(rank));
             if (aces_high)
-                values.push_back(static_cast<int>(KING) + 1);
+                values.push_back(static_cast<int>(Rank::KING) + 1);
         }
         else
             values.push_back(static_cast<int>(rank));
@@ -307,7 +307,7 @@ static std::vector<Cards> SortMelds(const Melds &melds)
     {
         Cards sorted_meld(meld.begin(), meld.end());
         std::sort(sorted_meld.begin(), sorted_meld.end());
-        if (sorted_meld[0].rank == ACE && sorted_meld[sorted_meld.size() - 1].rank == KING)
+        if (sorted_meld[0].rank == Rank::ACE && sorted_meld[sorted_meld.size() - 1].rank == Rank::KING)
         {
             // move the ace to the back of the vector
             std::rotate(sorted_meld.begin(), sorted_meld.begin() + 1, sorted_meld.end());
@@ -367,7 +367,7 @@ std::vector<SplitHand> GetCandidateMelds(
     return candidate_melds;
 }
 
-SplitHand SplitMelds(const Cards &hand, std::optional<Melds> melds)
+SplitHand SplitMelds(const Cards &hand, const std::optional<Melds> &melds)
 {
     if (melds.has_value())
     {
@@ -417,7 +417,7 @@ std::vector<std::vector<T>> Powerset(const std::vector<T> &set, int index)
 }
 
 std::tuple<std::vector<Rank>, std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>>>
-SplitSetsRuns(Melds melds)
+SplitSetsRuns(const Melds &melds)
 {
     std::vector<Rank> sets;
     std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>> runs;
@@ -454,7 +454,7 @@ SplitSetsRuns(Melds melds)
     return {sets, runs};
 }
 
-Cards GetSetLayoffs(Cards hand, std::vector<Rank> sets)
+Cards GetSetLayoffs(const Cards &hand, const std::vector<Rank> &sets)
 {
     Cards result;
     auto rp = RankPartition(hand);
@@ -470,7 +470,7 @@ Cards GetSetLayoffs(Cards hand, std::vector<Rank> sets)
 std::optional<Rank> NextLowRank(int low_value)
 {
     std::optional<Rank> next_low = std::nullopt;
-    if (low_value > Rank::ACE)
+    if (low_value > int(Rank::ACE))
         next_low = ValueToRank(low_value - 1);
     return next_low;
 }
@@ -478,7 +478,7 @@ std::optional<Rank> NextLowRank(int low_value)
 std::optional<Rank> NextHighRank(int high_value)
 {
     std::optional<Rank> next_high = std::nullopt;
-    if (high_value < Rank::KING + 1)
+    if (high_value < int(Rank::KING) + 1)
     {
         next_high = ValueToRank(high_value + 1);
     }
@@ -486,8 +486,8 @@ std::optional<Rank> NextHighRank(int high_value)
 }
 
 std::vector<Ranks> GetSuitRunLayoffs(
-    Ranks suit_ranks,
-    std::vector<std::pair<Rank, Rank>> suit_runs)
+    const Ranks &suit_ranks,
+    const std::vector<std::pair<Rank, Rank>> &suit_runs)
 {
 
     if (suit_ranks.empty())
@@ -497,8 +497,8 @@ std::vector<Ranks> GetSuitRunLayoffs(
     std::vector<Ranks> layoff_ranks;
     for (auto const &[low, high] : suit_runs)
     {
-        int low_value = low;
-        int high_value = high != Rank::ACE ? high : Rank::KING + 1;
+        int low_value = int(low);
+        int high_value = high != Rank::ACE ? int(high) : int(Rank::KING) + 1;
         std::optional<Rank> next_low = NextLowRank(low_value);
         std::optional<Rank> next_high = NextHighRank(high_value);
 
@@ -528,8 +528,8 @@ std::vector<Ranks> GetSuitRunLayoffs(
 }
 
 std::vector<Cards> GetRunLayoffs(
-    Cards hand,
-    std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>> runs)
+    const Cards &hand,
+    const std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>> &runs)
 {
 
     auto sp = SuitPartition(hand);
@@ -553,8 +553,8 @@ std::vector<Cards> GetRunLayoffs(
 
 std::tuple<int, std::vector<Cards>, Cards, Cards>
 LayoffDeadwood(
-    Cards hand,
-    Melds opp_melds,
+    const Cards &hand,
+    const Melds &opp_melds,
     bool stop_on_zero)
 {
     auto [sets, runs] = SplitSetsRuns(opp_melds);

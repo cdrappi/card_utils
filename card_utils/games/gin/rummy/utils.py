@@ -63,7 +63,7 @@ def get_candidate_melds(
     # one option is we simply make 0 melds
     full_deadwood = get_deadwood(hand)
     if max_deadwood is None or full_deadwood <= max_deadwood:
-        candidates.append((full_deadwood, [], hand))
+        candidates.append((full_deadwood, [], sort_cards_by_rank(hand)))
 
     for n_combos in range(1, min(3, len(all_melds)) + 1):
         for melds in combinations(all_melds, n_combos):

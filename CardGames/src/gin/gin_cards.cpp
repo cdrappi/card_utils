@@ -12,18 +12,15 @@ GinCards DealHands(int n)
     // Create a standard deck
     Cards deck = ShuffledDeck();
 
-    // Create the GinCards object
-    GinCards gin_cards;
-
     // Deal n cards to each player
-    gin_cards.player1_hand = Cards(deck.begin(), deck.begin() + n);
-    gin_cards.player2_hand = Cards(deck.begin() + n, deck.begin() + 2 * n);
+    Cards player1_hand = Cards(deck.begin(), deck.begin() + n);
+    Cards player2_hand = Cards(deck.begin() + n, deck.begin() + 2 * n);
 
     // Deal one card to the discard pile
-    gin_cards.discard_pile = Cards(deck.begin() + 2 * n, deck.begin() + 2 * n + 1);
+    Cards discard_pile = Cards(deck.begin() + 2 * n, deck.begin() + 2 * n + 1);
 
     // The rest of the deck
-    gin_cards.deck = Cards(deck.begin() + 2 * n + 1, deck.end());
+    Cards rest_of_deck = Cards(deck.begin() + 2 * n + 1, deck.end());
 
-    return gin_cards;
+    return GinCards(player1_hand, player2_hand, discard_pile, rest_of_deck);
 }

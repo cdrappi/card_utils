@@ -1,3 +1,4 @@
+#include <random>
 #include "gin_rummy.hpp"
 #include "../deck/deck.hpp"
 
@@ -13,7 +14,7 @@ int GinRummyRankDeadwood(Rank rank)
     default:
         // ace has value 0 and 9 has value 8,
         // so add 1 to all the raw ranks
-        return static_cast<int>(rank + 1);
+        return int(rank) + 1;
     }
 }
 
@@ -34,18 +35,19 @@ GinRummyGameState::GinRummyGameState(
     std::optional<CardsHud> public_hud,
     std::optional<Card> last_draw_from_discard,
     bool is_complete,
-    int shuffles) : cards(cards),
-                    turn(turn),
-                    first_turn(first_turn),
-                    last_draw_from_discard(last_draw_from_discard),
-                    is_complete(is_complete),
-                    p1_score(0),
-                    p2_score(0)
+    int shuffles,
+    int turns) : cards(cards),
+                 turn(turn),
+                 first_turn(first_turn),
+                 last_draw_from_discard(last_draw_from_discard),
+                 is_complete(is_complete),
+                 p1_score(0),
+                 p2_score(0),
+                 shuffles(shuffles),
+                 turns(turns)
 {
     if (public_hud)
-    {
         this->public_hud = public_hud.value();
-    }
     else
     {
         this->public_hud = {};
@@ -55,10 +57,11 @@ GinRummyGameState::GinRummyGameState(
 
 void GinRummyGameState::FirstTurnPass()
 {
-    // TODO
     if (this->turn != GinTurn::P1_DRAWS_FIRST && this->turn != GinTurn::P2_DRAWS_FIRST)
         throw std::invalid_argument("Cannot pass: it is not your first turn");
+
     this->turn = this->AdvanceTurn(this->turn);
+    this->turns += 1;
     if (this->turn == GinTurn::P1_DRAWS_FROM_DECK)
         this->DrawCard(false);
     else if (this->turn == GinTurn::P2_DRAWS_FROM_DECK)
@@ -82,6 +85,7 @@ Card GinRummyGameState::DrawCard(bool from_discard)
         this->AddToHand(p1_draws, card_drawn);
         this->cards.discard_pile.pop_back();
         this->public_hud[card_drawn] = p1_draws ? GinHud::PLAYER_1 : GinHud::PLAYER_2;
+        this->turn = this->AdvanceTurn(this->turn, from_discard, 11);
         this->last_draw_from_discard = card_drawn;
         return card_drawn;
     }
@@ -107,7 +111,7 @@ void RemoveCard(Cards &cards, const Card &card)
 
 bool GinRummyGameState::EndIfHitWall()
 {
-    if (this->cards.deck.size() == this->end_cards_in_deck)
+    if (this->cards.deck.size() == this->end_cards_in_deck || this->turns >= this->max_turns)
     {
         this->EndGame(GinEnding::PLAYED_TO_THE_WALL, 0, 0);
         return true;
@@ -135,6 +139,9 @@ void GinRummyGameState::DiscardCard(Card card)
         // remove `card` from player 2's hand
         RemoveCard(this->cards.player2_hand, card);
     }
+
+    this->turns += 1;
+
     Cards hand = p1_discards ? this->cards.player1_hand : this->cards.player2_hand;
     int deadwood = this->GetDeadwood(hand);
     if (deadwood == 0)
@@ -146,6 +153,7 @@ void GinRummyGameState::DiscardCard(Card card)
         int p2_deadwood = p1_discards ? opp_deadwood : 0;
         GinEnding how = p1_discards ? GinEnding::P1_GINS : GinEnding::P2_GINS;
         this->EndGame(how, p1_deadwood, p2_deadwood);
+        return;
     }
     else
         this->turn = this->AdvanceTurn(this->turn, false, deadwood);
@@ -198,6 +206,8 @@ void GinRummyGameState::DecideKnock(bool knocks, std::optional<Melds> melds)
 
 void GinRummyGameState::EndGame(GinEnding how, int p1_deadwood, int p2_deadwood)
 {
+    if (this->is_complete)
+        throw std::invalid_argument("Cannot end game: game is already complete");
 
     if (how == GinEnding::PLAYED_TO_THE_WALL)
     {
@@ -252,6 +262,7 @@ void GinRummyGameState::EndGame(GinEnding how, int p1_deadwood, int p2_deadwood)
             this->p2_score = 0;
         }
     }
+    this->is_complete = true;
 };
 
 void GinRummyGameState::AddToHand(bool p1, Card card)
@@ -270,19 +281,27 @@ void GinRummyGameState::AddToHand(bool p1, Card card)
     }
 };
 
-Card GinRummyGameState::TopOfDiscard()
+Card GinRummyGameState::TopOfDiscard() const
 {
     // return the item at the top of the discard pile
     return this->cards.discard_pile.back();
 };
 
-Card GinRummyGameState::TopOfDeck()
+Card GinRummyGameState::TopOfDeck() const
 {
     // return the item at the top of the deck
     return this->cards.deck.front();
 };
 
-CardsHud GinRummyGameState::PlayerHud(bool p1)
+Cards GinRummyGameState::GetHand(bool p1) const
+{
+    if (p1)
+        return cards.player1_hand;
+    else
+        return cards.player2_hand;
+};
+
+CardsHud GinRummyGameState::PlayerHud(bool p1) const
 {
     CardsHud player_hud = {};
     for (const Card card : OrderedDeck())
@@ -305,12 +324,10 @@ CardsHud GinRummyGameState::PlayerHud(bool p1)
         else if (!p1 && hud == GinHud::PLAYER_1)
             player_hud[card] = GinHud::OPPONENT;
     }
-    if (p1)
-        for (const Card card : this->cards.player1_hand)
-            player_hud[card] = GinHud::USER;
-    else
-        for (const Card card : this->cards.player2_hand)
-            player_hud[card] = GinHud::USER;
+
+    for (const Card card : this->GetHand(p1))
+        player_hud[card] = GinHud::USER;
+
     return player_hud;
 };
 
@@ -384,3 +401,48 @@ Cards GinRummyGameState::SortHand(Cards hand)
     sorted_hand.insert(sorted_hand.end(), unmelded.begin(), unmelded.end());
     return sorted_hand;
 };
+
+static bool random_bool()
+{
+    std::random_device rd;                 // Initialize a random device
+    std::mt19937 gen(rd());                // Initialize a Mersenne Twister pseudorandom generator with the random device
+    std::bernoulli_distribution dist(0.5); // Initialize a Bernoulli distribution that gives 1 with a probability of 0.5
+    return dist(gen);                      // Return a random boolean
+}
+
+GinRummyGameState NewGinRummyGame()
+{
+
+    bool p1_first = random_bool();
+    GinTurn first_turn = p1_first ? GinTurn::P1_DRAWS_FIRST : GinTurn::P2_DRAWS_FIRST;
+    GinTurn turn = first_turn;
+    GinCards cards = DealHands(10);
+    return GinRummyGameState(cards, turn, first_turn);
+}
+
+void GinRummyGameState::DoAction(GinAction action, std::optional<Card> card)
+{
+    switch (action)
+    {
+    case GinAction::PICK_FROM_DECK:
+        this->DrawCard(false);
+        return;
+    case GinAction::PICK_FROM_DISCARD:
+        this->DrawCard(true);
+        return;
+    case GinAction::DISCARD_CARD:
+        this->DiscardCard(card.value());
+        return;
+    case GinAction::KNOCK:
+        this->DecideKnock(true);
+        return;
+    case GinAction::DONT_KNOCK:
+        this->DecideKnock(false);
+        return;
+    case GinAction::PASS:
+        this->FirstTurnPass();
+        return;
+    default:
+        throw std::runtime_error("Invalid action");
+    }
+}
