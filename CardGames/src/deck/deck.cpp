@@ -8,15 +8,9 @@
 Cards OrderedDeck()
 {
     Cards deck;
-
-    // Create a standard deck
-    for (int s = int(Suit::CLUBS); s <= int(Suit::SPADES); ++s)
-    {
-        for (int r = int(Rank::ACE); r <= int(Rank::KING); ++r)
-        {
-            deck.push_back(Card(static_cast<Rank>(r), static_cast<Suit>(s)));
-        }
-    }
+    for (auto r : ALL_RANKS)
+        for (auto s : ALL_SUITS)
+            deck.push_back(Card(r, s));
     return deck;
 }
 

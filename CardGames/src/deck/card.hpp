@@ -14,8 +14,7 @@ public:
     Card(Rank r, Suit s) : rank(r), suit(s) {}
     std::string ToString() const;
     int ToId() const;
-    bool operator<(const Card &other) const;
-    // bool operator==(const Card &other) const;
+    bool operator<(Card other) const;
 };
 
 bool operator==(Card first, Card second);
@@ -23,8 +22,8 @@ bool operator!=(Card first, Card second);
 
 void SortByRank(std::vector<Card> &cards);
 Card CardFromId(int card_id);
-Card CardFromString(std::string card);
-std::vector<Card> FromStrings(std::vector<std::string> cards);
+Card CardFromString(const std::string &card);
+std::vector<Card> FromStrings(const std::vector<std::string> &cards);
 std::vector<std::string> ToStrings(const std::vector<Card> &cards);
 
 using Cards = std::vector<Card>;

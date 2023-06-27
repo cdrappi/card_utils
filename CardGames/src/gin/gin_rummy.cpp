@@ -47,9 +47,7 @@ GinRummyGameState::GinRummyGameState(
                  turns(turns)
 {
     if (public_hud)
-    {
         this->public_hud = public_hud.value();
-    }
     else
     {
         this->public_hud = {};
@@ -59,7 +57,6 @@ GinRummyGameState::GinRummyGameState(
 
 void GinRummyGameState::FirstTurnPass()
 {
-    // TODO
     if (this->turn != GinTurn::P1_DRAWS_FIRST && this->turn != GinTurn::P2_DRAWS_FIRST)
         throw std::invalid_argument("Cannot pass: it is not your first turn");
 

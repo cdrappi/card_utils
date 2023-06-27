@@ -1,5 +1,6 @@
 // suit.hpp
 #pragma once
+#include <vector>
 
 enum class Suit
 {
@@ -11,3 +12,5 @@ enum class Suit
 
 Suit CharToSuit(char ch);
 char SuitToChar(Suit suit);
+
+const std::vector<Suit> ALL_SUITS = {Suit::CLUBS, Suit::DIAMONDS, Suit::HEARTS, Suit::SPADES};

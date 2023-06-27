@@ -5,6 +5,17 @@
 
 #include "../deck/card.hpp"
 
+enum class GinEnding
+{
+    P1_KNOCKS,
+    P2_KNOCKS,
+    P1_GINS,
+    P2_GINS,
+    P1_BIG_GINS,
+    P2_BIG_GINS,
+    PLAYED_TO_THE_WALL,
+};
+
 enum class GinTurn
 {
     P1_DRAWS_FIRST,
@@ -25,21 +36,8 @@ enum class GinTurn
 
 bool IsP1Draw(GinTurn turn);
 bool IsP2Draw(GinTurn turn);
-
 bool IsP1Turn(GinTurn turn);
-
 std::string TurnToString(GinTurn turn);
-
-enum class GinEnding
-{
-    P1_KNOCKS,
-    P2_KNOCKS,
-    P1_GINS,
-    P2_GINS,
-    P1_BIG_GINS,
-    P2_BIG_GINS,
-    PLAYED_TO_THE_WALL,
-};
 
 enum class GinAction
 {

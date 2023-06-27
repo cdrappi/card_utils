@@ -9,6 +9,7 @@
 
 void SortByRank(std::vector<Card> &cards)
 {
+    // modifies cards in place
     std::sort(cards.begin(), cards.end(), [](const Card &a, const Card &b)
               { return a.rank < b.rank; });
 }
@@ -37,7 +38,7 @@ int Card::ToId() const
     return int(suit) + 4 * RankToIndex(rank);
 }
 
-bool Card::operator<(const Card &other) const
+bool Card::operator<(Card other) const
 {
     if (rank != other.rank)
     {
@@ -56,17 +57,12 @@ bool operator!=(Card first, Card second)
     return !(first == second);
 }
 
-// bool Card::operator==(const Card &other) const
-// {
-//     return rank == other.rank && suit == other.suit;
-// }
-
-Card CardFromString(std::string card)
+Card CardFromString(const std::string &card)
 {
     return Card(CharToRank(card[0]), CharToSuit(card[1]));
 }
 
-std::vector<Card> FromStrings(std::vector<std::string> cards)
+std::vector<Card> FromStrings(const std::vector<std::string> &cards)
 {
     std::vector<Card> cardObjects;
     for (const auto &card : cards)
