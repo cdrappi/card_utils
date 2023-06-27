@@ -34,7 +34,7 @@ def test_layoffs() -> None:
 
 if __name__ == "__main__":
     test_layoffs()
-    # for i in range(1_000_000):
-    #     _test_deadwood()
-    #     if (i + 1) % 100_000 == 0:
-    #         print(f"thru {i+1} tests")
+    for i in range(1_000_000):
+        _test_deadwood()
+        if (i + 1) % 100_000 == 0:
+            print(f"thru {i+1} tests")
