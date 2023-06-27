@@ -13,32 +13,51 @@
 #include "../deck/rank.hpp"
 #include "../deck/suit.hpp"
 
-std::map<Rank, std::vector<Suit>> RankPartition(const std::vector<Card> &cards)
+std::unordered_map<Rank, std::vector<Suit>> RankPartition(const std::vector<Card> &cards)
 {
-    std::map<Rank, std::vector<Suit>> rankToSuitsMap;
+    auto start = std::chrono::high_resolution_clock::now();
+    std::unordered_map<Rank, std::vector<Suit>> rankToSuitsMap;
 
     // Group the cards by rank
     for (const auto &card : cards)
         rankToSuitsMap[card.rank].push_back(card.suit);
 
+    // order each suit vector
+    // for (auto &[rank, suits] : rankToSuitsMap)
+    //     std::sort(suits.begin(), suits.end());
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "RankPartition took "
+              << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+              << " microseconds\n";
+
     return rankToSuitsMap;
 }
 
-std::map<Suit, std::vector<Rank>> SuitPartition(const std::vector<Card> &cards)
+std::unordered_map<Suit, std::vector<Rank>> SuitPartition(const std::vector<Card> &cards)
 {
-    std::map<Suit, std::vector<Rank>> suitToRanksMap;
+    auto start = std::chrono::high_resolution_clock::now();
+    std::unordered_map<Suit, std::vector<Rank>> suitToRanksMap;
 
     // Group the cards by suit
     for (const auto &card : cards)
-    {
         suitToRanksMap[card.suit].push_back(card.rank);
-    }
+
+    // order each rank vector
+    // for (auto &[suit, ranks] : suitToRanksMap)
+    //     std::sort(ranks.begin(), ranks.end());
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "SuitPartition took "
+              << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+              << " microseconds\n";
 
     return suitToRanksMap;
 }
 
 static Melds FindSets(const std::vector<Card> &cards)
 {
+    // get the start time
+    auto start = std::chrono::high_resolution_clock::now();
+
     const auto rankToSuitsMap = RankPartition(cards);
 
     Melds sets;
@@ -87,6 +106,13 @@ static Melds FindSets(const std::vector<Card> &cards)
             }
         }
     }
+
+    // get the end time
+    auto end = std::chrono::high_resolution_clock::now();
+    // print timedelta  in micros
+    std::cout << "FindSets took "
+              << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+              << " microseconds\n";
 
     return sets;
 }
@@ -211,6 +237,11 @@ static std::vector<Ranks> FindStraights(const Ranks &ranks,
 
 static Melds FindRuns(const std::vector<Card> &cards)
 {
+    if (cards.size() < 3)
+        return {};
+
+    auto start = std::chrono::high_resolution_clock::now();
+
     const auto suitPartition = SuitPartition(cards);
     Melds runs;
 
@@ -221,13 +252,17 @@ static Melds FindRuns(const std::vector<Card> &cards)
         {
             CardSet run;
             for (const auto &rank : straight)
-            {
                 run.insert(Card(rank, suit));
-            }
+
             if (run.size() > 0)
                 runs.push_back(run);
         }
     }
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "FindRuns took "
+              << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+              << " microseconds\n";
+
     return runs;
 }
 
@@ -240,9 +275,8 @@ static CardSet MeldsToSet(const Melds &melds)
 {
     CardSet melded_cards;
     for (const auto &meld : melds)
-    {
         melded_cards.insert(meld.begin(), meld.end());
-    }
+
     return melded_cards;
 }
 
@@ -294,6 +328,9 @@ static std::vector<Melds> MeldCombinations(Melds &v, int r)
 
 static std::vector<Cards> SortMelds(const Melds &melds)
 {
+    if (melds.size() == 0)
+        return {};
+
     // first order the melds by size
     Melds melds_copy = melds;
     std::sort(
@@ -335,23 +372,27 @@ std::vector<SplitHand> GetCandidateMelds(
 
     Melds all_melds = FindMelds(hand);
     int n_melds = all_melds.size();
+
+    // int total_combos = 0;
     for (int n_combos = 1; n_combos <= std::min(3, n_melds); n_combos++)
     {
         std::vector<Melds> meld_combos = MeldCombinations(all_melds, n_combos);
         for (int i = 0; i < meld_combos.size(); i++)
         {
+            // total_combos++;
             Melds meld_combo = meld_combos[i];
             CardSet melded_cards = MeldsToSet(meld_combo);
+
             int melds_size = 0;
             for (int j = 0; j < meld_combo.size(); j++)
-            {
                 melds_size += meld_combo[j].size();
-            }
+
             if (melded_cards.size() == melds_size)
             {
                 Cards unmelded_cards = UnmeldedCards(hand, meld_combo);
                 if (stop_on_gin && unmelded_cards.size() == 0)
                 {
+                    // std::cout << "C++ looped over " << total_combos << " combos" << std::endl;
                     return {SplitHand{0, SortMelds(meld_combo), {}}};
                 }
                 int deadwood = GinRummyCardsDeadwood(unmelded_cards);
@@ -363,12 +404,14 @@ std::vector<SplitHand> GetCandidateMelds(
             }
         }
     }
+    // std::cout << "C++ looped over " << total_combos << " combos" << std::endl;
 
     return candidate_melds;
 }
 
 SplitHand SplitMelds(const Cards &hand, const std::optional<Melds> &melds)
 {
+
     if (melds.has_value())
     {
         Melds chosen_melds = melds.value();
@@ -377,6 +420,8 @@ SplitHand SplitMelds(const Cards &hand, const std::optional<Melds> &melds)
         return {deadwood, SortMelds(chosen_melds), unmelded};
     }
 
+    // get start time
+    auto start = std::chrono::high_resolution_clock::now();
     auto candidate_melds = GetCandidateMelds(hand);
     auto split_hand = std::min_element(
         candidate_melds.begin(),
@@ -385,11 +430,15 @@ SplitHand SplitMelds(const Cards &hand, const std::optional<Melds> &melds)
         [](const SplitHand &a, const SplitHand &b)
         { return std::get<0>(a) < std::get<0>(b); });
 
+    // get end time
+    auto end = std::chrono::high_resolution_clock::now();
+    // print duration in milliseconds
+    std::cout << "C++ took "
+              << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+              << " micros" << std::endl;
+
     return *split_hand;
 }
-
-#include <vector>
-#include <iostream>
 
 template <typename T>
 std::vector<std::vector<T>> Powerset(const std::vector<T> &set, int index)
@@ -431,24 +480,19 @@ SplitSetsRuns(const Melds &melds)
         {
             auto [suit, ranks] = *sp.begin();
             if (runs.count(suit) == 0)
-            {
                 runs[suit] = {};
-            }
+
             runs[suit].push_back({ranks.front(), ranks.back()});
         }
         else if (rp.size() == 1)
         {
             auto [rank, suits] = *rp.begin();
             if (suits.size() == 3)
-            {
                 // 4-sets can't be laid off against, so only consider 3-sets
                 sets.push_back(rank);
-            }
         }
         else
-        {
             throw std::invalid_argument("Invalid meld passed into SplitSetsRuns");
-        }
     }
 
     return {sets, runs};
@@ -470,9 +514,9 @@ Cards GetSetLayoffs(const Cards &hand, const std::vector<Rank> &sets)
 std::optional<Rank> NextLowRank(int low_value)
 {
     std::optional<Rank> next_low = std::nullopt;
-    if (low_value > int(Rank::ACE))
-        next_low = ValueToRank(low_value - 1);
-    return next_low;
+    if (low_value <= int(Rank::ACE))
+        return std::nullopt;
+    return ValueToRank(low_value - 1);
 }
 
 std::optional<Rank> NextHighRank(int high_value)
@@ -542,9 +586,8 @@ std::vector<Cards> GetRunLayoffs(
         {
             std::vector<Card> card_chunk;
             for (auto const &r : sc)
-            {
                 card_chunk.push_back(Card(r, suit));
-            }
+
             layoff_card_chunks.push_back(card_chunk);
         }
     }
@@ -600,5 +643,4 @@ LayoffDeadwood(
         candidates.end(),
         [](auto const &a, auto const &b)
         { return std::get<0>(a) < std::get<0>(b); });
-    return {0, {}, {}, {}};
 }

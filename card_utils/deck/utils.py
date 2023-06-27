@@ -1,7 +1,7 @@
 import random
 from typing import List, Dict
 from card_utils import deck
-
+import time
 
 Card = str
 
@@ -20,11 +20,15 @@ def rank_partition(cards) -> Dict[str, List[str]]:
     :param cards: ([str])
     :return: ({str: [str]} rank --> [suit]
     """
+    start = time.time()
     rank_to_suits: Dict[str, List[str]] = {}
     for rank, suit in cards:
         if rank not in rank_to_suits:
             rank_to_suits[rank] = []
         rank_to_suits[rank].append(suit)
+    print(
+        f"python rank_partition took {(time.time() - start) * 1000000:.0f} micros"
+    )
 
     return rank_to_suits
 
@@ -34,12 +38,15 @@ def suit_partition(cards) -> Dict[str, List[str]]:
     :param cards: ([str])
     :return: ({str: [str]} suit --> [ranks]
     """
+    start = time.time()
     suit_to_ranks: Dict[str, List[str]] = {}
     for rank, suit in cards:
         if suit not in suit_to_ranks:
             suit_to_ranks[suit] = []
         suit_to_ranks[suit].append(rank)
-
+    print(
+        f"python suit_partition took {(time.time() - start) * 1000000:.0f} micros"
+    )
     return suit_to_ranks
 
 

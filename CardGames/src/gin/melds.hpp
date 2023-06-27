@@ -5,6 +5,7 @@
 #include <set>
 #include <map>
 #include <set>
+#include <iostream>
 #include <unordered_map>
 
 #include "../deck/card.hpp"
@@ -15,8 +16,8 @@ using Melds = std::vector<CardSet>;
 using RankValues = std::vector<int>;
 using SplitHand = std::tuple<int, std::vector<Cards>, Cards>;
 
-std::map<Rank, std::vector<Suit>> RankPartition(const std::vector<Card> &cards);
-std::map<Suit, std::vector<Rank>> SuitPartition(const std::vector<Card> &cards);
+std::unordered_map<Rank, std::vector<Suit>> RankPartition(const std::vector<Card> &cards);
+std::unordered_map<Suit, std::vector<Rank>> SuitPartition(const std::vector<Card> &cards);
 
 SplitHand SplitMelds(const Cards &hand, const std::optional<Melds> &melds = std::nullopt);
 std::vector<SplitHand> GetCandidateMelds(const Cards &hand, std::optional<int> max_deadwood = std::nullopt, bool stop_on_gin = true);
