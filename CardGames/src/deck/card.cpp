@@ -46,10 +46,20 @@ bool Card::operator<(const Card &other) const
     return suit < other.suit;
 }
 
-bool Card::operator==(const Card &other) const
+bool operator==(Card first, Card second)
 {
-    return rank == other.rank && suit == other.suit;
+    return first.rank == second.rank && first.suit == second.suit;
 }
+
+bool operator!=(Card first, Card second)
+{
+    return !(first == second);
+}
+
+// bool Card::operator==(const Card &other) const
+// {
+//     return rank == other.rank && suit == other.suit;
+// }
 
 Card CardFromString(std::string card)
 {

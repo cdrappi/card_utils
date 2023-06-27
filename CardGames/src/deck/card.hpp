@@ -15,8 +15,11 @@ public:
     std::string ToString() const;
     int ToId() const;
     bool operator<(const Card &other) const;
-    bool operator==(const Card &other) const;
+    // bool operator==(const Card &other) const;
 };
+
+bool operator==(Card first, Card second);
+bool operator!=(Card first, Card second);
 
 void SortByRank(std::vector<Card> &cards);
 Card CardFromId(int card_id);
