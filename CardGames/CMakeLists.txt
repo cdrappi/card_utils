@@ -9,3 +9,9 @@ file(GLOB SOURCES "CardGames.hpp" "src/deck/*.cpp" "src/gin/*.cpp")
 add_library(CardGames ${SOURCES})
 
 set_target_properties(CardGames PROPERTIES CXX_VISIBILITY_PRESET hidden)
+
+
+add_subdirectory(lib/pybind11)
+
+# Generate Python module.
+pybind11_add_module(card_games ${SOURCES})
