@@ -377,6 +377,7 @@ SplitHand SplitMelds(const Cards &hand, const std::optional<Melds> &melds)
         return {deadwood, SortMelds(chosen_melds), unmelded};
     }
 
+    int start_result = ProfilerStart("spiral_profiler.prof");
     auto candidate_melds = GetCandidateMelds(hand);
     auto split_hand = std::min_element(
         candidate_melds.begin(),
@@ -384,7 +385,7 @@ SplitHand SplitMelds(const Cards &hand, const std::optional<Melds> &melds)
         // pick the meld combo with the least deadwood
         [](const SplitHand &a, const SplitHand &b)
         { return std::get<0>(a) < std::get<0>(b); });
-
+    ProfilerStop();
     return *split_hand;
 }
 
