@@ -77,6 +77,6 @@ def _test_4melds() -> None:
 
 
 if __name__ == "__main__":
-    _test_layoffs()
-    _test_timing()
-    # _test_4melds()
+    # _test_layoffs()
+    # _test_timing()
+    _test_4melds()

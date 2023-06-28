@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <numeric>
+#include <gperftools/profiler.h>
 
 #include "../deck/card.hpp"
 

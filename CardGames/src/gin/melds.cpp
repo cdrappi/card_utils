@@ -469,15 +469,18 @@ SortedSplitHand SplitMelds(const Cards &hand, const std::optional<Melds> &melds)
         return {deadwood, SortMelds(chosen_melds), unmelded};
     }
 
-    // auto start = std::chrono::high_resolution_clock::now();
-
+    int start_result = ProfilerStart("split_melds.prof");
     auto candidate_melds = GetCandidateMelds(hand);
+    for (int i = 0; i < 10'000; i++)
+        candidate_melds = GetCandidateMelds(hand);
+
     auto split_hand = std::min_element(
         candidate_melds.begin(),
         candidate_melds.end(),
         // pick the meld combo with the least deadwood
         [](const SplitHand &a, const SplitHand &b)
         { return std::get<0>(a) < std::get<0>(b); });
+    ProfilerStop();
 
     // auto end = std::chrono::high_resolution_clock::now();
     // std::cout << "C++ SplitMelds took "
