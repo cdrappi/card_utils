@@ -251,6 +251,7 @@ static Cards UnmeldedCards(const Cards &hand, const Melds &melds)
     CardSet hand_set = CardsToSet(hand);
     CardSet melded_cards = MeldsToSet(melds);
     CardSet unmelded_cards;
+
     std::set_difference(
         hand_set.begin(),
         hand_set.end(),
@@ -377,8 +378,10 @@ SplitHand SplitMelds(const Cards &hand, const std::optional<Melds> &melds)
         return {deadwood, SortMelds(chosen_melds), unmelded};
     }
 
-    int start_result = ProfilerStart("spiral_profiler.prof");
-    auto candidate_melds = GetCandidateMelds(hand);
+    int start_result = ProfilerStart("split_melds.prof");
+    std::vector<SplitHand> candidate_melds = GetCandidateMelds(hand);
+    for (int i = 0; i < 10000; i++)
+        candidate_melds = GetCandidateMelds(hand);
     auto split_hand = std::min_element(
         candidate_melds.begin(),
         candidate_melds.end(),
