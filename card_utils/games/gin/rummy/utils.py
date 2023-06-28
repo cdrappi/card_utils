@@ -26,7 +26,7 @@ def deal_new_game():
 
 
 def _get_runs(hand: List[str]) -> List[Set[str]]:
-    start = time.time()
+    # start = time.time()
     sp = suit_partition(hand)
     runs_map = {
         suit: rank_straights(
@@ -38,15 +38,15 @@ def _get_runs(hand: List[str]) -> List[Set[str]]:
         for suit, ranks in sp.items()
     }
     runs = [set(run) for _, runs in runs_map.items() for run in runs]
-    print(f"python get_runs: {(time.time() - start) * 1000000:.0f} micros")
+    # print(f"python get_runs: {(time.time() - start) * 1000000:.0f} micros")
     return runs
 
 
 def _get_sets(hand: List[str]) -> List[Set[str]]:
-    start = time.time()
+    # start = time.time()
     sets_3, sets_4 = get_sets(hand)
     sets = [set(s) for s in sets_3 + sets_4]
-    print(f"python get_sets: {(time.time() - start) * 1000000:.0f} micros")
+    # print(f"python get_sets: {(time.time() - start) * 1000000:.0f} micros")
     return sets
 
 
@@ -65,7 +65,10 @@ def get_candidate_melds(
     stop_on_gin: bool = True,
 ) -> List[Tuple[int, List[List[Card]], List[str]]]:
     hand_set = set(hand)
+
+    # start = time.time()
     all_melds = _get_sets(hand) + _get_runs(hand)
+    # print(f"python FindMelds: {(time.time() - start) * 1000000:.0f} micros")
     candidates: List[Tuple[int, List[List[Card]], List[Card]]] = []
 
     # one option is we simply make 0 melds
@@ -73,10 +76,13 @@ def get_candidate_melds(
     if max_deadwood is None or full_deadwood <= max_deadwood:
         candidates.append((full_deadwood, [], sort_cards_by_rank(hand)))
 
-    # tot_combos = 0
+    # print(f"all melds = {len(all_melds)}")
+
+    tot_combos = 0
     for n_combos in range(1, min(3, len(all_melds)) + 1):
+        start = time.time()
         for melds in combinations(all_melds, n_combos):
-            # tot_combos += 1
+            tot_combos += 1
             melded_cards = {c for m in melds for c in m}
             unique_cards = len(melded_cards)
             total_cards = sum(len(m) for m in melds)
@@ -90,6 +96,9 @@ def get_candidate_melds(
                     return [(0, melds_list, [])]
                 if max_deadwood is None or deadwood <= max_deadwood:
                     candidates.append((deadwood, melds_list, um_cards))
+        # print(
+        #     f"python MeldCombinations loop {n_combos} took {(time.time() - start) * 1000000:.0f} micros"
+        # )
     # print(f"python looped over {tot_combos} combos")
     return candidates
 
@@ -108,8 +117,9 @@ def split_melds(
     start = time.time()
     candidates = get_candidate_melds(hand, stop_on_gin=True)
     min_meld = min(candidates)
-    end = time.time()
-    print(f"python took {(end - start) * 1000000:.0f} micros")
+    # print(
+    #     f"python split_melds took {(time.time() - start) * 1000000:.0f} micros"
+    # )
     return min_meld
 
 

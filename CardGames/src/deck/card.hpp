@@ -27,3 +27,11 @@ std::vector<Card> FromStrings(const std::vector<std::string> &cards);
 std::vector<std::string> ToStrings(const std::vector<Card> &cards);
 
 using Cards = std::vector<Card>;
+
+struct CardHasher
+{
+    std::size_t operator()(const Card &card) const
+    {
+        return std::hash<int>()(card.ToId());
+    }
+};

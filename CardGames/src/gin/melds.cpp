@@ -1,71 +1,70 @@
 // melds.cpp
 
-#include <algorithm>
-#include <map>
-#include <tuple>
-#include <vector>
-#include <iostream>
-#include <unordered_map>
-
 #include "melds.hpp"
 #include "gin_rummy.hpp"
 #include "../deck/card.hpp"
 #include "../deck/rank.hpp"
 #include "../deck/suit.hpp"
 
-std::unordered_map<Rank, std::vector<Suit>> RankPartition(const std::vector<Card> &cards)
+std::array<std::vector<Suit>, 13> RankPartition(const std::vector<Card> &cards)
 {
-    auto start = std::chrono::high_resolution_clock::now();
-    std::unordered_map<Rank, std::vector<Suit>> rankToSuitsMap;
+    // auto start = std::chrono::high_resolution_clock::now();
+    std::array<std::vector<Suit>, 13> rankToSuitsMap;
 
     // Group the cards by rank
     for (const auto &card : cards)
-        rankToSuitsMap[card.rank].push_back(card.suit);
+    {
+        int rank_int = int(card.rank);
+        if (rankToSuitsMap[rank_int].size() == 0)
+        {
+            rankToSuitsMap[rank_int].reserve(4);
+        }
+        rankToSuitsMap[rank_int].push_back(card.suit);
+    }
 
-    // order each suit vector
-    // for (auto &[rank, suits] : rankToSuitsMap)
-    //     std::sort(suits.begin(), suits.end());
-    auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "RankPartition took "
-              << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
-              << " microseconds\n";
+    // auto end = std::chrono::high_resolution_clock::now();
+    // std::cout << "RankPartition took "
+    //           << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+    //           << " microseconds\n";
 
     return rankToSuitsMap;
 }
 
-std::unordered_map<Suit, std::vector<Rank>> SuitPartition(const std::vector<Card> &cards)
+std::array<std::vector<Rank>, 4> SuitPartition(const std::vector<Card> &cards)
 {
-    auto start = std::chrono::high_resolution_clock::now();
-    std::unordered_map<Suit, std::vector<Rank>> suitToRanksMap;
+    // auto start = std::chrono::high_resolution_clock::now();
+    std::array<std::vector<Rank>, 4> suitToRanksMap;
 
     // Group the cards by suit
     for (const auto &card : cards)
-        suitToRanksMap[card.suit].push_back(card.rank);
+    {
+        int suit_int = int(card.suit);
+        if (suitToRanksMap[suit_int].size() == 0)
+            suitToRanksMap[suit_int].reserve(13);
+        suitToRanksMap[suit_int].push_back(card.rank);
+    }
 
-    // order each rank vector
     // for (auto &[suit, ranks] : suitToRanksMap)
     //     std::sort(ranks.begin(), ranks.end());
-    auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "SuitPartition took "
-              << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
-              << " microseconds\n";
+    // auto end = std::chrono::high_resolution_clock::now();
+    // std::cout << "SuitPartition took "
+    //           << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+    //           << " microseconds\n";
 
     return suitToRanksMap;
 }
 
 static Melds FindSets(const std::vector<Card> &cards)
 {
-    // get the start time
-    auto start = std::chrono::high_resolution_clock::now();
 
     const auto rankToSuitsMap = RankPartition(cards);
 
     Melds sets;
 
     // Iterate over each rank
-    for (const auto &[rank, suits] : rankToSuitsMap)
+    for (Rank rank : ALL_RANKS)
     {
-
+        std::vector<Suit> suits = rankToSuitsMap[int(rank)];
         // If there are 3 or more cards of the same rank, add them to setsOfThree
         if (suits.size() == 3)
         {
@@ -107,12 +106,10 @@ static Melds FindSets(const std::vector<Card> &cards)
         }
     }
 
-    // get the end time
-    auto end = std::chrono::high_resolution_clock::now();
-    // print timedelta  in micros
-    std::cout << "FindSets took "
-              << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
-              << " microseconds\n";
+    // auto end = std::chrono::high_resolution_clock::now();
+    // std::cout << "FindSets took "
+    //           << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+    //           << " microseconds\n";
 
     return sets;
 }
@@ -240,13 +237,14 @@ static Melds FindRuns(const std::vector<Card> &cards)
     if (cards.size() < 3)
         return {};
 
-    auto start = std::chrono::high_resolution_clock::now();
+    // auto start = std::chrono::high_resolution_clock::now();
 
     const auto suitPartition = SuitPartition(cards);
     Melds runs;
 
-    for (const auto &[suit, ranks] : suitPartition)
+    for (Suit suit : ALL_SUITS)
     {
+        std::vector<Rank> ranks = suitPartition[int(suit)];
         const auto straights = FindStraights(ranks);
         for (const auto &straight : straights)
         {
@@ -258,10 +256,11 @@ static Melds FindRuns(const std::vector<Card> &cards)
                 runs.push_back(run);
         }
     }
+
     auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "FindRuns took "
-              << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
-              << " microseconds\n";
+    // std::cout << "C++ FindRuns took "
+    //           << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+    //           << " microseconds\n";
 
     return runs;
 }
@@ -269,6 +268,11 @@ static Melds FindRuns(const std::vector<Card> &cards)
 static CardSet CardsToSet(const Cards &cards)
 {
     return CardSet(cards.begin(), cards.end());
+}
+
+static SortedCardSet CardsToSortedSet(const Cards &cards)
+{
+    return SortedCardSet(cards.begin(), cards.end());
 }
 
 static CardSet MeldsToSet(const Melds &melds)
@@ -280,11 +284,18 @@ static CardSet MeldsToSet(const Melds &melds)
     return melded_cards;
 }
 
-static Cards UnmeldedCards(const Cards &hand, const Melds &melds)
+static SortedCardSet MeldsToSortedSet(const Melds &melds)
 {
-    CardSet hand_set = CardsToSet(hand);
-    CardSet melded_cards = MeldsToSet(melds);
-    CardSet unmelded_cards;
+    SortedCardSet melded_cards;
+    for (const auto &meld : melds)
+        melded_cards.insert(meld.begin(), meld.end());
+
+    return melded_cards;
+}
+
+static Cards UnmeldedCards(const SortedCardSet &hand_set, const SortedCardSet &melded_cards)
+{
+    SortedCardSet unmelded_cards;
     std::set_difference(
         hand_set.begin(),
         hand_set.end(),
@@ -302,6 +313,18 @@ static Melds FindMelds(const Cards &hand)
     return melds;
 }
 
+bool AddUniqueCards(CardSet &cards1, const CardSet &cards2)
+{
+    for (const auto &card : cards2)
+    {
+        if (cards1.find(card) != cards1.end())
+            return false;
+        else
+            cards1.insert(card);
+    }
+    return true;
+}
+
 static std::vector<Melds> MeldCombinations(Melds &v, int r)
 {
 
@@ -314,11 +337,22 @@ static std::vector<Melds> MeldCombinations(Melds &v, int r)
     std::vector<Melds> combinations;
     do
     {
+        CardSet cards_in_meld = {};
         std::vector<CardSet> vComb;
         for (int i = 0; i < v.size(); ++i)
         {
             if (vMask[i])
-                vComb.push_back(v[i]);
+            {
+                if (AddUniqueCards(cards_in_meld, v[i]))
+                {
+                    vComb.push_back(v[i]);
+                }
+                else
+                {
+                    vComb.clear();
+                    break;
+                }
+            }
         }
         combinations.push_back(vComb);
     } while (std::prev_permutation(vMask.begin(), vMask.end()));
@@ -326,7 +360,7 @@ static std::vector<Melds> MeldCombinations(Melds &v, int r)
     return combinations;
 }
 
-static std::vector<Cards> SortMelds(const Melds &melds)
+std::vector<Cards> SortMelds(const Melds &melds)
 {
     if (melds.size() == 0)
         return {};
@@ -366,62 +400,77 @@ std::vector<SplitHand> GetCandidateMelds(
     if (!max_deadwood.has_value() || full_deadwood <= max_deadwood.value())
     {
         Cards hand_copy = hand;
-        SortByRank(hand_copy);
+        // SortByRank(hand_copy);
         candidate_melds.push_back({full_deadwood, {}, hand_copy});
     }
 
+    SortedCardSet hand_set = CardsToSortedSet(hand);
+
+    // auto start = std::chrono::high_resolution_clock::now();
     Melds all_melds = FindMelds(hand);
+    // auto end = std::chrono::high_resolution_clock::now();
+    // std::cout << "C++ FindMelds took "
+    //           << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+    //           << " microseconds\n";
     int n_melds = all_melds.size();
+    // std::cout << "n_melds " << n_melds << std::endl;
 
     // int total_combos = 0;
     for (int n_combos = 1; n_combos <= std::min(3, n_melds); n_combos++)
     {
+        // auto start = std::chrono::high_resolution_clock::now();
         std::vector<Melds> meld_combos = MeldCombinations(all_melds, n_combos);
+        // auto end = std::chrono::high_resolution_clock::now();
+        // std::cout << "C++ MeldCombinations took "
+        //           << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+        //           << " microseconds\n";
         for (int i = 0; i < meld_combos.size(); i++)
         {
             // total_combos++;
             Melds meld_combo = meld_combos[i];
-            CardSet melded_cards = MeldsToSet(meld_combo);
+            SortedCardSet melded_cards = MeldsToSortedSet(meld_combo);
 
-            int melds_size = 0;
-            for (int j = 0; j < meld_combo.size(); j++)
-                melds_size += meld_combo[j].size();
+            // int melds_size = 0;
+            // for (int j = 0; j < meld_combo.size(); j++)
+            //     melds_size += meld_combo[j].size();
 
-            if (melded_cards.size() == melds_size)
+            if (true) // melded_cards.size() == melds_size)
             {
-                Cards unmelded_cards = UnmeldedCards(hand, meld_combo);
+                Cards unmelded_cards = UnmeldedCards(hand_set, melded_cards);
                 if (stop_on_gin && unmelded_cards.size() == 0)
                 {
                     // std::cout << "C++ looped over " << total_combos << " combos" << std::endl;
-                    return {SplitHand{0, SortMelds(meld_combo), {}}};
+                    return {SplitHand{0, meld_combo, {}}};
                 }
                 int deadwood = GinRummyCardsDeadwood(unmelded_cards);
                 if (!max_deadwood.has_value() || deadwood <= max_deadwood.value())
                 {
-                    SortByRank(unmelded_cards);
-                    candidate_melds.push_back({deadwood, SortMelds(meld_combo), unmelded_cards});
+                    // SortByRank(unmelded_cards);
+                    candidate_melds.push_back({deadwood, meld_combo, unmelded_cards});
                 }
             }
         }
+        // end = std::chrono::high_resolution_clock::now();
+        // std::cout << "C++ MeldCombinations loop " << n_combos << " took " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " microseconds\n";
     }
     // std::cout << "C++ looped over " << total_combos << " combos" << std::endl;
 
     return candidate_melds;
 }
 
-SplitHand SplitMelds(const Cards &hand, const std::optional<Melds> &melds)
+SortedSplitHand SplitMelds(const Cards &hand, const std::optional<Melds> &melds)
 {
 
     if (melds.has_value())
     {
         Melds chosen_melds = melds.value();
-        Cards unmelded = UnmeldedCards(hand, chosen_melds);
+        Cards unmelded = UnmeldedCards(CardsToSortedSet(hand), MeldsToSortedSet(chosen_melds));
         int deadwood = GinRummyCardsDeadwood(unmelded);
         return {deadwood, SortMelds(chosen_melds), unmelded};
     }
 
-    // get start time
-    auto start = std::chrono::high_resolution_clock::now();
+    // auto start = std::chrono::high_resolution_clock::now();
+
     auto candidate_melds = GetCandidateMelds(hand);
     auto split_hand = std::min_element(
         candidate_melds.begin(),
@@ -430,14 +479,15 @@ SplitHand SplitMelds(const Cards &hand, const std::optional<Melds> &melds)
         [](const SplitHand &a, const SplitHand &b)
         { return std::get<0>(a) < std::get<0>(b); });
 
-    // get end time
-    auto end = std::chrono::high_resolution_clock::now();
-    // print duration in milliseconds
-    std::cout << "C++ took "
-              << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
-              << " micros" << std::endl;
-
-    return *split_hand;
+    // auto end = std::chrono::high_resolution_clock::now();
+    // std::cout << "C++ SplitMelds took "
+    //           << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+    //           << " micros" << std::endl;
+    int deadwood = std::get<0>(*split_hand);
+    Melds chosen_melds = std::get<1>(*split_hand);
+    Cards unmelded = std::get<2>(*split_hand);
+    SortByRank(unmelded);
+    return SortedSplitHand{deadwood, SortMelds(chosen_melds), unmelded};
 }
 
 template <typename T>
@@ -465,6 +515,25 @@ std::vector<std::vector<T>> Powerset(const std::vector<T> &set, int index)
     return subsets;
 }
 
+bool IsRun(const CardSet &meld)
+{
+    std::unordered_set<Suit> suits;
+    std::unordered_set<Rank> ranks;
+    for (auto &card : meld)
+    {
+        suits.insert(card.suit);
+        ranks.insert(card.rank);
+    }
+    if (suits.size() == 1)
+        return true;
+    else if (ranks.size() == 1)
+        return false;
+    else
+    {
+        throw std::invalid_argument("Invalid meld passed into IsRun");
+    }
+}
+
 std::tuple<std::vector<Rank>, std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>>>
 SplitSetsRuns(const Melds &melds)
 {
@@ -474,25 +543,15 @@ SplitSetsRuns(const Melds &melds)
     for (auto &meld : melds)
     {
         auto meld_vec = std::vector<Card>(meld.begin(), meld.end());
-        auto sp = SuitPartition(meld_vec);
-        auto rp = RankPartition(meld_vec);
-        if (sp.size() == 1)
+        if (IsRun(meld))
         {
-            auto [suit, ranks] = *sp.begin();
-            if (runs.count(suit) == 0)
-                runs[suit] = {};
-
-            runs[suit].push_back({ranks.front(), ranks.back()});
+            SortByRank(meld_vec);
+            Card first = meld_vec.front();
+            Card last = meld_vec.back();
+            runs[first.suit].push_back({first.rank, last.rank});
         }
-        else if (rp.size() == 1)
-        {
-            auto [rank, suits] = *rp.begin();
-            if (suits.size() == 3)
-                // 4-sets can't be laid off against, so only consider 3-sets
-                sets.push_back(rank);
-        }
-        else
-            throw std::invalid_argument("Invalid meld passed into SplitSetsRuns");
+        else if (meld_vec.size() == 3)
+            sets.push_back(meld_vec.front().rank);
     }
 
     return {sets, runs};
@@ -504,10 +563,8 @@ Cards GetSetLayoffs(const Cards &hand, const std::vector<Rank> &sets)
     auto rp = RankPartition(hand);
 
     for (const auto &r : sets)
-    {
-        if (rp.count(r) > 0)
-            result.push_back(Card(r, rp[r][0]));
-    }
+        if (rp[int(r)].size() > 0)
+            result.push_back(Card(r, rp[int(r)][0]));
     return result;
 }
 
@@ -537,7 +594,7 @@ std::vector<Ranks> GetSuitRunLayoffs(
     if (suit_ranks.empty())
         return {};
 
-    std::set<Rank> rank_set(suit_ranks.begin(), suit_ranks.end());
+    std::unordered_set<Rank> rank_set(suit_ranks.begin(), suit_ranks.end());
     std::vector<Ranks> layoff_ranks;
     for (auto const &[low, high] : suit_runs)
     {
@@ -581,7 +638,7 @@ std::vector<Cards> GetRunLayoffs(
 
     for (auto const &[suit, suit_runs] : runs)
     {
-        auto suit_chunks = GetSuitRunLayoffs(sp[suit], suit_runs);
+        auto suit_chunks = GetSuitRunLayoffs(sp[int(suit)], suit_runs);
         for (auto const &sc : suit_chunks)
         {
             std::vector<Card> card_chunk;
@@ -594,6 +651,16 @@ std::vector<Cards> GetRunLayoffs(
     return layoff_card_chunks;
 }
 
+std::tuple<int, std::vector<Cards>, Cards, Cards> SortLayoffCandidate(
+    std::tuple<int, Melds, Cards, Cards> candidate)
+{
+    int deadwood = std::get<0>(candidate);
+    auto melds = std::get<1>(candidate);
+    Cards layoffs = std::get<2>(candidate);
+    Cards unmelded = std::get<3>(candidate);
+    return {deadwood, SortMelds(melds), layoffs, unmelded};
+}
+
 std::tuple<int, std::vector<Cards>, Cards, Cards>
 LayoffDeadwood(
     const Cards &hand,
@@ -601,7 +668,7 @@ LayoffDeadwood(
     bool stop_on_zero)
 {
     auto [sets, runs] = SplitSetsRuns(opp_melds);
-    std::vector<std::tuple<int, std::vector<Cards>, Cards, Cards>> candidates;
+    std::vector<std::tuple<int, Melds, Cards, Cards>> candidates;
 
     for (auto &[_, melds, unmelded] : GetCandidateMelds(hand))
     {
@@ -611,8 +678,8 @@ LayoffDeadwood(
         Cards sls = GetSetLayoffs(unmelded, sets);
         for (auto &set_layoffs : Powerset(sls))
         {
-            CardSet lo_sets = CardsToSet(set_layoffs);
-            CardSet um_set;
+            SortedCardSet lo_sets = CardsToSortedSet(set_layoffs);
+            SortedCardSet um_set;
             std::set_difference(unmelded_set.begin(), unmelded_set.end(), lo_sets.begin(), lo_sets.end(), std::inserter(um_set, um_set.end()));
             std::vector<Cards> rls = GetRunLayoffs(std::vector<Card>(um_set.begin(), um_set.end()), runs);
             for (auto &run_layoffs : Powerset(rls))
@@ -633,14 +700,16 @@ LayoffDeadwood(
                     Cards(laid_off_cards.begin(), laid_off_cards.end()),
                     um_cards);
                 if (stop_on_zero && deadwood == 0)
-                    return candidate;
+                    return SortLayoffCandidate(candidate);
                 candidates.push_back(candidate);
             }
         }
     }
-    return *std::min_element(
+
+    auto best_candidate = *std::min_element(
         candidates.begin(),
         candidates.end(),
         [](auto const &a, auto const &b)
         { return std::get<0>(a) < std::get<0>(b); });
+    return SortLayoffCandidate(best_candidate);
 }

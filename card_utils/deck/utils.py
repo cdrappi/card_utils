@@ -26,9 +26,9 @@ def rank_partition(cards) -> Dict[str, List[str]]:
         if rank not in rank_to_suits:
             rank_to_suits[rank] = []
         rank_to_suits[rank].append(suit)
-    print(
-        f"python rank_partition took {(time.time() - start) * 1000000:.0f} micros"
-    )
+    # print(
+    #     f"python rank_partition took {(time.time() - start) * 1000000:.0f} micros"
+    # )
 
     return rank_to_suits
 
@@ -44,9 +44,9 @@ def suit_partition(cards) -> Dict[str, List[str]]:
         if suit not in suit_to_ranks:
             suit_to_ranks[suit] = []
         suit_to_ranks[suit].append(rank)
-    print(
-        f"python suit_partition took {(time.time() - start) * 1000000:.0f} micros"
-    )
+    # print(
+    #     f"python suit_partition took {(time.time() - start) * 1000000:.0f} micros"
+    # )
     return suit_to_ranks
 
 
