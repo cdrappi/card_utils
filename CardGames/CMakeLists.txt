@@ -5,8 +5,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 add_subdirectory(lib/pybind11)
-include_directories(/opt/homebrew/include)
-link_directories(/opt/homebrew/lib)
+
+set(BREW_PATH "/usr/local")
+include_directories("${BREW_PATH}/include")
+link_directories("${BREW_PATH}/lib")
+# include_directories(/opt/homebrew/include)
+# link_directories(/opt/homebrew/lib)
 
 file(GLOB LIBRARY_SOURCES "CardGames.hpp" "src/deck/*.cpp" "src/gin/*.cpp")
 add_library(CardGames ${LIBRARY_SOURCES})
