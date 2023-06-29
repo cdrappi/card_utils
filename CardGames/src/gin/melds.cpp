@@ -298,11 +298,11 @@ static SortedCardSet MeldsToSortedSet(const Melds &melds)
     return melded_cards;
 }
 
-static Cards UnmeldedCards(const SortedCardSet &hand_set, const CardIds &melded_card_ids)
+static Cards UnmeldedCards(const Cards &hand, const CardIds &melded_card_ids)
 {
     Cards unmelded_cards;
-    unmelded_cards.reserve(hand_set.size());
-    for (const auto &card : hand_set)
+    unmelded_cards.reserve(hand.size());
+    for (const auto &card : hand)
     {
         if (melded_card_ids[card.ToId()] == 0)
             unmelded_cards.push_back(card);
@@ -414,8 +414,6 @@ std::vector<SplitHand> GetCandidateMelds(
         candidate_melds.push_back(std::move(full_deadwood_hand));
     }
 
-    SortedCardSet hand_set = CardsToSortedSet(hand);
-
     // auto start = std::chrono::high_resolution_clock::now();
     Melds all_melds = FindMelds(hand);
     // auto end = std::chrono::high_resolution_clock::now();
@@ -437,7 +435,7 @@ std::vector<SplitHand> GetCandidateMelds(
         for (int i = 0; i < meld_combos.size(); i++)
         {
             CardIds meld_combo = meld_combos[i];
-            Cards unmelded_cards = UnmeldedCards(hand_set, meld_combo);
+            Cards unmelded_cards = UnmeldedCards(hand, meld_combo);
             if (stop_on_gin && unmelded_cards.size() == 0)
             {
                 // std::cout << "C++ looped over " << total_combos << " combos" << std::endl;
@@ -484,7 +482,7 @@ SortedSplitHand SplitMelds(const Cards &hand, const std::optional<Melds> &melds)
         for (const auto &meld : chosen_melds)
             for (const auto &card : meld)
                 chosen_meld_ids[card.ToId()] = 1;
-        Cards unmelded = UnmeldedCards(CardsToSortedSet(hand), chosen_meld_ids);
+        Cards unmelded = UnmeldedCards(hand, chosen_meld_ids);
         int deadwood = GinRummyCardsDeadwood(unmelded);
         return std::make_tuple(deadwood, SortMelds(chosen_melds), unmelded);
     }
