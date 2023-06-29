@@ -41,9 +41,8 @@ int Card::ToId() const
 bool Card::operator<(Card other) const
 {
     if (rank != other.rank)
-    {
         return rank < other.rank;
-    }
+
     return suit < other.suit;
 }
 

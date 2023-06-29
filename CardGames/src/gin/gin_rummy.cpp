@@ -383,13 +383,13 @@ int GinRummyGameState::GetDeadwood(const Cards hand, std::optional<Melds> melds,
         auto lo = LayoffDeadwood(hand, opp_melds.value());
         return std::get<0>(lo);
     }
-    SplitHand split_melds = SplitMelds(hand, melds);
+    SortedSplitHand split_melds = SplitMelds(hand, melds);
     return std::get<0>(split_melds);
 };
 
 Cards GinRummyGameState::SortHand(Cards hand)
 {
-    SplitHand split_melds = SplitMelds(hand);
+    SortedSplitHand split_melds = SplitMelds(hand);
     std::vector<Cards> melds = std::get<1>(split_melds);
     Cards unmelded = std::get<2>(split_melds);
 

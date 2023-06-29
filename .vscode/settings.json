@@ -116,6 +116,11 @@
         "streambuf": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "__verbose_abort": "cpp",
+        "bit": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "utility": "cpp"
     }
 }
