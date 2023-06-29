@@ -47,6 +47,7 @@ public:
     void DoAction(GinAction action, std::optional<Card> card = std::nullopt);
     Card TopOfDiscard() const;
     Card TopOfDeck() const;
+    int DiscardSize() const;
     std::map<Card, GinHud> PlayerHud(bool p1) const;
     static int GetDeadwood(
         const Cards hand,

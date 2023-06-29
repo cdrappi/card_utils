@@ -8,6 +8,7 @@
 Cards OrderedDeck()
 {
     Cards deck;
+    deck.reserve(52);
     for (auto r : ALL_RANKS)
         for (auto s : ALL_SUITS)
             deck.push_back(Card(r, s));

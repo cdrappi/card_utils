@@ -287,6 +287,11 @@ Card GinRummyGameState::TopOfDiscard() const
     return this->cards.discard_pile.back();
 };
 
+int GinRummyGameState::DiscardSize() const
+{
+    return this->cards.discard_pile.size();
+};
+
 Card GinRummyGameState::TopOfDeck() const
 {
     // return the item at the top of the deck
