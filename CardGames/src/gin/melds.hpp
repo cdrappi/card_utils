@@ -16,7 +16,7 @@
 using Ranks = std::vector<Rank>;
 using CardSet = std::unordered_set<Card, CardHasher>;
 using SortedCardSet = std::set<Card>;
-using Melds = std::vector<CardSet>;
+using Melds = std::vector<Cards>;
 using RankValues = std::vector<int>;
 using SortedSplitHand = std::tuple<int, std::vector<Cards>, Cards>;
 using CardIds = std::array<int, 52>;

@@ -68,11 +68,11 @@ static Melds FindSets(const std::vector<Card> &cards)
         // If there are 3 or more cards of the same rank, add them to setsOfThree
         if (suits.size() == 3)
         {
-            CardSet cards;
+            Cards cards;
+            cards.reserve(3);
             for (const auto &suit : suits)
             {
-                Card card = Card(rank, suit);
-                cards.insert(card);
+                cards.push_back(Card(rank, suit));
             }
             sets.push_back(std::move(cards));
         }
@@ -83,22 +83,24 @@ static Melds FindSets(const std::vector<Card> &cards)
         if (suits.size() == 4)
         {
             // add to sets of four
-            CardSet cards;
+            Cards cards;
+            cards.reserve(4);
             for (const auto &suit : suits)
             {
-                cards.insert(Card(rank, suit));
+                cards.push_back(Card(rank, suit));
             }
             sets.push_back(std::move(cards));
 
             // add all possible combinations of 3 cards to sets of three
             for (const auto &exclude_suit : suits)
             {
-                CardSet cards;
+                Cards cards;
+                cards.reserve(3);
                 for (const auto &suit : suits)
                 {
                     if (suit != exclude_suit)
                     {
-                        cards.insert(Card(rank, suit));
+                        cards.push_back(Card(rank, suit));
                     }
                 }
                 sets.push_back(std::move(cards));
@@ -117,18 +119,20 @@ static Melds FindSets(const std::vector<Card> &cards)
 static RankValues SortedRankValues(const Ranks &ranks, bool aces_low, bool aces_high)
 {
     RankValues values;
+    // can have up to 4 aces
+    values.reserve(ranks.size() + 4 * (int(aces_high) + int(aces_low) - 1));
 
     for (const auto &rank : ranks)
     {
         if (rank == Rank::ACE)
         {
             if (aces_low)
-                values.push_back(static_cast<int>(rank));
+                values.push_back(int(rank));
             if (aces_high)
-                values.push_back(static_cast<int>(Rank::KING) + 1);
+                values.push_back(int(Rank::KING) + 1);
         }
         else
-            values.push_back(static_cast<int>(rank));
+            values.push_back(int(rank));
     }
 
     std::sort(values.begin(), values.end());
@@ -139,9 +143,13 @@ static std::vector<RankValues> SplitConnectedValues(const RankValues &sorted_val
 {
     std::vector<RankValues> connected_values;
 
+    int max_size = std::min(7, int(sorted_values.size()));
+    connected_values.reserve(max_size);
+
     int last_value = sorted_values[0];
 
     RankValues current_values;
+    current_values.reserve(max_size);
     current_values.push_back(last_value);
 
     for (int i = 1; i < sorted_values.size(); ++i)
@@ -156,9 +164,9 @@ static std::vector<RankValues> SplitConnectedValues(const RankValues &sorted_val
         // they are not, so start a new group
         {
             {
-                connected_values.push_back(current_values);
-                current_values.clear();
-                current_values.push_back(value);
+                connected_values.push_back(std::move(current_values));
+                current_values = {value};
+                current_values.reserve(max_size);
             }
         }
         last_value = value;
@@ -166,7 +174,7 @@ static std::vector<RankValues> SplitConnectedValues(const RankValues &sorted_val
 
     if (!current_values.empty())
     {
-        connected_values.push_back(current_values);
+        connected_values.push_back(std::move(current_values));
     }
 
     return connected_values;
@@ -174,15 +182,18 @@ static std::vector<RankValues> SplitConnectedValues(const RankValues &sorted_val
 
 static std::vector<RankValues> FindStraightCombinations(const RankValues &connected_values, int min_length, int max_length)
 {
-    std::vector<RankValues> straight_combinations;
 
     int n = connected_values.size();
     int max_len = std::min(n, max_length);
+
+    std::vector<RankValues> straight_combinations;
+    // TODO: reserve?
     for (int size = min_length; size <= max_len; ++size)
     {
         for (int i = 0; i <= n - size; ++i)
         {
             RankValues straight;
+            straight.reserve(size);
             for (int j = 0; j < size; ++j)
             {
                 straight.push_back(connected_values[i + j]);
@@ -221,6 +232,7 @@ static std::vector<Ranks> FindStraights(const Ranks &ranks,
         for (int j = 0; j < straight_combinations.size(); j++)
         {
             Ranks straight;
+            straight.reserve(straight_combinations[j].size());
             for (int k = 0; k < straight_combinations[j].size(); k++)
             {
                 straight.push_back(ValueToRank(straight_combinations[j][k]));
@@ -248,12 +260,14 @@ static Melds FindRuns(const std::vector<Card> &cards)
         const auto straights = FindStraights(ranks);
         for (const auto &straight : straights)
         {
-            CardSet run;
-            for (const auto &rank : straight)
-                run.insert(Card(rank, suit));
-
-            if (run.size() > 0)
+            if (int straight_size = straight.size() > 0)
+            {
+                Cards run;
+                run.reserve(straight_size);
+                for (const auto &rank : straight)
+                    run.push_back(Card(rank, suit));
                 runs.push_back(run);
+            }
         }
     }
 
@@ -273,15 +287,6 @@ static CardSet CardsToSet(const Cards &cards)
 static SortedCardSet CardsToSortedSet(const Cards &cards)
 {
     return SortedCardSet(cards.begin(), cards.end());
-}
-
-static CardSet MeldsToSet(const Melds &melds)
-{
-    CardSet melded_cards;
-    for (const auto &meld : melds)
-        melded_cards.insert(meld.begin(), meld.end());
-
-    return melded_cards;
 }
 
 static SortedCardSet MeldsToSortedSet(const Melds &melds)
@@ -314,15 +319,15 @@ static Melds FindMelds(const Cards &hand)
     return melds;
 }
 
-bool AddUniqueCards(CardIds &cards1, const CardSet &cards2, int meld_n)
+bool AddUniqueCards(CardIds &add_to, const Cards &add_from, int meld_n)
 {
-    for (const auto &card : cards2)
+    for (const auto &card : add_from)
     {
         int card_id = card.ToId();
-        if (cards1[card_id] != 0)
+        if (add_to[card_id] != 0)
             return false;
         else
-            cards1[card_id] = meld_n;
+            add_to[card_id] = meld_n;
     }
     return true;
 }
@@ -341,8 +346,7 @@ static std::vector<CardIds> MeldCombinations(Melds &v, int r)
     {
         CardIds cards_in_meld;
         cards_in_meld.fill(0);
-        std::vector<CardSet> vComb;
-        vComb.reserve(r);
+
         bool unique_cards = true;
         int meld_n = 0;
         for (int i = 0; i < v.size(); ++i)
@@ -374,7 +378,7 @@ std::vector<Cards> SortMelds(const Melds &melds)
     std::sort(
         melds_copy.begin(),
         melds_copy.end(),
-        [](const CardSet a, const CardSet b)
+        [](const Cards a, const Cards b)
         { return a.size() > b.size(); });
 
     std::vector<Cards> sorted_melds;
@@ -534,14 +538,14 @@ std::vector<std::vector<T>> Powerset(const std::vector<T> &set, int index)
     return subsets;
 }
 
-bool IsRun(const CardSet &meld)
+bool IsRun(const Cards &meld)
 {
-    std::unordered_set<Suit> suits;
-    std::unordered_set<Rank> ranks;
+    std::vector<Suit> suits;
+    std::vector<Rank> ranks;
     for (auto &card : meld)
     {
-        suits.insert(card.suit);
-        ranks.insert(card.rank);
+        suits.push_back(card.suit);
+        ranks.push_back(card.rank);
     }
     if (suits.size() == 1)
         return true;
