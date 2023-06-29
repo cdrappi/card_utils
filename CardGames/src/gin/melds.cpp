@@ -538,15 +538,14 @@ std::vector<std::vector<T>> Powerset(const std::vector<T> &set, int index)
 
 bool IsRun(const Cards &meld)
 {
-    std::vector<Suit> suits;
-    std::vector<Rank> ranks;
+    std::set<Suit> suits;
+    std::set<Rank> ranks;
     for (auto &card : meld)
     {
-        std::cout << card.ToString();
-        suits.push_back(card.suit);
-        ranks.push_back(card.rank);
+        suits.insert(card.suit);
+        ranks.insert(card.rank);
     }
-    std::cout << std::endl;
+
     if (suits.size() == 1)
         return true;
     else if (ranks.size() == 1)
