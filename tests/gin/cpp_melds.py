@@ -8,7 +8,7 @@ import time
 from card_utils.games.gin.rummy.game_state import GinRummyGameState
 
 
-def _test_hand(hand: List[Card]) -> Tuple[float, float]:
+def _test_hand(hand: List[Card], print_micros=1000) -> Tuple[float, float]:
     start_cpp = time.time()
     cpp_dw, cpp_melds, cpp_um = card_games.split_melds(hand, None)
     end_cpp = time.time()
@@ -21,7 +21,7 @@ def _test_hand(hand: List[Card]) -> Tuple[float, float]:
         raise ValueError("cpp_dw != py_dw")
 
     cpp_time, py_time = (end_cpp - start_cpp, start_py - end_cpp)
-    if True or cpp_time > py_time + 50e-6:
+    if cpp_time > py_time + print_micros * 1e-6:
         print("------")
         # print(hand)
         print(GinRummyGameState.sort_hand(hand))

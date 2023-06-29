@@ -39,11 +39,11 @@ std::tuple<int, std::vector<CardStrings>, CardStrings> split_melds(std::vector<s
         }
     }
 
-    auto start = std::chrono::high_resolution_clock::now();
+    // auto start = std::chrono::high_resolution_clock::now();
     SortedSplitHand split_melds = SplitMelds(cards, melds_set);
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-    std::cout << "SplitMelds took " << duration.count() << " microseconds" << std::endl;
+    // auto stop = std::chrono::high_resolution_clock::now();
+    // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    // std::cout << "SplitMelds took " << duration.count() << " microseconds" << std::endl;
     return SerializeSplitMelds(split_melds);
 }
 
