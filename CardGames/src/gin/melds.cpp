@@ -293,16 +293,17 @@ static SortedCardSet MeldsToSortedSet(const Melds &melds)
     return melded_cards;
 }
 
-static Cards UnmeldedCards(const SortedCardSet &hand_set, const SortedCardSet &melded_cards)
+static Cards UnmeldedCards(const SortedCardSet &hand_set, const CardIds &melded_card_ids)
 {
-    SortedCardSet unmelded_cards;
-    std::set_difference(
-        hand_set.begin(),
-        hand_set.end(),
-        melded_cards.begin(),
-        melded_cards.end(),
-        std::inserter(unmelded_cards, unmelded_cards.begin()));
-    return Cards(unmelded_cards.begin(), unmelded_cards.end());
+    Cards unmelded_cards;
+    unmelded_cards.reserve(hand_set.size());
+    for (const auto &card : hand_set)
+    {
+        if (melded_card_ids[card.ToId()] == 0)
+            unmelded_cards.push_back(card);
+    }
+
+    return unmelded_cards;
 }
 
 static Melds FindMelds(const Cards &hand)
@@ -313,19 +314,20 @@ static Melds FindMelds(const Cards &hand)
     return melds;
 }
 
-bool AddUniqueCards(CardSet &cards1, const CardSet &cards2)
+bool AddUniqueCards(CardIds &cards1, const CardSet &cards2, int meld_n)
 {
     for (const auto &card : cards2)
     {
-        if (cards1.find(card) != cards1.end())
+        int card_id = card.ToId();
+        if (cards1[card_id] != 0)
             return false;
         else
-            cards1.insert(card);
+            cards1[card_id] = meld_n;
     }
     return true;
 }
 
-static std::vector<Melds> MeldCombinations(Melds &v, int r)
+static std::vector<CardIds> MeldCombinations(Melds &v, int r)
 {
 
     if (r > v.size())
@@ -334,27 +336,29 @@ static std::vector<Melds> MeldCombinations(Melds &v, int r)
     std::vector<bool> vMask(v.size());
     std::fill(vMask.begin(), vMask.begin() + r, true);
 
-    std::vector<Melds> combinations;
+    std::vector<CardIds> combinations;
     do
     {
-        CardSet cards_in_meld = {};
+        CardIds cards_in_meld;
+        cards_in_meld.fill(0);
         std::vector<CardSet> vComb;
+        vComb.reserve(r);
+        bool unique_cards = true;
+        int meld_n = 0;
         for (int i = 0; i < v.size(); ++i)
         {
             if (vMask[i])
             {
-                if (AddUniqueCards(cards_in_meld, v[i]))
+                meld_n += 1;
+                if (!AddUniqueCards(cards_in_meld, v[i], meld_n))
                 {
-                    vComb.push_back(v[i]);
-                }
-                else
-                {
-                    vComb.clear();
+                    unique_cards = false;
                     break;
                 }
             }
         }
-        combinations.push_back(vComb);
+        if (unique_cards)
+            combinations.push_back(std::move(cards_in_meld));
     } while (std::prev_permutation(vMask.begin(), vMask.end()));
 
     return combinations;
@@ -400,8 +404,10 @@ std::vector<SplitHand> GetCandidateMelds(
     if (!max_deadwood.has_value() || full_deadwood <= max_deadwood.value())
     {
         Cards hand_copy = hand;
-        // SortByRank(hand_copy);
-        candidate_melds.push_back({full_deadwood, {}, hand_copy});
+        CardIds melded_card_ids;
+        melded_card_ids.fill(0);
+        SplitHand full_deadwood_hand = std::make_tuple(full_deadwood, melded_card_ids, hand_copy);
+        candidate_melds.push_back(std::move(full_deadwood_hand));
     }
 
     SortedCardSet hand_set = CardsToSortedSet(hand);
@@ -419,35 +425,25 @@ std::vector<SplitHand> GetCandidateMelds(
     for (int n_combos = 1; n_combos <= std::min(3, n_melds); n_combos++)
     {
         // auto start = std::chrono::high_resolution_clock::now();
-        std::vector<Melds> meld_combos = MeldCombinations(all_melds, n_combos);
+        std::vector<CardIds> meld_combos = MeldCombinations(all_melds, n_combos);
         // auto end = std::chrono::high_resolution_clock::now();
         // std::cout << "C++ MeldCombinations took "
         //           << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
         //           << " microseconds\n";
         for (int i = 0; i < meld_combos.size(); i++)
         {
-            // total_combos++;
-            Melds meld_combo = meld_combos[i];
-            SortedCardSet melded_cards = MeldsToSortedSet(meld_combo);
-
-            // int melds_size = 0;
-            // for (int j = 0; j < meld_combo.size(); j++)
-            //     melds_size += meld_combo[j].size();
-
-            if (true) // melded_cards.size() == melds_size)
+            CardIds meld_combo = meld_combos[i];
+            Cards unmelded_cards = UnmeldedCards(hand_set, meld_combo);
+            if (stop_on_gin && unmelded_cards.size() == 0)
             {
-                Cards unmelded_cards = UnmeldedCards(hand_set, melded_cards);
-                if (stop_on_gin && unmelded_cards.size() == 0)
-                {
-                    // std::cout << "C++ looped over " << total_combos << " combos" << std::endl;
-                    return {SplitHand{0, meld_combo, {}}};
-                }
-                int deadwood = GinRummyCardsDeadwood(unmelded_cards);
-                if (!max_deadwood.has_value() || deadwood <= max_deadwood.value())
-                {
-                    // SortByRank(unmelded_cards);
-                    candidate_melds.push_back({deadwood, meld_combo, unmelded_cards});
-                }
+                // std::cout << "C++ looped over " << total_combos << " combos" << std::endl;
+                return {std::make_tuple(0, meld_combo, Cards())};
+            }
+            int deadwood = GinRummyCardsDeadwood(unmelded_cards);
+            if (!max_deadwood.has_value() || deadwood <= max_deadwood.value())
+            {
+                // SortByRank(unmelded_cards);
+                candidate_melds.push_back(std::make_tuple(deadwood, meld_combo, unmelded_cards));
             }
         }
         // end = std::chrono::high_resolution_clock::now();
@@ -458,39 +454,59 @@ std::vector<SplitHand> GetCandidateMelds(
     return candidate_melds;
 }
 
+std::vector<Cards> MeldIdsToMelds(const CardIds &meld_ids)
+{
+    std::vector<Cards> melds;
+    melds.reserve(3);
+    for (int i = 0; i < meld_ids.size(); i++)
+    {
+        int meld_n = meld_ids[i];
+        if (meld_ids[i] != 0)
+        {
+            melds[meld_n - 1].push_back({CardFromId(i)});
+        }
+    }
+    return {};
+}
+
 SortedSplitHand SplitMelds(const Cards &hand, const std::optional<Melds> &melds)
 {
 
     if (melds.has_value())
     {
         Melds chosen_melds = melds.value();
-        Cards unmelded = UnmeldedCards(CardsToSortedSet(hand), MeldsToSortedSet(chosen_melds));
+        CardIds chosen_meld_ids;
+        chosen_meld_ids.fill(0);
+        for (const auto &meld : chosen_melds)
+            for (const auto &card : meld)
+                chosen_meld_ids[card.ToId()] = 1;
+        Cards unmelded = UnmeldedCards(CardsToSortedSet(hand), chosen_meld_ids);
         int deadwood = GinRummyCardsDeadwood(unmelded);
-        return {deadwood, SortMelds(chosen_melds), unmelded};
+        return std::make_tuple(deadwood, SortMelds(chosen_melds), unmelded);
     }
 
-    int start_result = ProfilerStart("split_melds.prof");
+    // int start_result = ProfilerStart("split_melds.prof");
     auto candidate_melds = GetCandidateMelds(hand);
-    for (int i = 0; i < 10'000; i++)
-        candidate_melds = GetCandidateMelds(hand);
+    // for (int i = 0; i < 10'000; i++)
+    //     candidate_melds = GetCandidateMelds(hand);
 
-    auto split_hand = std::min_element(
+    SplitHand split_hand = *std::min_element(
         candidate_melds.begin(),
         candidate_melds.end(),
         // pick the meld combo with the least deadwood
         [](const SplitHand &a, const SplitHand &b)
         { return std::get<0>(a) < std::get<0>(b); });
-    ProfilerStop();
+    // ProfilerStop();
 
     // auto end = std::chrono::high_resolution_clock::now();
     // std::cout << "C++ SplitMelds took "
     //           << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
     //           << " micros" << std::endl;
-    int deadwood = std::get<0>(*split_hand);
-    Melds chosen_melds = std::get<1>(*split_hand);
-    Cards unmelded = std::get<2>(*split_hand);
+    int deadwood = std::get<0>(split_hand);
+    CardIds chosen_meld_ids = std::get<1>(split_hand);
+    Cards unmelded = std::get<2>(split_hand);
     SortByRank(unmelded);
-    return SortedSplitHand{deadwood, SortMelds(chosen_melds), unmelded};
+    return std::make_tuple(deadwood, MeldIdsToMelds(chosen_meld_ids), unmelded);
 }
 
 template <typename T>
@@ -655,13 +671,13 @@ std::vector<Cards> GetRunLayoffs(
 }
 
 std::tuple<int, std::vector<Cards>, Cards, Cards> SortLayoffCandidate(
-    std::tuple<int, Melds, Cards, Cards> candidate)
+    std::tuple<int, CardIds, Cards, Cards> candidate)
 {
     int deadwood = std::get<0>(candidate);
-    auto melds = std::get<1>(candidate);
+    CardIds meld_ids = std::get<1>(candidate);
     Cards layoffs = std::get<2>(candidate);
     Cards unmelded = std::get<3>(candidate);
-    return {deadwood, SortMelds(melds), layoffs, unmelded};
+    return std::make_tuple(deadwood, MeldIdsToMelds(meld_ids), layoffs, unmelded);
 }
 
 std::tuple<int, std::vector<Cards>, Cards, Cards>
@@ -671,7 +687,7 @@ LayoffDeadwood(
     bool stop_on_zero)
 {
     auto [sets, runs] = SplitSetsRuns(opp_melds);
-    std::vector<std::tuple<int, Melds, Cards, Cards>> candidates;
+    std::vector<std::tuple<int, CardIds, Cards, Cards>> candidates;
 
     for (auto &[_, melds, unmelded] : GetCandidateMelds(hand))
     {

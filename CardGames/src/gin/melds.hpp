@@ -18,8 +18,9 @@ using CardSet = std::unordered_set<Card, CardHasher>;
 using SortedCardSet = std::set<Card>;
 using Melds = std::vector<CardSet>;
 using RankValues = std::vector<int>;
-using SplitHand = std::tuple<int, Melds, Cards>;
 using SortedSplitHand = std::tuple<int, std::vector<Cards>, Cards>;
+using CardIds = std::array<int, 52>;
+using SplitHand = std::tuple<int, CardIds, Cards>;
 
 std::array<std::vector<Suit>, 13> RankPartition(const std::vector<Card> &cards);
 std::array<std::vector<Rank>, 4> SuitPartition(const std::vector<Card> &cards);
@@ -42,6 +43,7 @@ std::vector<Ranks> GetSuitRunLayoffs(
 
 std::vector<Cards> GetRunLayoffs(const Cards &hand, const std::unordered_map<Suit, std::vector<std::pair<Rank, Rank>>> &runs);
 
+std::vector<Cards> MeldIdsToMelds(const CardIds &meld_ids);
 std::tuple<int, std::vector<Cards>, Cards, Cards> SortLayoffCandidate(std::tuple<int, Melds, Cards, Cards> candidate);
 std::tuple<int, std::vector<Cards>, Cards, Cards> LayoffDeadwood(
     const Cards &hand,

@@ -9,10 +9,6 @@ from card_utils.games.gin.rummy.game_state import GinRummyGameState
 
 
 def _test_hand(hand: List[Card]) -> Tuple[float, float]:
-    # print("------")
-    # print(hand)
-    # print(GinRummyGameState.sort_hand(hand))
-
     start_cpp = time.time()
     cpp_dw, cpp_melds, cpp_um = card_games.split_melds(hand, None)
     end_cpp = time.time()
@@ -23,7 +19,19 @@ def _test_hand(hand: List[Card]) -> Tuple[float, float]:
         print(f"cpp unmelded: {cpp_um}")
         print(f"py unmelded: {py_um}")
         raise ValueError("cpp_dw != py_dw")
-    return (end_cpp - start_cpp, start_py - end_cpp)
+
+    cpp_time, py_time = (end_cpp - start_cpp, start_py - end_cpp)
+    if True or cpp_time > py_time + 50e-6:
+        print("------")
+        # print(hand)
+        print(GinRummyGameState.sort_hand(hand))
+
+        print(
+            f"deadwood: {py_dw:>2} | "
+            f"c++: {1_000_000*cpp_time:.0f} micros | "
+            f"py: {1_000_000*py_time:.0f} micros"
+        )
+    return cpp_time, py_time
 
 
 def _test_deadwood(min_deadwood: Optional[int] = None) -> Tuple[float, float]:
@@ -68,15 +76,12 @@ def _test_timing() -> None:
 
 def _test_4melds() -> None:
     cpp_time, py_time = _test_hand(
-        ["Kd", "Kc", "Kh", "Ks", "Ah", "2h", "3h", "4h", "3d", "Td"]
-    )
-    print(
-        f"c++: {1_000_000*cpp_time:.0f} micros, "
-        f"py: {1_000_000*py_time:.0f} micros"
+        # ["Kd", "Kc", "Kh", "Ks", "Ah", "2h", "3h", "4h", "3d", "Td"]
+        ["5h", "6h", "7h", "2c", "3h", "4d", "8s", "Jd", "Jh", "Kc"]
     )
 
 
 if __name__ == "__main__":
-    # _test_layoffs()
-    # _test_timing()
+    _test_layoffs()
     _test_4melds()
+    _test_timing()

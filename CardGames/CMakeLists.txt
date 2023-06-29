@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 project(CardGames)
 
 set(CMAKE_CXX_STANDARD 17)
-# set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 add_subdirectory(lib/pybind11)
 include_directories(/opt/homebrew/include)

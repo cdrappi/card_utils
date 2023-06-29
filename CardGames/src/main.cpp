@@ -26,6 +26,7 @@ std::tuple<int, std::vector<CardStrings>, CardStrings> SerializeSplitMelds(Sorte
 
 std::tuple<int, std::vector<CardStrings>, CardStrings> split_melds(std::vector<std::string> &hand, std::optional<std::vector<std::vector<std::string>>> melds = std::nullopt)
 {
+
     std::vector<Card> cards = FromStrings(hand);
     std::optional<Melds> melds_set = std::nullopt;
     if (melds.has_value())
@@ -38,7 +39,11 @@ std::tuple<int, std::vector<CardStrings>, CardStrings> split_melds(std::vector<s
         }
     }
 
+    auto start = std::chrono::high_resolution_clock::now();
     SortedSplitHand split_melds = SplitMelds(cards, melds_set);
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    std::cout << "SplitMelds took " << duration.count() << " microseconds" << std::endl;
     return SerializeSplitMelds(split_melds);
 }
 
@@ -50,9 +55,9 @@ std::vector<std::tuple<int, std::vector<CardStrings>, CardStrings>> all_candidat
     for (SplitHand candidate_meld : candidate_melds)
     {
         int deadwood = std::get<0>(candidate_meld);
-        Melds chosen_melds = std::get<1>(candidate_meld);
+        CardIds chosen_melds = std::get<1>(candidate_meld);
         Cards unmelded = std::get<2>(candidate_meld);
-        SortedSplitHand sorted_split_hand = SortedSplitHand{deadwood, SortMelds(chosen_melds), unmelded};
+        SortedSplitHand sorted_split_hand = SortedSplitHand{deadwood, MeldIdsToMelds(chosen_melds), unmelded};
         serialized_candidate_melds.push_back(SerializeSplitMelds(sorted_split_hand));
     }
     return serialized_candidate_melds;

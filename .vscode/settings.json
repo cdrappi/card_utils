@@ -118,6 +118,9 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "__verbose_abort": "cpp",
-        "bit": "cpp"
+        "bit": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "utility": "cpp"
     }
 }
