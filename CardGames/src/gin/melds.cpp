@@ -542,9 +542,11 @@ bool IsRun(const Cards &meld)
     std::vector<Rank> ranks;
     for (auto &card : meld)
     {
+        std::cout << card.ToString();
         suits.push_back(card.suit);
         ranks.push_back(card.rank);
     }
+    std::cout << std::endl;
     if (suits.size() == 1)
         return true;
     else if (ranks.size() == 1)
