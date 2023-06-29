@@ -35,7 +35,7 @@ std::tuple<int, std::vector<CardStrings>, CardStrings> split_melds(std::vector<s
         for (auto meld : melds.value())
         {
             Cards cards_meld = FromStrings(meld);
-            melds_set.value().push_back(CardSet(cards_meld.begin(), cards_meld.end()));
+            melds_set.value().push_back(std::move(cards_meld));
         }
     }
 
@@ -73,7 +73,7 @@ layoff_deadwood(
     for (auto meld : opp_melds)
     {
         Cards cards_meld = FromStrings(meld);
-        opp_melds_set.push_back(CardSet(cards_meld.begin(), cards_meld.end()));
+        opp_melds_set.push_back(std::move(cards_meld));
     }
     auto dw = LayoffDeadwood(FromStrings(hand), opp_melds_set, stop_on_zero);
     std::vector<Cards> melded_cards = std::get<1>(dw);
