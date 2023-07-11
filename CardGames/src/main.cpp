@@ -84,7 +84,6 @@ layoff_deadwood(
     }
     return {std::get<0>(dw), melded_cards_strings, ToStrings(std::get<2>(dw)), ToStrings(std::get<3>(dw))};
 }
-
 namespace py = pybind11;
 
 PYBIND11_MODULE(card_games, m)
